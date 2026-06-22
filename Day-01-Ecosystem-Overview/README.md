@@ -319,7 +319,6 @@ graph TD
         ComputeLayer <--> Network
         Network <--> StorageLayer2
     end
-end
 ```
 *(Diagram Source: [storage-vs-compute.mermaid](diagrams/storage-vs-compute.mermaid))*
 
@@ -366,7 +365,6 @@ graph TD
         L_BatchView --> L_Query["Serving Query Engine"]
         L_RealtimeView --> L_Query
     end
-end
 ```
 *(Diagram Source: [batch-vs-streaming.mermaid](diagrams/batch-vs-streaming.mermaid))*
 
