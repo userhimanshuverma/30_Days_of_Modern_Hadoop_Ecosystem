@@ -1,0 +1,178 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. COORDINATION & MESSAGING LAYER
+  # =========================================================================
+  zookeeper:
+    image: zookeeper:3.8.0
+    container_name: zookeeper-day01
+    restart: unless-stopped
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper:2888:3888;2181
+    networks:
+      - day01-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.2.1
+    container_name: kafka-day01
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    depends_on:
+      - zookeeper
+    networks:
+      - day01-network
+
+  # =========================================================================
+  # 2. STORAGE LAYER (HADOOP HDFS)
+  # =========================================================================
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode-day01
+    restart: unless-stopped
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CLUSTER_NAME=day01-hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=1
+      - HDFS_CONF_dfs_permissions_enabled=false
+    volumes:
+      - namenode_data:/hadoop/dfs/name
+    networks:
+      - day01-network
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode-day01
+    restart: unless-stopped
+    ports:
+      - "9864:9864"
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=1
+    volumes:
+      - datanode_data:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - day01-network
+
+  # =========================================================================
+  # 3. METADATA CATALOG & QUERY LAYER (HIVE)
+  # =========================================================================
+  hive-metastore-db:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore-db-day01
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=metastore
+      - POSTGRES_USER=hive
+      - POSTGRES_PASSWORD=hive
+    volumes:
+      - metastore_db_data:/var/lib/postgresql/data
+    networks:
+      - day01-network
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore-day01
+    restart: unless-stopped
+    ports:
+      - "9083:9083"
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - SERVICE_PRECONDITION=namenode:9870 hive-metastore-db:5432
+    command: /opt/hive/bin/hive --service metastore
+    depends_on:
+      - namenode
+      - hive-metastore-db
+    networks:
+      - day01-network
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server-day01
+    restart: unless-stopped
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-db:5432/metastore
+      - SERVICE_PRECONDITION=hive-metastore:9083
+    command: /opt/hive/bin/hive --service hiveserver2
+    depends_on:
+      - hive-metastore
+    networks:
+      - day01-network
+
+  # =========================================================================
+  # 4. DISTRIBUTED PROCESSING ENGINE (SPARK)
+  # =========================================================================
+  spark-master:
+    image: bitnami/spark:3.2.1
+    container_name: spark-master-day01
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    networks:
+      - day01-network
+
+  spark-worker:
+    image: bitnami/spark:3.2.1
+    container_name: spark-worker-day01
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    depends_on:
+      - spark-master
+    networks:
+      - day01-network
+
+# ===========================================================================
+# NETWORKS & VOLUMES DEFINITIONS
+# ===========================================================================
+networks:
+  day01-network:
+    name: day01-network
+    driver: bridge
+
+volumes:
+  namenode_data:
+  datanode_data:
+  metastore_db_data:

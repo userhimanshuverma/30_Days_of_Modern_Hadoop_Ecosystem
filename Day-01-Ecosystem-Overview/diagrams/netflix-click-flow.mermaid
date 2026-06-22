@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor User as Netflix User
+    participant Web as Netflix App / Browser
+    participant Gateway as API Gateway
+    participant Kafka as Kafka Event Broker
+    participant Stream as Flink Stream Processing
+    participant Storage as Iceberg Data Lake (S3)
+    participant Engine as Trino / Spark SQL
+    participant Dash as Grafana Dashboard / ML Model
+    
+    User->>Web: Clicks "Play" Button
+    Web->>Gateway: POST /click-event (Payload: movie_id, user_id)
+    Gateway->>Kafka: Publish event to topic 'netflix-clicks'
+    Kafka->>Stream: Consume event stream
+    Stream->>Stream: Update sliding window stats (active streams)
+    Stream->>Dash: Push real-time count metrics (1-second latency)
+    Kafka->>Storage: Micro-batch write to S3 in Iceberg format (15-min latency)
+    Storage->>Engine: Catalog sync & register new partitions
+    Engine->>Dash: Query historical metrics & trends

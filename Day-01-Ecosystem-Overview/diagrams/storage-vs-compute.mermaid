@@ -1,0 +1,20 @@
+graph TD
+    subgraph Coupled["Coupled Architecture (Traditional Hadoop)"]
+        Node1["Hadoop Node 1<br>(CPU + RAM + HDFS Disk)"]
+        Node2["Hadoop Node 2<br>(CPU + RAM + HDFS Disk)"]
+        Node3["Hadoop Node 3<br>(CPU + RAM + HDFS Disk)"]
+    end
+    subgraph Decoupled["Decoupled Architecture (Cloud Native)"]
+        subgraph ComputeLayer["Compute Cluster (Transient)"]
+            Spark1["Spark Executor 1<br>(CPU/RAM)"]
+            Spark2["Spark Executor 2<br>(CPU/RAM)"]
+        end
+        subgraph Network["Network Bus (High-Bandwidth)"]
+            Net["100 Gbps Network"]
+        end
+        subgraph StorageLayer2["Storage Cluster (Persistent)"]
+            S3["Cloud Object Storage (S3/ADLS/GCS)"]
+        end
+        ComputeLayer <--> Network
+        Network <--> StorageLayer2
+    end

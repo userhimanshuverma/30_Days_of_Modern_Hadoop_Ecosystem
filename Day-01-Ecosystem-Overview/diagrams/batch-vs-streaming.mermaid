@@ -1,0 +1,15 @@
+graph TD
+    subgraph BatchFlow["Batch Processing (Daily/Hourly)"]
+        B1["Static Data on Disk"] --> B2["Spark/Hive Batch Job"] --> B3["Aggregated Tables/Reports"]
+    end
+    subgraph StreamFlow["Streaming Processing (Event-by-Event)"]
+        S1["Kafka Continuous Stream"] --> S2["Spark Streaming/Flink Engine"] --> S3["Real-time Alerts/Dashboards"]
+    end
+    subgraph Lambda["Lambda Architecture (Both Paths)"]
+        L_In["New Data"] --> L_Batch["Batch Layer (Accurate, High Latency)"]
+        L_In --> L_Speed["Speed Layer (Real-time, Low Accuracy)"]
+        L_Batch --> L_BatchView["Batch Views"]
+        L_Speed --> L_RealtimeView["Real-time Views"]
+        L_BatchView --> L_Query["Serving Query Engine"]
+        L_RealtimeView --> L_Query
+    end

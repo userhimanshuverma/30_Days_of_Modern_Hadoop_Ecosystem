@@ -1,0 +1,14 @@
+graph TD
+    subgraph DataPlatform["The Data Platform City"]
+        A["Inflow: Ingestion (Highways, Rail, Ports)"] --> B["Storage: Warehouses, Water Reservoirs (Data Lake/HDFS)"]
+        B --> C["Processing: Water Purification, Assembly Lines (Spark, Flink)"]
+        C --> D["Consumption: Homes, Businesses, Offices (BI, ML, Apps)"]
+        E["Governance & Security: Police, City Registry (Ranger, Knox, Atlas)"] -.-> A
+        E -.-> B
+        E -.-> C
+        E -.-> D
+        F["Orchestration: Traffic Control Towers (Airflow)"] -.-> A
+        F -.-> B
+        F -.-> C
+        F -.-> D
+    end

@@ -1,0 +1,58 @@
+graph TD
+    subgraph IngestionLayer["Ingestion Layer (How Data Enters)"]
+        A["Kafka (Real-time Streaming)"]
+        B["NiFi (Data Routing/Flows)"]
+        C["Sqoop (RDBMS to HDFS)"]
+        D["Flume (Log Ingestion)"]
+    end
+
+    subgraph StorageLayer["Storage Layer (Where Data Lives)"]
+        E["HDFS (Hadoop Distributed File System)"]
+        F["Cloud Object Storage (S3 / ADLS / GCS)"]
+        G["Table Formats (Iceberg / Hudi / Delta Lake)"]
+    end
+
+    subgraph ResourceManagement["Resource Management (Who Schedules)"]
+        H["YARN (Yet Another Resource Negotiator)"]
+        I["Kubernetes (K8s)"]
+    end
+
+    subgraph ProcessingLayer["Processing & Query Layer (How Data Computes)"]
+        J["Apache Spark (In-Memory Batch/Stream)"]
+        K["Apache Flink (Real-time Stateful Stream)"]
+        L["Apache Hive (SQL on HDFS via Tez)"]
+        M["Trino (Distributed MPP SQL Query Engine)"]
+    end
+
+    subgraph MetadataGovernance["Metadata & Governance"]
+        N["Hive Metastore (Table Schema Directory)"]
+        O["Apache Atlas (Data Lineage & Governance)"]
+    end
+
+    subgraph SecurityLayer["Security Layer"]
+        P["Apache Ranger (Fine-grained Authorization)"]
+        Q["Apache Knox (API Gateway Security)"]
+        R["Kerberos (Strong Authentication)"]
+    end
+
+    subgraph OrchestrationLayer["Orchestration (When to Run)"]
+        S["Apache Airflow (DAG Workflows)"]
+        T["Oozie (Hadoop Workflow Scheduler)"]
+    end
+
+    subgraph ObservabilityLayer["Observability & Monitoring"]
+        U["Prometheus (Metrics Collection)"]
+        V["Grafana (Dashboards)"]
+        W["Apache Ambari (Cluster Ops)"]
+    end
+
+    IngestionLayer --> StorageLayer
+    StorageLayer --> ProcessingLayer
+    ResourceManagement -.-> ProcessingLayer
+    MetadataGovernance -.-> ProcessingLayer
+    SecurityLayer -.-> IngestionLayer
+    SecurityLayer -.-> StorageLayer
+    SecurityLayer -.-> ProcessingLayer
+    OrchestrationLayer -.-> ProcessingLayer
+    ObservabilityLayer -.-> ResourceManagement
+    ObservabilityLayer -.-> ProcessingLayer

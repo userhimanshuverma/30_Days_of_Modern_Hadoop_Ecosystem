@@ -1,0 +1,13 @@
+graph TD
+    subgraph BeforeHadoop["Before Hadoop: Scale-Up (Vertical)"]
+        A["Single High-End Server (Expensive SMP)"] --> B["100TB Database"]
+        A -.->|Limits Reached| C["OOM / Disk Bottleneck"]
+    end
+    subgraph AfterHadoop["After Hadoop: Scale-Out (Horizontal)"]
+        D["NameNode (Metadata Master)"] --> E["DataNode 1"]
+        D --> F["DataNode 2"]
+        D --> G["DataNode N"]
+        E --> H["Local Disk 1"]
+        F --> I["Local Disk 2"]
+        G --> J["Local Disk N"]
+    end

@@ -1,0 +1,19 @@
+graph TD
+    subgraph DockerBridge["Docker Bridge Network: day01-network"]
+        ZK["zookeeper-day01 (2181)"]
+        KAFKA["kafka-day01 (9092)"]
+        NN["namenode-day01 (9000, 9870)"]
+        DN["datanode-day01 (9864)"]
+        PG["hive-metastore-db-day01 (5432)"]
+        HMS["hive-metastore-day01 (9083)"]
+        HS2["hive-server-day01 (10000, 10002)"]
+        SP_M["spark-master-day01 (7077, 8080)"]
+        SP_W["spark-worker-day01 (8081)"]
+    end
+    
+    HostPorts["Host Machine Ports Access"]
+    HostPorts -->|9870| NN
+    HostPorts -->|10000| HS2
+    HostPorts -->|8080| SP_M
+    HostPorts -->|29092| KAFKA
+    HostPorts -->|2181| ZK

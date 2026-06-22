@@ -1,0 +1,13 @@
+graph TD
+    App["Application Logs / IoT Events"] -->|Publish| Kafka["Apache Kafka Ingestion"]
+    Kafka -->|Consume & Stream| Flink["Apache Flink (Real-time Stream)"]
+    Kafka -->|Batch Micro-batch| Spark["Apache Spark (Processing Engine)"]
+    
+    Flink -->|Write Analytics| Iceberg["Iceberg / Data Lake (S3/HDFS)"]
+    Spark -->|Write ETL| Iceberg
+    
+    Iceberg -->|Metadata Catalog| HMS["Hive Metastore (HMS)"]
+    HMS -->|Query Catalog| Trino["Trino MPP SQL Engine"]
+    
+    Trino -->|SQL Query| BI["BI Dashboards (Grafana / Tableau)"]
+    Spark -->|Train Models| ML["Machine Learning (PyTorch / MLflow)"]
