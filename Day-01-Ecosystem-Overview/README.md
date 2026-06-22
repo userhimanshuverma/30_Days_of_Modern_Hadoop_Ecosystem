@@ -131,7 +131,6 @@ graph TD
         F --> I["Local Disk 2"]
         G --> J["Local Disk N"]
     end
-end
 ```
 *(Diagram Source: [before-after-hadoop.mermaid](diagrams/before-after-hadoop.mermaid))*
 
