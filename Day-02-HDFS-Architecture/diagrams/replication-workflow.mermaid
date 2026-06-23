@@ -1,0 +1,17 @@
+graph TD
+    Client["Client App"] -->|Writes Block| R1_N1["Rack 1 - Node 1 (Replica 1)"]
+    R1_N1 -->|Pipeline Forward (Local Rack)| R1_N2["Rack 1 - Node 2 (Replica 2)"]
+    R1_N2 -->|Pipeline Forward (Cross Rack)| R2_N1["Rack 2 - Node 1 (Replica 3)"]
+
+    subgraph Rack1["Physical Rack 1"]
+        R1_N1
+        R1_N2
+        R1_N3["Rack 1 - Node 3 (Empty)"]
+    end
+
+    subgraph Rack2["Physical Rack 2"]
+        R2_N1
+        R2_N2["Rack 2 - Node 2 (Empty)"]
+    end
+    
+    note["Rack Awareness Policy (Hadoop Default):<br/>- Replica 1: Local node/rack (Rack 1)<br/>- Replica 2: Same rack (Rack 1, Node 2)<br/>- Replica 3: Remote rack (Rack 2, Node 1)"]

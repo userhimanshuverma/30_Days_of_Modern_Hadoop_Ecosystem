@@ -1,0 +1,11 @@
+graph TD
+    Start["1. Execute: docker compose up -d"] --> Wait["2. Wait 15-20 seconds (Init daemons)"]
+    Wait --> VerifyNN["3. Run: verify-namenode.sh"]
+    VerifyNN -->|Succeeds?| VerifyDN["4. Run: verify-datanodes.sh"]
+    VerifyNN -->|Fails| DebugNN["Debug: Check Namenode Logs"]
+    VerifyDN -->|Succeeds?| TestRep["5. Run: verify-replication.sh"]
+    VerifyDN -->|Fails| DebugDN["Debug: Check Datanode Logs"]
+    TestRep -->|Succeeds?| AuditHealth["6. Run: verify-hdfs-health.sh"]
+    TestRep -->|Fails| DebugRep["Debug: Check Port Bindings & Configurations"]
+    AuditHealth -->|Healthy?| Ready["7. Cluster Operational & Verified!"]
+    AuditHealth -->|Corrupt/Missing| DebugHealth["Debug: Safe Mode/Lost Blocks inspection"]

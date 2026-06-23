@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant NN as Active NameNode
+    participant SNN as Secondary NameNode
+
+    Note over NN: Clients send metadata modifications (mkdir, put, rm)<br/>NN writes directly to local edits log (edits_inprogress_001)
+
+    Note over SNN: Checkpoint trigger: e.g. 1 hour or 1 million transactions
+    SNN->>NN: Request roll of edit logs
+    activate NN
+    NN->>NN: Close 'edits_inprogress_001', open new 'edits_inprogress_002'
+    NN-->>SNN: Return status and current logs ready
+    deactivate NN
+
+    SNN->>NN: Download 'fsimage' & closed 'edits_inprogress_001'
+    activate NN
+    NN-->>SNN: Send binary images and logs
+    deactivate NN
+
+    Note over SNN: Merge process:<br/>Load fsimage into SNN RAM<br/>Replay edits_inprogress_001 entries<br/>Generate new combined image (fsimage.ckpt)
+    
+    SNN->>NN: Upload new 'fsimage.ckpt'
+    activate NN
+    NN->>NN: Replace old 'fsimage' with 'fsimage.ckpt'
+    NN-->>SNN: Acknowledge complete
+    deactivate NN

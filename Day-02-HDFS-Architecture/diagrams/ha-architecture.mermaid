@@ -1,0 +1,32 @@
+graph TD
+    Client["HDFS Client"] -->|RPC Queries (Writes/Reads)| ANN["Active NameNode"]
+    Client -.->|Fails over to| SNN["Standby NameNode"]
+
+    subgraph HA_Control["HA Coordination Layer"]
+        ZK["ZooKeeper Quorum (Leader Election)"]
+        ZKFC1["ZKFC (Active controller)"]
+        ZKFC2["ZKFC (Standby controller)"]
+        
+        ZKFC1 <-->|Heartbeats| ZK
+        ZKFC2 <-->|Heartbeats| ZK
+        ZKFC1 -->|Monitors & Fences| ANN
+        ZKFC2 -->|Monitors| SNN
+    end
+
+    subgraph MetadataSync["Shared Edit Log (Quorum Storage)"]
+        JN1["JournalNode 1"]
+        JN2["JournalNode 2"]
+        JN3["JournalNode 3"]
+    end
+
+    ANN -->|1. Write Edit Logs| MetadataSync
+    SNN -.->|2. Continuous Read/Sync Edit Logs| MetadataSync
+
+    subgraph BlockTracking["DataNode Reports"]
+        DN1["DataNode 1"]
+        DN2["DataNode 2"]
+        DN1 -->|Block Reports & Heartbeats| ANN
+        DN1 -->|Block Reports & Heartbeats| SNN
+        DN2 -->|Block Reports & Heartbeats| ANN
+        DN2 -->|Block Reports & Heartbeats| SNN
+    end

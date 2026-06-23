@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. HDFS NAMENODE (METADATA MASTER)
+  # =========================================================================
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode-day02
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # NameNode RPC port
+    environment:
+      - CLUSTER_NAME=day02-hdfs-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=3
+      - HDFS_CONF_dfs_permissions_enabled=false
+      - HDFS_CONF_dfs_namenode_datanode_registration_ip_hostname_check=false
+    volumes:
+      - namenode_data_day02:/hadoop/dfs/name
+    networks:
+      - day02-network
+
+  # =========================================================================
+  # 2. HDFS DATANODES (BLOCK WORKERS)
+  # =========================================================================
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1-day02
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # DataNode 1 Web UI
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=3
+    volumes:
+      - datanode1_data_day02:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - day02-network
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2-day02
+    restart: unless-stopped
+    ports:
+      - "9865:9864"  # DataNode 2 Web UI mapped to host 9865
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=3
+    volumes:
+      - datanode2_data_day02:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - day02-network
+
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3-day02
+    restart: unless-stopped
+    ports:
+      - "9866:9864"  # DataNode 3 Web UI mapped to host 9866
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=3
+    volumes:
+      - datanode3_data_day02:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - day02-network
+
+# ===========================================================================
+# NETWORKS & VOLUMES DEFINITIONS
+# ===========================================================================
+networks:
+  day02-network:
+    name: day02-network
+    driver: bridge
+
+volumes:
+  namenode_data_day02:
+  datanode1_data_day02:
+  datanode2_data_day02:
+  datanode3_data_day02:

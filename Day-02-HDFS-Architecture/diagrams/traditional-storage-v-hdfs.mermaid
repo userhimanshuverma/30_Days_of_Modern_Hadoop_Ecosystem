@@ -1,0 +1,24 @@
+graph TD
+    subgraph Monolithic["Traditional Storage (Coupled & Monolithic)"]
+        Server["High-End Database Server"] --> Bus["Shared SCSI / Fiber Channel Bus"]
+        Bus --> SAN["Monolithic SAN Array (Disk Group)"]
+        SAN -.-> SPOF["Single Point of Failure (Controller/Bus)"]
+        Server -.-> Limits["Limit: Vertical scale cap (~100TB) & High Cost"]
+    end
+
+    subgraph Distributed["Hadoop HDFS (Scale-out Distributed)"]
+        NN["NameNode (Metadata Master)"] -.->|Coordinates| DN1["DataNode 1 (Commodity PC)"]
+        NN -.->|Coordinates| DN2["DataNode 2 (Commodity PC)"]
+        NN -.->|Coordinates| DN3["DataNode 3 (Commodity PC)"]
+        
+        DN1 --> Disk1["Local SATA Disk 1"]
+        DN2 --> Disk2["Local SATA Disk 2"]
+        DN3 --> Disk3["Local SATA Disk 3"]
+        
+        Disk1 -.-> BlockA1["Block A (Replica 1)"]
+        Disk1 -.-> BlockB1["Block B (Replica 1)"]
+        Disk2 -.-> BlockA2["Block A (Replica 2)"]
+        Disk2 -.-> BlockC1["Block C (Replica 1)"]
+        Disk3 -.-> BlockB2["Block B (Replica 2)"]
+        Disk3 -.-> BlockC2["Block C (Replica 2)"]
+    end

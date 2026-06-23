@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- hdfs-site.xml -->
+<configuration>
+    <!-- Default replication factor: set to 3 for production grade -->
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+        <description>Default block replication. The actual number of replications can be specified when the file is created.</description>
+    </property>
+
+    <!-- Default Block Size: set to 128MB (134217728 bytes) -->
+    <property>
+        <name>dfs.blocksize</name>
+        <value>134217728</value>
+        <description>The default block size for new files, in bytes. 128 MB is the standard for modern Hadoop clusters to balance metadata heap size with high-throughput processing.</description>
+    </property>
+
+    <!-- NameNode storage directory -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///hadoop/dfs/name</value>
+        <description>Path on the local filesystem where the NameNode stores the namespace and transactions logs persistently.</description>
+    </property>
+
+    <!-- DataNode storage directory -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///hadoop/dfs/data</value>
+        <description>Determines where on the local filesystem a DataNode should store its blocks.</description>
+    </property>
+
+    <!-- Permissions checking: disable for local sandbox testing, enable in production -->
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+        <description>If true, enable permission checking in HDFS. If false, permission checking is turned off (all operations succeed).</description>
+    </property>
+
+    <!-- NameNode IP/Hostname matching: disable to prevent container routing failures during docker loopback DNS resolution -->
+    <property>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>false</value>
+        <description>If true, NameNode checks that a DataNode's IP resolves to its reported hostname during registration. Often set to false in cloud/Docker setups.</description>
+    </property>
+
+    <!-- Heartbeat interval: default is 3 seconds -->
+    <property>
+        <name>dfs.heartbeat.interval</name>
+        <value>3</value>
+        <description>The interval in seconds between DataNode heartbeats to the NameNode.</description>
+    </property>
+
+    <!-- Block report interval: default is 6 hours (21600000 ms) -->
+    <property>
+        <name>dfs.blockreport.intervalMsec</name>
+        <value>21600000</value>
+        <description>Determines block report interval in milliseconds.</description>
+    </property>
+</configuration>

@@ -1,0 +1,27 @@
+graph TD
+    User["Netflix User smart TV / App"] -->|1. Clicks Play| Gateway["Zuul API Gateway"]
+    Gateway -->|2. High-throughput buffered writes| Kafka["Kafka Topic: user-clicks"]
+    
+    subgraph Compute["Distributed Processing (Compute Cluster)"]
+        SparkETL["Spark Streaming / Spark Batch Nodes"]
+    end
+    
+    Kafka -->|3. Parallel micro-batch consumption| SparkETL
+
+    subgraph Storage["Distributed HDFS Storage (Exabyte Scale)"]
+        NN["Active NameNode (Namespace Master)"]
+        
+        subgraph RackA["Server Rack A"]
+            DN1["DataNode 1"]
+            DN2["DataNode 2"]
+        end
+        
+        subgraph RackB["Server Rack B"]
+            DN3["DataNode 3"]
+        end
+    end
+
+    SparkETL -->|4. RPC: Allocate Blocks| NN
+    SparkETL -->|5. Pipelined block writes (RF=3)| DN1
+    DN1 -->|Internal pipeline replication| DN2
+    DN2 -->|Cross-rack replication| DN3

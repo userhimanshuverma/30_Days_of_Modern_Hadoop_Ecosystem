@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    actor Client as HDFS Client
+    participant NN as NameNode
+    participant DN1 as DataNode 1 (Close Rack)
+    participant DN2 as DataNode 2 (Far Rack)
+
+    Client->>NN: Get block locations (RPC: filename, range)
+    activate NN
+    NN->>NN: Validate file existence & check permissions
+    NN->>NN: Sort replicas by network proximity (Data Locality)
+    NN-->>Client: Return block metadata list with locations (e.g. Block 1 on DN1, DN2)
+    deactivate NN
+
+    Client->>DN1: Open connection and read Block 1 (InputStream)
+    activate DN1
+    DN1-->>Client: Stream Block 1 data bytes (Verify checksums)
+    deactivate DN1
+
+    Client->>DN2: Open connection and read Block 2 (InputStream)
+    activate DN2
+    DN2-->>Client: Stream Block 2 data bytes (Verify checksums)
+    deactivate DN2
+
+    Client->>Client: Merge blocks locally and return file stream to application

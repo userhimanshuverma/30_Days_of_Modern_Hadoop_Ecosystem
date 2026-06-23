@@ -1,0 +1,19 @@
+graph TD
+    subgraph LargeFile["File Breakdown: 1 GB File (1024 MB)"]
+        F1["large_dataset.csv (1 GB)"] -->|Split into 128MB Chunks| B1["Block 1: 128MB"]
+        F1 --> B2["Block 2: 128MB"]
+        F1 --> B3["Block 3: 128MB"]
+        F1 --> B4["Block 4: 128MB"]
+        F1 --> B5["Block 5: 128MB"]
+        F1 --> B6["Block 6: 128MB"]
+        F1 --> B7["Block 7: 128MB"]
+        F1 --> B8["Block 8: 128MB"]
+        note1["Exactly 8 Blocks. Very efficient for NameNode RAM (only 8 tracking records)."]
+    end
+
+    subgraph SmallFile["File Breakdown: Small Files Problem (10,000 files x 100KB = 1GB)"]
+        SF1["file_1.txt (100KB)"] --> SB1["Block 1: 100KB (Occupies 1 Block slot)"]
+        SF2["file_2.txt (100KB)"] --> SB2["Block 2: 100KB (Occupies 1 Block slot)"]
+        SFN["file_10000.txt (100KB)"] --> SBN["Block 10000: 100KB (Occupies 1 Block slot)"]
+        note2["10,000 Blocks allocated. Bloats NameNode heap memory (10,000 tracking records for same 1GB data)."]
+    end

@@ -1,0 +1,33 @@
+graph TD
+    subgraph HostSystem["Host Machine (Windows/OSX/Linux)"]
+        User["User CLI / Browser"]
+        User -->|localhost:9870| NN_Port["Host Port 9870 (NameNode Web UI)"]
+        User -->|localhost:9000| NN_RPC["Host Port 9000 (NameNode RPC)"]
+        User -->|localhost:9864| DN1_Port["Host Port 9864 (DataNode 1 UI)"]
+        User -->|localhost:9865| DN2_Port["Host Port 9865 (DataNode 2 UI)"]
+        User -->|localhost:9866| DN3_Port["Host Port 9866 (DataNode 3 UI)"]
+
+        subgraph DockerBridge["Docker Network: day02-network"]
+            NN_C["namenode-day02"]
+            DN1_C["datanode1-day02"]
+            DN2_C["datanode2-day02"]
+            DN3_C["datanode3-day02"]
+            
+            NN_C <-->|Internal RPC:9000| DN1_C
+            NN_C <-->|Internal RPC:9000| DN2_C
+            NN_C <-->|Internal RPC:9000| DN3_C
+        end
+        
+        subgraph Volumes["Docker Named Volumes"]
+            V_NN["namenode_data_day02"] ---> NN_C
+            V_DN1["datanode1_data_day02"] ---> DN1_C
+            V_DN2["datanode2_data_day02"] ---> DN2_C
+            V_DN3["datanode3_data_day02"] ---> DN3_C
+        end
+    end
+    
+    NN_Port ---> NN_C
+    NN_RPC ---> NN_C
+    DN1_Port ---> DN1_C
+    DN2_Port ---> DN2_C
+    DN3_Port ---> DN3_C

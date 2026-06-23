@@ -1,0 +1,30 @@
+graph TD
+    Client["HDFS Client"] -->|1. Metadata Ops: Read/Write Requests| NN["NameNode (Active Metadata Master)"]
+    Client -->|2. Streaming Data IO: Blocks Read/Write| DN1["DataNode 1 (Worker)"]
+    Client -->|2. Streaming Data IO: Blocks Read/Write| DN2["DataNode 2 (Worker)"]
+    Client -->|2. Streaming Data IO: Blocks Read/Write| DN3["DataNode 3 (Worker)"]
+
+    subgraph NameNodeBlock["NameNode (RAM Storage)"]
+        NN
+        Tree["Directory Namespace Tree"]
+        BMap["File-to-Block Mappings"]
+        LocMap["Block-to-Node Locations"]
+        Tree --> BMap
+        BMap --> LocMap
+    end
+
+    subgraph DataNodeWorkers["DataNode Cluster"]
+        DN1
+        DN2
+        DN3
+        DN1 -.->|Heartbeats & Block Reports| NN
+        DN2 -.->|Heartbeats & Block Reports| NN
+        DN3 -.->|Heartbeats & Block Reports| NN
+    end
+
+    subgraph SecondaryNNBlock["Secondary NameNode (Helper)"]
+        SNN["Secondary NameNode"]
+        SNN -->|Downloads Image & Edits| NN
+        SNN -->|Performs Merging| SNN
+        SNN -->|Uploads new fsimage| NN
+    end

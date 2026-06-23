@@ -1,0 +1,15 @@
+graph TD
+    subgraph Timeout["Scenario A: DataNode Heartbeat Timeout"]
+        DN[DataNode] -.->|No Heartbeat for 10 min| NN[NameNode]
+        NN -->|Mark node DEAD| DeadNode[Dead DataNode]
+        NN -->|Scan metadata| Scan[Find blocks hosted on Dead Node]
+        Scan -->|Under-Replicated| Copy[Schedule copy task on healthy DataNodes]
+    end
+
+    subgraph Corruption["Scenario B: Block Corruption Discovery"]
+        Client[Client] -->|Read block data| DNRead[DataNode]
+        Client -->|Checksum verification fails| Client
+        Client -->|Report Bad Block| NN
+        NN -->|Re-replicate block from healthy node| Heal[Copy replica to new node]
+        NN -->|Mark bad block for deletion| Delete[Command DataNode to delete corrupt block]
+    end

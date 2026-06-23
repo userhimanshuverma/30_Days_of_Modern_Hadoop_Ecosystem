@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    actor Client as HDFS Client
+    participant NN as NameNode
+    participant DN1 as DataNode 1 (Primary)
+    participant DN2 as DataNode 2 (Secondary)
+    participant DN3 as DataNode 3 (Tertiary)
+
+    Client->>NN: Create file (RPC: filename, path, size, replication)
+    activate NN
+    NN->>NN: Validate permissions & path
+    NN->>NN: Allocate new block & target DataNodes list
+    NN-->>Client: Return Block ID & DataNode list [DN1, DN2, DN3]
+    deactivate NN
+
+    Client->>DN1: Establish pipeline connection & stream packet (64KB packets)
+    activate DN1
+    DN1->>DN2: Forward packet
+    activate DN2
+    DN2->>DN3: Forward packet
+    activate DN3
+    
+    Note over DN1,DN3: Data nodes write packets to local disk cache & confirm checksums
+    
+    DN3-->>DN2: Ack packet written
+    deactivate DN3
+    DN2-->>DN1: Ack packet written
+    deactivate DN2
+    DN1-->>Client: Ack packet written
+    deactivate DN1
+
+    Client->>NN: Close file (RPC: write complete)
+    activate NN
+    NN->>NN: Commit transaction to Edit Log
+    NN-->>Client: File closed successfully
+    deactivate NN
