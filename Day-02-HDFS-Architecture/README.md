@@ -410,8 +410,8 @@ In multi-node clusters, servers are mounted on physical chassis racks. Each rack
 ```mermaid
 graph TD
     Client["Client App"] -->|Writes Block| R1_N1["Rack 1 - Node 1 (Replica 1)"]
-    R1_N1 -->|Pipeline Forward (Local Rack)| R1_N2["Rack 1 - Node 2 (Replica 2)"]
-    R1_N2 -->|Pipeline Forward (Cross Rack)| R2_N1["Rack 2 - Node 1 (Replica 3)"]
+    R1_N1 -->|Pipeline Forward Local Rack| R1_N2["Rack 1 - Node 2 (Replica 2)"]
+    R1_N2 -->|Pipeline Forward Cross Rack| R2_N1["Rack 2 - Node 1 (Replica 3)"]
 
     subgraph Rack1["Physical Rack 1"]
         R1_N1
@@ -533,7 +533,7 @@ In traditional Hadoop 1.x, the single NameNode was a Single Point of Failure (SP
 
 ```mermaid
 graph TD
-    Client["HDFS Client"] -->|RPC Queries (Writes/Reads)| ANN["Active NameNode"]
+    Client["HDFS Client"] -->|RPC Queries for Writes and Reads| ANN["Active NameNode"]
     Client -.->|Fails over to| SNN["Standby NameNode"]
 
     subgraph HA_Control["HA Coordination Layer"]
@@ -910,7 +910,7 @@ graph TD
     end
 
     SparkETL -->|4. RPC: Allocate Blocks| NN
-    SparkETL -->|5. Pipelined block writes (RF=3)| DN1
+    SparkETL -->|5. Pipelined block writes with RF 3| DN1
     DN1 -->|Internal pipeline replication| DN2
     DN2 -->|Cross-rack replication| DN3
 ```

@@ -1,5 +1,5 @@
 graph TD
-    Client["HDFS Client"] -->|RPC Queries (Writes/Reads)| ANN["Active NameNode"]
+    Client["HDFS Client"] -->|RPC Queries for Writes and Reads| ANN["Active NameNode"]
     Client -.->|Fails over to| SNN["Standby NameNode"]
 
     subgraph HA_Control["HA Coordination Layer"]

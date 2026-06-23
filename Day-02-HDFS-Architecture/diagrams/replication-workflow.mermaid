@@ -1,7 +1,7 @@
 graph TD
     Client["Client App"] -->|Writes Block| R1_N1["Rack 1 - Node 1 (Replica 1)"]
-    R1_N1 -->|Pipeline Forward (Local Rack)| R1_N2["Rack 1 - Node 2 (Replica 2)"]
-    R1_N2 -->|Pipeline Forward (Cross Rack)| R2_N1["Rack 2 - Node 1 (Replica 3)"]
+    R1_N1 -->|Pipeline Forward Local Rack| R1_N2["Rack 1 - Node 2 (Replica 2)"]
+    R1_N2 -->|Pipeline Forward Cross Rack| R2_N1["Rack 2 - Node 1 (Replica 3)"]
 
     subgraph Rack1["Physical Rack 1"]
         R1_N1
