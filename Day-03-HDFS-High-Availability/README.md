@@ -176,7 +176,7 @@ graph TB
         ZKFC2[ZKFC]
     end
 
-    subgraph JournalNodeCluster [JournalNode Cluster (QJM)]
+    subgraph JournalNodeCluster ["JournalNode Cluster (QJM)"]
         JN1[JournalNode 1]
         JN2[JournalNode 2]
         JN3[JournalNode 3]
