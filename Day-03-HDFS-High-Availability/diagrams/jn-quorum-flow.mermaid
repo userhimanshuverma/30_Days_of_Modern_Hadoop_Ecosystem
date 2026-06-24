@@ -1,0 +1,25 @@
+graph TD
+    subgraph Quorum Scenario: 3 JournalNodes - Quorum Size = 2
+        A_NN[Active NameNode] -->|Write Edits| JN1[JournalNode 1 - ONLINE]
+        A_NN -->|Write Edits| JN2[JournalNode 2 - ONLINE]
+        A_NN -.->|Write Edits (timeout/error)| JN3[JournalNode 3 - DOWN/FAIL]
+        
+        JN1 -->|ACK| A_NN
+        JN2 -->|ACK| A_NN
+        
+        Note over A_NN: 2 ACKs received >= Quorum of 2. <br/>Write Transaction is COMMITTED.
+    end
+
+    subgraph Quorum Scenario: 5 JournalNodes - Quorum Size = 3
+        B_NN[Active NameNode] -->|Write Edits| JN_A[JournalNode A - ONLINE]
+        B_NN -->|Write Edits| JN_B[JournalNode B - ONLINE]
+        B_NN -->|Write Edits| JN_C[JournalNode C - ONLINE]
+        B_NN -.->|Write Edits (offline)| JN_D[JournalNode D - OFFLINE]
+        B_NN -.->|Write Edits (offline)| JN_E[JournalNode E - OFFLINE]
+        
+        JN_A -->|ACK| B_NN
+        JN_B -->|ACK| B_NN
+        JN_C -->|ACK| B_NN
+
+        Note over B_NN: 3 ACKs received >= Quorum of 3. <br/>Write Transaction is COMMITTED.
+    end

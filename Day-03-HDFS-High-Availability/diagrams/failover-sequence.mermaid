@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant ActiveNN as Active NameNode (nn1)
+    participant ZKFC1 as Active ZKFC
+    participant ZK as ZooKeeper Quorum
+    participant ZKFC2 as Standby ZKFC
+    participant StandbyNN as Standby NameNode (nn2)
+
+    ActiveNN-xActiveNN: JVM Freeze or Hardware Failure
+    ZKFC1-xActiveNN: Health Monitor check fails (RPC timeout)
+    ZKFC1->>ZK: Delete Ephemeral Active Elector Lock
+    Note over ZKFC1: ZKFC1 session to ZooKeeper is closed or expires
+    
+    ZK->>ZKFC2: NodeDeleted Event Notification (Watcher Fired)
+    ZKFC2->>ZK: Attempt to Create Elector Lock (/hadoop-ha/mycluster/ActiveStandbyElectorLock)
+    ZK-->>ZKFC2: Lock Acquired (Success - nn2 wins)
+    
+    ZKFC2->>ActiveNN: Fencing Action: SSH fence / power down / shell check
+    Note over ZKFC2: Fencing prevents split-brain by ensuring NN1 cannot process requests
+    ActiveNN--xZKFC2: Fenced (Successfully isolated)
+    
+    ZKFC2->>StandbyNN: Transition to ACTIVE (RPC request)
+    StandbyNN->>StandbyNN: Roll edits in JournalNode & finalize state
+    StandbyNN-->>ZKFC2: Role changed to ACTIVE
+    Note over StandbyNN: StandbyNN (nn2) is now ACTIVE and serving clients

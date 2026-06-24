@@ -1,0 +1,53 @@
+graph TB
+    subgraph Clients
+        C[HDFS Client]
+    end
+
+    subgraph ZooKeeper Cluster
+        ZK1[ZooKeeper 1]
+        ZK2[ZooKeeper 2]
+        ZK3[ZooKeeper 3]
+    end
+
+    subgraph Active NameNode Host
+        ANN[Active NameNode - nn1]
+        ZKFC1[ZKFC - ZooKeeper Failover Controller]
+    end
+
+    subgraph Standby NameNode Host
+        SNN[Standby NameNode - nn2]
+        ZKFC2[ZKFC - ZooKeeper Failover Controller]
+    end
+
+    subgraph JournalNode Quorum QJM
+        JN1[JournalNode 1]
+        JN2[JournalNode 2]
+        JN3[JournalNode 3]
+    end
+
+    subgraph DataNode Workers
+        DN1[DataNode 1]
+        DN2[DataNode 2]
+    end
+
+    C -->|Read/Write Requests via mycluster Nameservice| ANN
+    C -.->|Failover Client Retries| SNN
+
+    ANN -->|Writes Edits Log Quorum| JN1
+    ANN -->|Writes Edits Log Quorum| JN2
+    ANN -->|Writes Edits Log Quorum| JN3
+
+    SNN -.->|Reads Edits Log & Replays to Standby State| JN1
+    SNN -.->|Reads Edits Log & Replays to Standby State| JN2
+    SNN -.->|Reads Edits Log & Replays to Standby State| JN3
+
+    ZKFC1 <-->|Active Lock check & Ephemeral lease| ZK1
+    ZKFC1 <-->|Monitors Health| ANN
+
+    ZKFC2 <-->|Standby Lock check & standby lease| ZK1
+    ZKFC2 <-->|Monitors Health| SNN
+
+    DN1 -->|Heartbeats & Block Reports| ANN
+    DN1 -->|Heartbeats & Block Reports| SNN
+    DN2 -->|Heartbeats & Block Reports| ANN
+    DN2 -->|Heartbeats & Block Reports| SNN

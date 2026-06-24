@@ -1,0 +1,20 @@
+graph TD
+    subgraph SPLIT-BRAIN RISK (No Fencing)
+        NN1[NameNode 1 - Believes it is ACTIVE] -->|Writes stale edits| QJM[JournalNodes Quorum]
+        NN2[NameNode 2 - Promoted to ACTIVE] -->|Writes conflicting edits| QJM
+        QJM -->|Result: Metadata Corruption!| Conflict[Conflicting transactions accepted]
+    end
+
+    subgraph PREVENTING SPLIT-BRAIN (With Fencing & Epochs)
+        S_NN1[NameNode 1 - Epoch: 10]
+        S_NN2[NameNode 2 - Promoted to ACTIVE - Epoch: 11]
+        
+        S_NN2 -->|1. Increment Epoch on JournalNodes| S_QJM[JournalNodes Quorum]
+        Note over S_QJM: JournalNodes lock epoch to 11. <br/>Reject all writes with epoch < 11.
+
+        S_NN1 -.->|2. Attempts stale write with Epoch 10| S_QJM
+        S_QJM --x|3. REJECT WRITE (Epoch 10 < 11)| S_NN1
+        
+        S_NN2 -->|4. Active ZKFC triggers SSH Fence| Fence[Fence Action: Kill NameNode 1 process]
+        Fence -->|Terminates| S_NN1
+    end

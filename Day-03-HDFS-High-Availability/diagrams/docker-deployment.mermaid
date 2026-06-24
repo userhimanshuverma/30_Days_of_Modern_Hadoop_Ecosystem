@@ -1,0 +1,32 @@
+graph TD
+    subgraph Day 03 Network - Docker Bridge
+        ZK[zookeeper-day03]
+        JN1[journalnode1-day03]
+        JN2[journalnode2-day03]
+        JN3[journalnode3-day03]
+        NN1[namenode1-day03]
+        NN2[namenode2-day03]
+        DN1[datanode1-day03]
+        DN2[datanode2-day03]
+    end
+
+    HostPorts((Host Machine))
+    
+    HostPorts -->|2181| ZK
+    HostPorts -->|8485| JN1
+    HostPorts -->|8486| JN2
+    HostPorts -->|8487| JN3
+    HostPorts -->|9000| NN1
+    HostPorts -->|9870| NN1
+    HostPorts -->|9001| NN2
+    HostPorts -->|9871| NN2
+    HostPorts -->|9864| DN1
+    HostPorts -->|9865| DN2
+
+    %% Link dependencies
+    NN1 --> ZK
+    NN2 --> ZK
+    NN1 --> JN1 & JN2 & JN3
+    NN2 --> JN1 & JN2 & JN3
+    DN1 --> NN1 & NN2
+    DN2 --> NN1 & NN2

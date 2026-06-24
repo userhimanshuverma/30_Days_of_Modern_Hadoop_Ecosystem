@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. ZOOKEEPER COORDINATOR
+  # =========================================================================
+  zookeeper:
+    image: zookeeper:3.6.3
+    container_name: zookeeper-day03
+    restart: unless-stopped
+    ports:
+      - "2181:2181"
+    networks:
+      - day03-network
+
+  # =========================================================================
+  # 2. JOURNALNODES (QUORUM EDITS LOG SHARED STORAGE)
+  # =========================================================================
+  journalnode1:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: journalnode1-day03
+    restart: unless-stopped
+    ports:
+      - "8485:8485"  # QJM RPC Port
+    command: hdfs journalnode
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - jn1_data_day03:/hadoop/dfs/journal
+    networks:
+      - day03-network
+
+  journalnode2:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: journalnode2-day03
+    restart: unless-stopped
+    ports:
+      - "8486:8485"
+    command: hdfs journalnode
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - jn2_data_day03:/hadoop/dfs/journal
+    networks:
+      - day03-network
+
+  journalnode3:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: journalnode3-day03
+    restart: unless-stopped
+    ports:
+      - "8487:8485"
+    command: hdfs journalnode
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - jn3_data_day03:/hadoop/dfs/journal
+    networks:
+      - day03-network
+
+  # =========================================================================
+  # 3. NAMENODES (ACTIVE & STANDBY SHARERS)
+  # =========================================================================
+  namenode1:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode1-day03
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # HTTP Web Console
+      - "9000:9000"  # HDFS RPC
+    command: bash /run-namenode-ha.sh
+    environment:
+      - NODE_ID=nn1
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ./run-namenode-ha.sh:/run-namenode-ha.sh
+      - nn1_data_day03:/hadoop/dfs/name
+    depends_on:
+      - zookeeper
+      - journalnode1
+      - journalnode2
+      - journalnode3
+    networks:
+      - day03-network
+
+  namenode2:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode2-day03
+    restart: unless-stopped
+    ports:
+      - "9871:9870"  # HTTP Web Console (standby mapped to 9871)
+      - "9001:9000"  # HDFS RPC (standby mapped to 9001)
+    command: bash /run-namenode-ha.sh
+    environment:
+      - NODE_ID=nn2
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ./run-namenode-ha.sh:/run-namenode-ha.sh
+      - nn2_data_day03:/hadoop/dfs/name
+    depends_on:
+      - zookeeper
+      - journalnode1
+      - journalnode2
+      - journalnode3
+      - namenode1
+    networks:
+      - day03-network
+
+  # =========================================================================
+  # 4. DATANODES (WORKERS)
+  # =========================================================================
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1-day03
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # DataNode 1 HTTP UI
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - dn1_data_day03:/hadoop/dfs/data
+    depends_on:
+      - namenode1
+      - namenode2
+    networks:
+      - day03-network
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2-day03
+    restart: unless-stopped
+    ports:
+      - "9865:9864"  # DataNode 2 HTTP UI
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - dn2_data_day03:/hadoop/dfs/data
+    depends_on:
+      - namenode1
+      - namenode2
+    networks:
+      - day03-network
+
+# ===========================================================================
+# NETWORKS & VOLUMES DEFINITIONS
+# ===========================================================================
+networks:
+  day03-network:
+    name: day03-network
+    driver: bridge
+
+volumes:
+  jn1_data_day03:
+  jn2_data_day03:
+  jn3_data_day03:
+  nn1_data_day03:
+  nn2_data_day03:
+  dn1_data_day03:
+  dn2_data_day03:

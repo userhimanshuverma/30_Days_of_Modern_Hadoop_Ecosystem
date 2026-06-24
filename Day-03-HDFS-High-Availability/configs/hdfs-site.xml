@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- hdfs-site.xml -->
+<configuration>
+    <!-- 1. High Availability Logical Nameservice Definition -->
+    <property>
+        <name>dfs.nameservices</name>
+        <value>mycluster</value>
+        <description>The logical nameservice ID for the HDFS HA cluster.</description>
+    </property>
+
+    <!-- 2. Define the list of NameNode IDs inside the nameservice -->
+    <property>
+        <name>dfs.ha.namenodes.mycluster</name>
+        <value>nn1,nn2</value>
+        <description>The two NameNodes belonging to the logical nameservice.</description>
+    </property>
+
+    <!-- 3. NameNode 1 (nn1) Endpoint Mappings -->
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn1</name>
+        <value>namenode1:9000</value>
+        <description>RPC endpoint address for NameNode 1.</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn1</name>
+        <value>namenode1:9870</value>
+        <description>Web HTTP console address for NameNode 1.</description>
+    </property>
+
+    <!-- 4. NameNode 2 (nn2) Endpoint Mappings -->
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn2</name>
+        <value>namenode2:9000</value>
+        <description>RPC endpoint address for NameNode 2.</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn2</name>
+        <value>namenode2:9870</value>
+        <description>Web HTTP console address for NameNode 2.</description>
+    </property>
+
+    <!-- 5. Shared Edits Log Directory: JournalNode Quorum -->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://journalnode1:8485;journalnode2:8485;journalnode3:8485/mycluster</value>
+        <description>Quorum Journal Manager (QJM) shared edits URI. Pointing to the 3 JournalNode daemons.</description>
+    </property>
+
+    <!-- 6. Client Failover Proxy Provider Class -->
+    <property>
+        <name>dfs.client.failover.proxy.provider.mycluster</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+        <description>The Java class HDFS clients use to determine which NameNode is active and route requests.</description>
+    </property>
+
+    <!-- 7. Fencing Configuration: Preventing Split-Brain Scenario -->
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>shell(/bin/true)</value>
+        <description>Fencing methods used to isolate a dead Active NameNode. In local Docker labs, a dummy shell fence is used. In production, sshfence or ipofence would power down nodes.</description>
+    </property>
+
+    <!-- 8. Automatic Failover Coordination Settings -->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+        <description>Enables automatic failover via the ZooKeeper Failover Controller (ZKFC).</description>
+    </property>
+
+    <!-- 9. Storage Directories and Replication Settings -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///hadoop/dfs/name</value>
+        <description>Local filesystem path where the NameNode metadata is written.</description>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///hadoop/dfs/data</value>
+        <description>Local filesystem path where DataNodes store HDFS blocks.</description>
+    </property>
+    <property>
+        <name>dfs.replication</name>
+        <value>2</value>
+        <description>Default HDFS block replication factor (configured as 2 for local Docker topology verification).</description>
+    </property>
+
+    <!-- 10. IP Hostname Check bypass for registration -->
+    <property>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>false</value>
+    </property>
+</configuration>

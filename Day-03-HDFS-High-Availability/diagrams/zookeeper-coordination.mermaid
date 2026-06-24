@@ -1,0 +1,8 @@
+graph TD
+    Root["/ (ZooKeeper Root)"] --> HA["hadoop-ha"]
+    HA --> NS["mycluster (Nameservice node)"]
+    NS --> Lock["ActiveStandbyElectorLock (Ephemeral ZNode)"]
+    NS --> Breadcrumb["ActiveBreadcrumb (Persistent ZNode)"]
+
+    Note over Lock: Ephemeral Node. Stores hostname and <br/>port of the ACTIVE NameNode.<br/>Session lost = ZNode deleted.
+    Note over Breadcrumb: Persistent Node. Stores the last known <br/>Active NameNode identifier.<br/>Prevents split-brain by identifying <br/>prior active node during boot.

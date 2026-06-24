@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    actor Client
+    participant ActiveNN as Active NameNode (nn1)
+    participant JNs as JournalNodes Quorum (QJM)
+    participant StandbyNN as Standby NameNode (nn2)
+
+    Client->>ActiveNN: mkdir /user/data (RPC Write request)
+    ActiveNN->>ActiveNN: Validate permissions & lock namespace
+    ActiveNN->>JNs: Write Edit Record (Quorum write: 2/3 response required)
+    Note over JNs: JournalNode 1, 2, and 3 store edit log segment on local disk
+    JNs-->>ActiveNN: Quorum write acknowledgement (success)
+    ActiveNN->>ActiveNN: Apply change to memory state (fsimage)
+    ActiveNN-->>Client: RPC Success Response (metadata updated)
+    
+    Note over StandbyNN: Standby regularly polls JournalNodes for new transactions
+    StandbyNN->>JNs: Poll for edits (Transaction ID X to Y)
+    JNs-->>StandbyNN: Return Edits Stream
+    StandbyNN->>StandbyNN: Apply edit logs locally & update in-memory namespace

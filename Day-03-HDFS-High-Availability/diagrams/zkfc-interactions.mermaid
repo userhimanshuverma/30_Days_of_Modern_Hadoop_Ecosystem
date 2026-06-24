@@ -1,0 +1,18 @@
+graph LR
+    subgraph ZKFC [ZooKeeper Failover Controller Daemon]
+        HM[Health Monitor]
+        ASE[Active Standby Elector]
+    end
+
+    subgraph LocalNameNode [Local NameNode Host]
+        NN[NameNode Process]
+    end
+
+    subgraph ZooKeeperCluster [ZooKeeper Cluster]
+        ZK[ZooKeeper Quorum]
+    end
+
+    HM -->|1. Poll Health via HAServiceProtocol RPC| NN
+    HM -->|2. Report State Changes| ASE
+    ASE <-->|3. Create/Watch Ephemeral Lock ZNode| ZK
+    ASE -->|4. Trigger State Transition RPC (Active/Standby)| NN

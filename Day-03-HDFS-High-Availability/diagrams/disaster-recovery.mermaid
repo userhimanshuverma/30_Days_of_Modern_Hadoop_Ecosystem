@@ -1,0 +1,21 @@
+graph LR
+    subgraph Primary Site [Active DC - Primary Site]
+        subgraph Primary HA Cluster
+            P_ANN[Active NameNode] <--> P_SNN[Standby NameNode]
+            P_ANN --> P_DN[DataNodes]
+        end
+    end
+
+    subgraph DR Site [Recovery DC - Standby Site]
+        subgraph DR HA Cluster
+            DR_ANN[Active NameNode] <--> DR_SNN[Standby NameNode]
+            DR_ANN --> DR_DN[DataNodes]
+        end
+    end
+
+    %% DistCp replication
+    P_DN -->|Asynchronous Replication via DistCp / MapReduce Job| DR_DN
+    P_ANN -.->|Metadata Backup Snapshots via DistCp| DR_ANN
+
+    Note over P_DN, DR_DN: Periodic incremental delta runs sync HDFS blocks.<br/>Hadoop DistCp runs as MapReduce job to stream files.
+    Note over DR_ANN: DR NameNode is in ACTIVE state locally,<br/>but data volumes are read-only<br/>until failover is activated.

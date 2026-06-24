@@ -1,0 +1,31 @@
+graph TB
+    subgraph Rack 1
+        subgraph Server Node 1 [Server nn-01.prod]
+            ANN[Active NameNode]
+            ZKFC1[ZKFC]
+            JN1[JournalNode]
+            ZK1[ZooKeeper]
+        end
+    end
+
+    subgraph Rack 2
+        subgraph Server Node 2 [Server nn-02.prod]
+            SNN[Standby NameNode]
+            ZKFC2[ZKFC]
+            JN2[JournalNode]
+            ZK2[ZooKeeper]
+        end
+
+        subgraph Server Node 3 [Server worker-01.prod]
+            DN1[DataNode]
+            JN3[JournalNode]
+            ZK3[ZooKeeper]
+        end
+    end
+
+    ANN <--> SNN
+    JN1 & JN2 & JN3 <--> ANN
+    JN1 & JN2 & JN3 <--> SNN
+    ZK1 & ZK2 & ZK3 <--> ZKFC1
+    ZK1 & ZK2 & ZK3 <--> ZKFC2
+    DN1 --> ANN & SNN
