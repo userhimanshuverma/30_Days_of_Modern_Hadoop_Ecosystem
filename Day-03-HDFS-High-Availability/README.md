@@ -130,7 +130,7 @@ Below is a timeline comparison showing the time-to-recovery difference when a cr
 gantt
     title Cluster Recovery Timeline: Single NameNode vs. HA Failover
     dateFormat  X
-    axisFormat %d
+    axisFormat %M:%S
     
     section Non-HA Recovery
     NameNode Crash & Detect   :crit, active, 0, 10
