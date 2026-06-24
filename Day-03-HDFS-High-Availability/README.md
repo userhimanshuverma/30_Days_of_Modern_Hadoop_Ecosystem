@@ -176,7 +176,7 @@ graph TB
         ZKFC2[ZKFC]
     end
 
-    subgraph JournalNode Cluster (QJM)
+    subgraph JournalNodeCluster [JournalNode Cluster (QJM)]
         JN1[JournalNode 1]
         JN2[JournalNode 2]
         JN3[JournalNode 3]
@@ -282,11 +282,11 @@ If the Active NameNode fails, the standby ZKFC detects the outage, fences the fa
 ```mermaid
 sequenceDiagram
     autonumber
-    participant ActiveNN as Active NameNode (nn1)
-    participant ZKFC1 as Active ZKFC
-    participant ZK as ZooKeeper Quorum
-    participant ZKFC2 as Standby ZKFC
-    participant StandbyNN as Standby NameNode (nn2)
+    participant ActiveNN as "Active NameNode (nn1)"
+    participant ZKFC1 as "Active ZKFC"
+    participant ZK as "ZooKeeper Quorum"
+    participant ZKFC2 as "Standby ZKFC"
+    participant StandbyNN as "Standby NameNode (nn2)"
 
     ActiveNN-xActiveNN: NameNode Process Crashes (JVM OOM)
     ZKFC1-xActiveNN: Health Monitor RPC check fails

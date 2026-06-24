@@ -1,10 +1,10 @@
 sequenceDiagram
     autonumber
-    participant ActiveNN as Active NameNode (nn1)
-    participant ZKFC1 as Active ZKFC
-    participant ZK as ZooKeeper Quorum
-    participant ZKFC2 as Standby ZKFC
-    participant StandbyNN as Standby NameNode (nn2)
+    participant ActiveNN as "Active NameNode (nn1)"
+    participant ZKFC1 as "Active ZKFC"
+    participant ZK as "ZooKeeper Quorum"
+    participant ZKFC2 as "Standby ZKFC"
+    participant StandbyNN as "Standby NameNode (nn2)"
 
     ActiveNN-xActiveNN: JVM Freeze or Hardware Failure
     ZKFC1-xActiveNN: Health Monitor check fails (RPC timeout)

@@ -1,11 +1,11 @@
 graph TD
-    subgraph SPLIT-BRAIN RISK (No Fencing)
+    subgraph SplitBrainRisk ["SPLIT-BRAIN RISK (No Fencing)"]
         NN1[NameNode 1 - Believes it is ACTIVE] -->|Writes stale edits| QJM[JournalNodes Quorum]
         NN2[NameNode 2 - Promoted to ACTIVE] -->|Writes conflicting edits| QJM
         QJM -->|Result: Metadata Corruption!| Conflict[Conflicting transactions accepted]
     end
 
-    subgraph PREVENTING SPLIT-BRAIN (With Fencing & Epochs)
+    subgraph PreventSplitBrain ["PREVENTING SPLIT-BRAIN (With Fencing & Epochs)"]
         S_NN1[NameNode 1 - Epoch: 10]
         S_NN2[NameNode 2 - Promoted to ACTIVE - Epoch: 11]
         

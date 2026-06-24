@@ -1,9 +1,9 @@
 sequenceDiagram
     autonumber
     actor Client
-    participant ActiveNN as Active NameNode (nn1)
-    participant JNs as JournalNodes Quorum (QJM)
-    participant StandbyNN as Standby NameNode (nn2)
+    participant ActiveNN as "Active NameNode (nn1)"
+    participant JNs as "JournalNodes Quorum (QJM)"
+    participant StandbyNN as "Standby NameNode (nn2)"
 
     Client->>ActiveNN: mkdir /user/data (RPC Write request)
     ActiveNN->>ActiveNN: Validate permissions & lock namespace
