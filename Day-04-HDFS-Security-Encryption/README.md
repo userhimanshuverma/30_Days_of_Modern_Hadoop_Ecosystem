@@ -260,9 +260,9 @@ The Kerberos protocol coordinates authentication through a three-headed ticket s
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Client / User
-    participant AS as Authentication Service (AS)
-    participant TGS as Ticket Granting Service (TGS)
+    actor Client as "Client / User"
+    participant AS as "Authentication Service (AS)"
+    participant TGS as "Ticket Granting Service (TGS)"
     participant NN as NameNode
 
     Client->>AS: Request Ticket Granting Ticket (TGT) (kinit)
@@ -343,8 +343,8 @@ To protect RPC control channels and HTTP web interfaces, all node-to-node and cl
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as HDFS Client / Daemon
-    participant Server as Target Service (HTTPS/RPC)
+    actor Client as "HDFS Client / Daemon"
+    participant Server as "Target Service (HTTPS/RPC)"
 
     Client->>Server: TLS ClientHello (TLS Version, Supported Cipher Suites, Random Key)
     Server-->>Client: TLS ServerHello (Selected TLS Version, Selected Cipher Suite, Server Random Key)
@@ -658,16 +658,16 @@ graph TD
     KDC -->|Generates keytabs| KeytabsVol
     NN -->|Generates CA/Certs| SSLVol
 
-    NN -->|Reads nn.keytab & spnego.keytab| KeytabsVol
-    NN -->|Reads keystore.jks & truststore.jks| SSLVol
+    NN -->|Reads nn.keytab and spnego.keytab| KeytabsVol
+    NN -->|Reads keystore.jks and truststore.jks| SSLVol
 
-    DN -->|Reads dn.keytab & spnego.keytab| KeytabsVol
-    DN -->|Reads keystore.jks & truststore.jks| SSLVol
+    DN -->|Reads dn.keytab and spnego.keytab| KeytabsVol
+    DN -->|Reads keystore.jks and truststore.jks| SSLVol
 
-    KMS -->|Reads kms.keytab & spnego.keytab| KeytabsVol
-    KMS -->|Reads keystore.jks & truststore.jks| SSLVol
+    KMS -->|Reads kms.keytab and spnego.keytab| KeytabsVol
+    KMS -->|Reads keystore.jks and truststore.jks| SSLVol
 
-    Client -->|Reads alice.keytab & hdfs.keytab| KeytabsVol
+    Client -->|Reads alice.keytab and hdfs.keytab| KeytabsVol
     Client -->|Reads truststore.jks| SSLVol
 
     KDC ---|Internal Bridge Network: hadoop-secure-net| NN --- DN --- KMS --- Client

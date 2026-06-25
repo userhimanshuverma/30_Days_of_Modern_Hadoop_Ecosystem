@@ -1,7 +1,7 @@
 sequenceDiagram
     autonumber
-    actor Client as Hadoop Client / Daemon
-    participant Server as Target Service (HTTPS/RPC)
+    actor Client as "Hadoop Client / Daemon"
+    participant Server as "Target Service (HTTPS/RPC)"
 
     Client->>Server: TLS ClientHello (TLS Version, Supported Cipher Suites, Random Key)
     Server-->>Client: TLS ServerHello (Selected TLS Version, Selected Cipher Suite, Server Random Key)

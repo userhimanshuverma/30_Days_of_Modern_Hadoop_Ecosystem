@@ -1,9 +1,9 @@
 sequenceDiagram
     autonumber
     actor Client as HDFS Client
-    participant AS as Authentication Service (AS)
-    participant TGS as Ticket Granting Service (TGS)
-    participant Service as NameNode (Service)
+    participant AS as "Authentication Service (AS)"
+    participant TGS as "Ticket Granting Service (TGS)"
+    participant Service as "NameNode (Service)"
 
     Client->>AS: kinit (Requests TGT)
     Note over AS: Looks up principal database

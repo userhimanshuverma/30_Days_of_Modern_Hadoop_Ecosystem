@@ -13,8 +13,8 @@ graph TD
         Config_Mounts["Local Mounts: /tmp/configs"]
     end
 
-    KDC -->|1. Populates keytabs & spnego secrets| KT_Vol
-    NN -->|2. Runs generate-certs.sh & populates Keystore/Truststores| SSL_Vol
+    KDC -->|1. Populates keytabs and spnego secrets| KT_Vol
+    NN -->|2. Runs generate-certs.sh and populates Keystore/Truststores| SSL_Vol
 
     NN -.->|Reads nn.keytab| KT_Vol
     NN -.->|Reads keystore.jks| SSL_Vol
@@ -28,6 +28,6 @@ graph TD
     KMS -.->|Reads keystore.jks| SSL_Vol
     KMS -.->|Reads kms-site.xml / kms-acls.xml| Config_Mounts
 
-    Client -.->|Reads alice.keytab & hdfs.keytab| KT_Vol
+    Client -.->|Reads alice.keytab and hdfs.keytab| KT_Vol
     Client -.->|Reads truststore.jks| SSL_Vol
     Client -.->|Executes validation scripts| Config_Mounts
