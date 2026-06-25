@@ -404,9 +404,9 @@ graph LR
         ReplicaKDC["Replica KDC (Read-Only Warm Backup)"]
     end
     
-    Client["Hadoop Client / Daemon"] -->|1. Attempt Authenticate| MasterKDC
-    Client -.->|2. Fallback on Failure| ReplicaKDC
-    MasterKDC -->|3. Incremental Database Replication (kpropd)| ReplicaKDC
+    Client["Hadoop Client / Daemon"] -->|"1. Attempt Authenticate"| MasterKDC
+    Client -.->|"2. Fallback on Failure"| ReplicaKDC
+    MasterKDC -->|"3. Incremental Database Replication (kpropd)"| ReplicaKDC
 ```
 
 - **MIT Kerberos Replication**: Set up a Primary KDC and one or more Read-Only Replica KDCs. The replica databases are kept in sync using `kpropd` (Kerberos propagation daemon) periodically or on changes.
@@ -670,7 +670,7 @@ graph TD
     Client -->|Reads alice.keytab and hdfs.keytab| KeytabsVol
     Client -->|Reads truststore.jks| SSLVol
 
-    KDC ---|Internal Bridge Network: hadoop-secure-net| NN --- DN --- KMS --- Client
+    KDC ---|"Internal Bridge Network: hadoop-secure-net"| NN --- DN --- KMS --- Client
 ```
 
 - **Container Isolation**: Each container runs as a dedicated node within the private subnet bridge `hadoop-secure-net`.
@@ -792,12 +792,12 @@ graph TB
         end
     end
 
-    Analyst -->|1. REST Calls via HTTPS| Knox
-    Knox -->|2. Authenticate against AD| AD
-    Knox -->|3. Route Calls| NN
-    NN -->|4. Authorize access| Ranger
-    NN -->|5. Request EEK| KMS
-    Analyst -->|6. Transfer Block Data (SASL)| DNs
+    Analyst -->|"1. REST Calls via HTTPS"| Knox
+    Knox -->|"2. Authenticate against AD"| AD
+    Knox -->|"3. Route Calls"| NN
+    NN -->|"4. Authorize access"| Ranger
+    NN -->|"5. Request EEK"| KMS
+    Analyst -->|"6. Transfer Block Data (SASL)"| DNs
 ```
 
 1. **Identity & Authentication**:
