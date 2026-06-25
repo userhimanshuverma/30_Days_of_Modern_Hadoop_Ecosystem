@@ -10,7 +10,7 @@ sequenceDiagram
         Client->>NN: Create file '/zone/payroll.txt'
         Note over NN: Detects path is inside Encryption Zone
         NN->>KMS: Request EEK (for payroll-key)
-        KMS->>KMS: Generates raw DEK & encrypts with Zone Key -> EEK
+        KMS->>KMS: Generates raw DEK & encrypts with Zone Key to EEK
         KMS-->>NN: Returns EEK
         NN->>NN: Stores EEK in file's HDFS inode metadata
         NN-->>Client: Returns EEK + allocated DataNode block locations

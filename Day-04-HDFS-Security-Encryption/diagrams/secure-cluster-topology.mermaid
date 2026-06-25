@@ -31,13 +31,15 @@ graph TB
     KnoxGateway -->|2. Route to Active Master| ActiveNN
     KnoxGateway -->|3. Request authentication validation| KDCServer
 
-    ActiveNN <-->|Heartbeats & Block Reports (Kerberos)| DN1 & DN2 & DN3
-    ActiveNN <-->|Download policies| RangerAdmin
-    ActiveNN <-->|Decrypt/Encrypt keys| KMSServer
+    ActiveNN ---|Heartbeats & Block Reports| DN1
+    ActiveNN ---|Heartbeats & Block Reports| DN2
+    ActiveNN ---|Heartbeats & Block Reports| DN3
+    ActiveNN ---|Download policies| RangerAdmin
+    ActiveNN ---|Decrypt/Encrypt keys| KMSServer
     
-    DN1 <-->|Data Replication (SASL Privacy)| DN2
-    DN2 <-->|Data Replication (SASL Privacy)| DN3
+    DN1 ---|Data Replication (SASL Privacy)| DN2
+    DN2 ---|Data Replication (SASL Privacy)| DN3
 
-    ActiveNN <-->|Active state coordination| ZKQuorum
-    StandbyNN <-->|State check| ZKQuorum
-    ActiveNN <-->|Sync metadata| StandbyNN
+    ActiveNN ---|Active state coordination| ZKQuorum
+    StandbyNN ---|State check| ZKQuorum
+    ActiveNN ---|Sync metadata| StandbyNN

@@ -28,5 +28,5 @@ graph TB
     Client -->|4. HDFS Read/Write (Kerberos Auth)| NameNode
     NameNode -->|5. Check Ranger Policies & Local ACLs| Ranger
     NameNode -->|6. Request EEK Decryption| KMS
-    KMS <-->|7. Retrieve Master Key| JCEKS
+    KMS ---|7. Retrieve Master Key| JCEKS
     Client -->|8. Transfer Encrypted Blocks (SASL Privacy)| DataNodes

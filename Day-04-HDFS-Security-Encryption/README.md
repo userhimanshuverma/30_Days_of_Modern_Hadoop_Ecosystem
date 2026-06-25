@@ -84,11 +84,23 @@ The table below outlines the timeline and milestones of security enhancements in
 The timeline diagram below illustrates this evolution:
 
 ```mermaid
-timeline
-    title Hadoop Security Milestones
-    Hadoop 1.x / 0.20 : MIT Kerberos Auth : Service Principals & Keytabs : Delegation & Block Access Tokens
-    Hadoop 2.x : HDFS Encryption at Rest (TDE) : Hadoop Key Management Server (KMS) : WebHDFS HTTPS & SSL/TLS
-    Hadoop 3.x : Performance Optimizations : Apache Ranger Policy Integration : Apache Knox REST Perimeter Gateway
+graph LR
+    subgraph H1 ["Hadoop 1.x / 0.20"]
+        A["MIT Kerberos Auth"]
+        B["Service Principals & Keytabs"]
+        C["Delegation & Block Tokens"]
+    end
+    subgraph H2 ["Hadoop 2.x"]
+        D["HDFS Encryption at Rest (TDE)"]
+        E["Hadoop KMS"]
+        F["WebHDFS HTTPS & SSL/TLS"]
+    end
+    subgraph H3 ["Hadoop 3.x"]
+        G["Performance Optimizations"]
+        H["Apache Ranger Integration"]
+        I["Apache Knox REST Gateway"]
+    end
+    H1 --> H2 --> H3
 ```
 
 ### Hadoop Before and After Security
@@ -293,7 +305,7 @@ sequenceDiagram
     Client->>NN: Create file '/zone/data.txt'
     Note over NN: Identifies path is in Encryption Zone
     NN->>KMS: Request Encrypted Key (EEK) for Zone Key (e.g., zone-key-1)
-    Note over KMS: Generates raw Data Encryption Key (DEK)<br/>Encrypts DEK with Zone Key -> EEK
+    Note over KMS: Generates raw Data Encryption Key (DEK)<br/>Encrypts DEK with Zone Key to EEK
     KMS-->>NN: Returns EEK + Zone Key Version
     NN->>NN: Stores EEK in file's HDFS inode extended attribute (xattr)
     NN-->>Client: Returns EEK + DataNode block allocation details
@@ -658,7 +670,7 @@ graph TD
     Client -->|Reads alice.keytab & hdfs.keytab| KeytabsVol
     Client -->|Reads truststore.jks| SSLVol
 
-    KDC <-->|Internal Bridge Network: hadoop-secure-net| NN <--> DN <--> KMS <--> Client
+    KDC ---|Internal Bridge Network: hadoop-secure-net| NN --- DN --- KMS --- Client
 ```
 
 - **Container Isolation**: Each container runs as a dedicated node within the private subnet bridge `hadoop-secure-net`.
@@ -765,13 +777,13 @@ graph TB
             AD["Active Directory (AD)"]
             KDC["Kerberos KDC"]
             Ranger["Apache Ranger (Policies)"]
-            AD <-->|Sync Users/Groups| Ranger
+            AD ---|Sync Users/Groups| Ranger
         end
 
         subgraph KeyMgmt ["Encryption Architecture"]
             KMS["KMS (High Availability Cluster)"]
             HSM["Hardware Security Module (HSM)"]
-            KMS <-->|Master Keys| HSM
+            KMS ---|Master Keys| HSM
         end
 
         subgraph ComputeStorage ["Data Processing Core"]

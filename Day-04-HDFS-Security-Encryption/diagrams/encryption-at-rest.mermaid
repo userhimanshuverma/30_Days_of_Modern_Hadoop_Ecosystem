@@ -11,7 +11,7 @@ graph LR
     
     Client["Secure Client"] -->|1. Initiate Write File| NN
     NN -->|2. Request Encrypted Key (EEK)| KMS
-    KMS <-->|3. Generate & Encrypt Key using Zone Key| KeyStore
+    KMS ---|3. Generate & Encrypt Key using Zone Key| KeyStore
     KMS -->>NN: 4. Returns EEK
     NN -->>Client: 5. Sends EEK & Data Block Locations
     Client -->|6. Requests Decrypt of EEK| KMS
