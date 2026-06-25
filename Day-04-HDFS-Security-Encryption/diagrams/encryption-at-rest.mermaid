@@ -1,0 +1,20 @@
+graph LR
+    subgraph Storage [Secure HDFS Cluster]
+        NN["NameNode (Metadata)"]
+        DN["DataNode (Physical Blocks)"]
+    end
+    
+    subgraph Crypto [Key Management]
+        KMS["Key Management Server (KMS)"]
+        KeyStore["Key Store File (JCEKS)"]
+    end
+    
+    Client["Secure Client"] -->|1. Initiate Write File| NN
+    NN -->|2. Request Encrypted Key (EEK)| KMS
+    KMS <-->|3. Generate & Encrypt Key using Zone Key| KeyStore
+    KMS -->>NN: 4. Returns EEK
+    NN -->>Client: 5. Sends EEK & Data Block Locations
+    Client -->|6. Requests Decrypt of EEK| KMS
+    KMS -->|7. Decrypts EEK to raw DEK using Zone Key| Client
+    Client -->|8. Encrypts Plaintext -> Ciphertext using DEK| Client
+    Client -->|9. Writes Ciphertext Blocks directly| DN

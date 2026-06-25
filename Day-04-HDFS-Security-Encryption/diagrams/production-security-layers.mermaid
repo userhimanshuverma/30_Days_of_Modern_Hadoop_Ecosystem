@@ -1,0 +1,36 @@
+graph TD
+    subgraph L1 ["1. Perimeter Security"]
+        Knox["Apache Knox REST Proxy"]
+        VPN["VPC/VPN Peering & Firewalls"]
+    end
+
+    subgraph L2 ["2. Network Security"]
+        TLS["SSL/TLS RPC & HTTPS Encryption"]
+        SASL["SASL Data Transfer Protection (Privacy)"]
+    end
+
+    subgraph L3 ["3. Authentication"]
+        Kerberos["MIT Kerberos / Active Directory"]
+        Tokens["Delegation & Block Access Tokens"]
+    end
+
+    subgraph L4 ["4. Authorization"]
+        Ranger["Apache Ranger Central Policies"]
+        ACLs["POSIX Permissions & Extended ACLs"]
+    end
+
+    subgraph L5 ["5. Data Encryption at Rest"]
+        TDE["HDFS Transparent Data Encryption (TDE)"]
+        KMS["Hadoop Key Management Server (KMS)"]
+    end
+
+    subgraph L6 ["6. Audit & Monitoring"]
+        AuditLogs["NameNode & KMS Audit Logs"]
+        SIEM["SIEM Integration (Splunk/ELK)"]
+    end
+
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+    L4 --> L5
+    L5 --> L6

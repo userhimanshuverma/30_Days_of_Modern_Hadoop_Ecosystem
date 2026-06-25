@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- File System Configuration -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://namenode:9000</value>
+    </property>
+
+    <!-- Security Authentication Mode -->
+    <property>
+        <name>hadoop.security.authentication</name>
+        <value>kerberos</value>
+    </property>
+
+    <!-- Service Authorization Enable -->
+    <property>
+        <name>hadoop.security.authorization</name>
+        <value>true</value>
+    </property>
+
+    <!-- Kerberos Realm Translation Rule (Auth-to-Local) -->
+    <property>
+        <name>hadoop.security.auth_to_local</name>
+        <value>
+            RULE:[1:$1@$0](nn/.*@HADOOP.LOCAL)s/.*/hdfs/
+            RULE:[1:$1@$0](dn/.*@HADOOP.LOCAL)s/.*/hdfs/
+            RULE:[1:$1@$0](kms/.*@HADOOP.LOCAL)s/.*/kms/
+            RULE:[2:$1@$0](hdfs/.*@HADOOP.LOCAL)s/.*/hdfs/
+            RULE:[2:$1@$0](yarn/.*@HADOOP.LOCAL)s/.*/yarn/
+            DEFAULT
+        </value>
+    </property>
+
+    <!-- Key Management Provider URI -->
+    <property>
+        <name>hadoop.security.key.provider.path</name>
+        <value>kms://https@kms-server.hadoop.local:9600/kms</value>
+    </property>
+
+    <!-- Proxy User Configuration for Superuser (hdfs) -->
+    <property>
+        <name>hadoop.proxyuser.hdfs.groups</name>
+        <value>*</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.hdfs.hosts</name>
+        <value>*</value>
+    </property>
+    
+    <!-- Proxy User Configuration for KMS -->
+    <property>
+        <name>hadoop.proxyuser.kms.groups</name>
+        <value>*</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.kms.hosts</name>
+        <value>*</value>
+    </property>
+
+    <!-- Web UI Authentication for Kerberos (SPNEGO) -->
+    <property>
+        <name>hadoop.http.filter.initializers</name>
+        <value>org.apache.hadoop.security.AuthenticationFilterInitializer</value>
+    </property>
+    <property>
+        <name>hadoop.http.authentication.type</name>
+        <value>kerberos</value>
+    </property>
+    <property>
+        <name>hadoop.http.authentication.kerberos.principal</name>
+        <value>HTTP/_HOST@HADOOP.LOCAL</value>
+    </property>
+    <property>
+        <name>hadoop.http.authentication.kerberos.keytab</name>
+        <value>/etc/security/keytabs/spnego.keytab</value>
+    </property>
+    <property>
+        <name>hadoop.http.authentication.signature.secret.file</name>
+        <value>/etc/security/http_secret</value>
+    </property>
+</configuration>

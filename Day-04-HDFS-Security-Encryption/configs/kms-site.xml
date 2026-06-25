@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- KMS Key Provider Backing Store URI -->
+    <property>
+        <name>hadoop.kms.key.provider.uri</name>
+        <value>jceks://file@/var/lib/hadoop/kms.jceks</value>
+    </property>
+
+    <!-- KMS Security Authentication Configuration -->
+    <property>
+        <name>hadoop.kms.authentication.type</name>
+        <value>kerberos</value>
+    </property>
+    <property>
+        <name>hadoop.kms.authentication.kerberos.principal</name>
+        <value>kms/_HOST@HADOOP.LOCAL</value>
+    </property>
+    <property>
+        <name>hadoop.kms.authentication.kerberos.keytab</name>
+        <value>/etc/security/keytabs/kms.keytab</value>
+    </property>
+    <property>
+        <name>hadoop.kms.authentication.kerberos.name.rules</name>
+        <value>DEFAULT</value>
+    </property>
+
+    <!-- KMS TLS Configuration -->
+    <property>
+        <name>hadoop.kms.http.policy</name>
+        <value>HTTPS_ONLY</value>
+    </property>
+    <property>
+        <name>hadoop.kms.https.port</name>
+        <value>9600</value>
+    </property>
+</configuration>

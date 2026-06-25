@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- Server SSL Keystore Configuration -->
+  <property>
+    <name>ssl.server.keystore.type</name>
+    <value>jks</value>
+  </property>
+  <property>
+    <name>ssl.server.keystore.location</name>
+    <value>/var/ssl/keystore.jks</value>
+  </property>
+  <property>
+    <name>ssl.server.keystore.password</name>
+    <value>hadoopstorepass</value>
+  </property>
+  <property>
+    <name>ssl.server.keystore.keypassword</name>
+    <value>hadoopkeypass</value>
+  </property>
+
+  <!-- Server SSL Truststore Configuration -->
+  <property>
+    <name>ssl.server.truststore.type</name>
+    <value>jks</value>
+  </property>
+  <property>
+    <name>ssl.server.truststore.location</name>
+    <value>/var/ssl/truststore.jks</value>
+  </property>
+  <property>
+    <name>ssl.server.truststore.password</name>
+    <value>hadooptrustpass</value>
+  </property>
+</configuration>

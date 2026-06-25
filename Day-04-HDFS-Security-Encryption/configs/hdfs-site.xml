@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- NameNode Kerberos Configuration -->
+    <property>
+        <name>dfs.namenode.kerberos.principal</name>
+        <value>nn/_HOST@HADOOP.LOCAL</value>
+    </property>
+    <property>
+        <name>dfs.namenode.keytab.file</name>
+        <value>/etc/security/keytabs/nn.keytab</value>
+    </property>
+    <property>
+        <name>dfs.namenode.kerberos.internal.spnego.principal</name>
+        <value>HTTP/_HOST@HADOOP.LOCAL</value>
+    </property>
+
+    <!-- DataNode Kerberos Configuration -->
+    <property>
+        <name>dfs.datanode.kerberos.principal</name>
+        <value>dn/_HOST@HADOOP.LOCAL</value>
+    </property>
+    <property>
+        <name>dfs.datanode.keytab.file</name>
+        <value>/etc/security/keytabs/dn.keytab</value>
+    </property>
+    <property>
+        <name>dfs.datanode.kerberos.internal.spnego.principal</name>
+        <value>HTTP/_HOST@HADOOP.LOCAL</value>
+    </property>
+
+    <!-- HDFS Web & Data Transfer Protection (SASL) -->
+    <property>
+        <name>dfs.http.policy</name>
+        <value>HTTPS_ONLY</value>
+    </property>
+    <property>
+        <name>dfs.data.transfer.protection</name>
+        <value>privacy</value>
+    </property>
+    <property>
+        <name>dfs.block.access.token.enable</name>
+        <value>true</value>
+    </property>
+
+    <!-- Secure Ports for HDFS HTTPS Web UI -->
+    <property>
+        <name>dfs.namenode.https-address</name>
+        <value>namenode:9871</value>
+    </property>
+    <property>
+        <name>dfs.datanode.https-address</name>
+        <value>datanode:9865</value>
+    </property>
+
+    <!-- Enable Access Control Lists (ACLs) -->
+    <property>
+        <name>dfs.namenode.acls.enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- HDFS Storage Directories -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///var/lib/hadoop/dfs/name</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///var/lib/hadoop/dfs/data</value>
+    </property>
+
+    <!-- Data Encryption at Rest (TDE Key Provider) -->
+    <property>
+        <name>dfs.encryption.key.provider.uri</name>
+        <value>kms://https@kms-server.hadoop.local:9600/kms</value>
+    </property>
+</configuration>

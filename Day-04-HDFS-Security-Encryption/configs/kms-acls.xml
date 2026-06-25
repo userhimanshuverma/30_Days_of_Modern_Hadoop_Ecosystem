@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Default Key Access Control Lists (ACLs) -->
+    <!-- Allow hdfs, kms, and alice users to run management commands -->
+    <property>
+        <name>default.key.acl.MANAGEMENT</name>
+        <value>hdfs,kms</value>
+    </property>
+    
+    <!-- Who can generate Encrypted Encryption Keys (EEKS) - usually HDFS NN -->
+    <property>
+        <name>default.key.acl.GENERATE_EEK</name>
+        <value>hdfs,kms</value>
+    </property>
+    
+    <!-- Who can decrypt Encrypted Encryption Keys (EEKS) - usually HDFS NN or the authorized reader -->
+    <property>
+        <name>default.key.acl.DECRYPT_EEK</name>
+        <value>hdfs,kms,alice</value>
+    </property>
+    
+    <!-- Who can read key metadata -->
+    <property>
+        <name>default.key.acl.READ</name>
+        <value>hdfs,kms,alice</value>
+    </property>
+
+    <!-- Specific Key ACL for 'finance-key' -->
+    <property>
+        <name>key.acl.finance-key.MANAGEMENT</name>
+        <value>hdfs</value>
+    </property>
+    <property>
+        <name>key.acl.finance-key.GENERATE_EEK</name>
+        <value>hdfs</value>
+    </property>
+    <property>
+        <name>key.acl.finance-key.DECRYPT_EEK</name>
+        <value>alice</value>
+    </property>
+    <property>
+        <name>key.acl.finance-key.READ</name>
+        <value>alice</value>
+    </property>
+</configuration>

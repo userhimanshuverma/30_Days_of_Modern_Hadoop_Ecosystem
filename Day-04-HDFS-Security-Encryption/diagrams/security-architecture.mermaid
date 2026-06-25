@@ -1,0 +1,32 @@
+graph TB
+    subgraph Perimeter ["Perimeter Layer"]
+        Knox["Knox Gateway (HTTPS)"]
+    end
+    
+    subgraph Auth ["Authentication Layer"]
+        KDC["MIT Kerberos KDC (Port 88)"]
+    end
+
+    subgraph Authz ["Authorization Layer"]
+        Ranger["Ranger Admin & Policies"]
+        ACLs["HDFS POSIX & Extended ACLs"]
+    end
+
+    subgraph Encryption ["Key Management (KMS)"]
+        KMS["Hadoop KMS (Port 9600)"]
+        JCEKS["JCEKS Key Store File"]
+    end
+
+    subgraph Storage ["Hadoop Cluster"]
+        NameNode["NameNode (Port 9871 HTTPS)"]
+        DataNodes["DataNodes (Port 9865 HTTPS / SASL)"]
+    end
+
+    Client["HDFS Client"] -->|1. kinit / Authenticate| KDC
+    Client -->|2. Rest API / Gateway Access| Knox
+    Knox -->|3. Route to NameNode| NameNode
+    Client -->|4. HDFS Read/Write (Kerberos Auth)| NameNode
+    NameNode -->|5. Check Ranger Policies & Local ACLs| Ranger
+    NameNode -->|6. Request EEK Decryption| KMS
+    KMS <-->|7. Retrieve Master Key| JCEKS
+    Client -->|8. Transfer Encrypted Blocks (SASL Privacy)| DataNodes

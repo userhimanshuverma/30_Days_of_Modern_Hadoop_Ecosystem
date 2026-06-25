@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor Client as Client Node
+    participant NN as NameNode
+    participant KMS as Key Management Server
+    participant DN as DataNode
+
+    rect rgb(240, 248, 255)
+        Note over Client, DN: WRITE WORKFLOW
+        Client->>NN: Create file '/zone/payroll.txt'
+        Note over NN: Detects path is inside Encryption Zone
+        NN->>KMS: Request EEK (for payroll-key)
+        KMS->>KMS: Generates raw DEK & encrypts with Zone Key -> EEK
+        KMS-->>NN: Returns EEK
+        NN->>NN: Stores EEK in file's HDFS inode metadata
+        NN-->>Client: Returns EEK + allocated DataNode block locations
+        Client->>KMS: Decrypt EEK request (sends EEK)
+        Note over KMS: Checks kms-acls.xml for DECRYPT_EEK privilege
+        KMS-->>Client: Returns raw DEK
+        Note over Client: Encrypts data stream with raw DEK (AES-CTR)
+        Client->>DN: Writes encrypted HDFS blocks (ciphertext)
+    end
+
+    rect rgb(255, 240, 245)
+        Note over Client, DN: READ WORKFLOW
+        Client->>NN: Open file '/zone/payroll.txt'
+        NN-->>Client: Returns EEK + block locations from inode
+        Client->>KMS: Decrypt EEK request (sends EEK)
+        KMS-->>Client: Returns raw DEK
+        Client->>DN: Reads ciphertext blocks
+        Note over Client: Decrypts data stream using raw DEK
+    end

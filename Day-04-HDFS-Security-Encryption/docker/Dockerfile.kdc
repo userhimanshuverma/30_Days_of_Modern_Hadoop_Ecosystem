@@ -1,0 +1,12 @@
+FROM alpine:3.18
+
+# Install MIT Kerberos server and bash
+RUN apk add --no-cache krb5-server krb5 bash
+
+# Expose KDC ports: 88 (Kerberos authentication), 749 (Kerberos administration)
+EXPOSE 88 88/udp 749
+
+COPY bootstrap-kdc.sh /bootstrap-kdc.sh
+RUN chmod +x /bootstrap-kdc.sh
+
+ENTRYPOINT ["/bootstrap-kdc.sh"]

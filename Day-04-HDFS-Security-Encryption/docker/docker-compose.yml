@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  kdc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.kdc
+    image: local/krb5-kdc:latest
+    hostname: kdc-server
+    domainname: hadoop.local
+    volumes:
+      - keytabs-vol:/etc/security/keytabs
+    networks:
+      hadoop-secure-net:
+        aliases:
+          - kdc-server.hadoop.local
+
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile.hadoop
+    image: local/hadoop-secure:latest
+    hostname: namenode.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=namenode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - keytabs-vol:/etc/security/keytabs
+      - ssl-vol:/var/ssl
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - ./generate-certs.sh:/tmp/docker/generate-certs.sh:ro
+    ports:
+      - "9871:9871" # HDFS NameNode Web UI HTTPS
+    depends_on:
+      - kdc-server
+    networks:
+      hadoop-secure-net:
+        aliases:
+          - namenode.hadoop.local
+
+  datanode:
+    image: local/hadoop-secure:latest
+    hostname: datanode.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=datanode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - keytabs-vol:/etc/security/keytabs
+      - ssl-vol:/var/ssl
+      - ./bootstrap-hadoop.sh:/bootstrap-hadoop.sh:ro
+    depends_on:
+      - namenode
+    networks:
+      hadoop-secure-net:
+        aliases:
+          - datanode.hadoop.local
+
+  kms-server:
+    image: local/hadoop-secure:latest
+    hostname: kms-server.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=kms
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - keytabs-vol:/etc/security/keytabs
+      - ssl-vol:/var/ssl
+      - ./bootstrap-hadoop.sh:/bootstrap-hadoop.sh:ro
+    ports:
+      - "9600:9600" # KMS REST API HTTPS
+    depends_on:
+      - namenode
+    networks:
+      hadoop-secure-net:
+        aliases:
+          - kms-server.hadoop.local
+
+  client:
+    image: local/hadoop-secure:latest
+    hostname: client.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=client
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - keytabs-vol:/etc/security/keytabs
+      - ssl-vol:/var/ssl
+      - ../scripts:/tmp/scripts:ro
+      - ./bootstrap-hadoop.sh:/bootstrap-hadoop.sh:ro
+    depends_on:
+      - datanode
+      - kms-server
+    networks:
+      hadoop-secure-net:
+        aliases:
+          - client.hadoop.local
+
+volumes:
+  keytabs-vol:
+  ssl-vol:
+
+networks:
+  hadoop-secure-net:
+    name: hadoop-secure-net
+    driver: bridge

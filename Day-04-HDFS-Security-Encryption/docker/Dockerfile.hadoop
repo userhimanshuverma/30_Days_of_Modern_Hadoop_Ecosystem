@@ -1,0 +1,11 @@
+FROM apache/hadoop:3.3.6
+
+USER root
+
+# Install MIT Kerberos client utilities and libraries (image is CentOS/RedHat-based)
+RUN yum install -y krb5-workstation krb5-libs openssl && yum clean all
+
+COPY bootstrap-hadoop.sh /bootstrap-hadoop.sh
+RUN chmod +x /bootstrap-hadoop.sh
+
+ENTRYPOINT ["/bootstrap-hadoop.sh"]

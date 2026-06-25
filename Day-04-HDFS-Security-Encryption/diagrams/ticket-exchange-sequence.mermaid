@@ -1,0 +1,18 @@
+sequenceDiagram
+    autonumber
+    actor Client as HDFS Client
+    participant AS as Authentication Service (AS)
+    participant TGS as Ticket Granting Service (TGS)
+    participant Service as NameNode (Service)
+
+    Client->>AS: kinit (Requests TGT)
+    Note over AS: Looks up principal database
+    AS-->>Client: Returns TGT (Encrypted with KDC secret) & Session Key
+    
+    Client->>TGS: Requests Service Ticket (Sends TGT + Authenticator)
+    Note over TGS: Decrypts TGT, checks client validity
+    TGS-->>Client: Returns Service Ticket (Encrypted with Service key) & Session Key
+    
+    Client->>Service: Sends Service Ticket + Client Authenticator
+    Note over Service: Decrypts Ticket with local keytab
+    Service-->>Client: Service Access Granted / RPC Connection Established

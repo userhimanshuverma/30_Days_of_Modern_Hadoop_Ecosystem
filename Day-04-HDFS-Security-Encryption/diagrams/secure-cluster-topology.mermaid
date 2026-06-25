@@ -1,0 +1,43 @@
+graph TB
+    subgraph PublicSpace ["Public/External Client Access"]
+        Client["External Clients"]
+    end
+
+    subgraph PerimeterTiers ["DMZ / Perimeter Layer"]
+        KnoxGateway["Apache Knox Gateway (Reverse Proxy)"]
+    end
+
+    subgraph InternalTiers ["Secure Internal Cluster VPC Network"]
+        subgraph AdminTiers ["Security Infrastructure"]
+            KDCServer["Kerberos KDC (MIT / Active Directory)"]
+            RangerAdmin["Apache Ranger Admin Portal"]
+            KMSServer["Hadoop Key Management Server (KMS)"]
+        end
+
+        subgraph MastersTiers ["Hadoop Master Nodes"]
+            ActiveNN["Active NameNode"]
+            StandbyNN["Standby NameNode"]
+            ZKQuorum["ZooKeeper Coordination"]
+        end
+
+        subgraph WorkersTiers ["Hadoop Worker Nodes"]
+            DN1["DataNode 1"]
+            DN2["DataNode 2"]
+            DN3["DataNode 3"]
+        end
+    end
+
+    Client -->|1. REST/HTTPS Traffic| KnoxGateway
+    KnoxGateway -->|2. Route to Active Master| ActiveNN
+    KnoxGateway -->|3. Request authentication validation| KDCServer
+
+    ActiveNN <-->|Heartbeats & Block Reports (Kerberos)| DN1 & DN2 & DN3
+    ActiveNN <-->|Download policies| RangerAdmin
+    ActiveNN <-->|Decrypt/Encrypt keys| KMSServer
+    
+    DN1 <-->|Data Replication (SASL Privacy)| DN2
+    DN2 <-->|Data Replication (SASL Privacy)| DN3
+
+    ActiveNN <-->|Active state coordination| ZKQuorum
+    StandbyNN <-->|State check| ZKQuorum
+    ActiveNN <-->|Sync metadata| StandbyNN

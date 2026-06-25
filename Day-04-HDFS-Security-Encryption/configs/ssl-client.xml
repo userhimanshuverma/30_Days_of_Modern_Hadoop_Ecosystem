@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- Client SSL Truststore Configuration -->
+  <property>
+    <name>ssl.client.truststore.type</name>
+    <value>jks</value>
+  </property>
+  <property>
+    <name>ssl.client.truststore.location</name>
+    <value>/var/ssl/truststore.jks</value>
+  </property>
+  <property>
+    <name>ssl.client.truststore.password</name>
+    <value>hadooptrustpass</value>
+  </property>
+</configuration>

@@ -1,0 +1,15 @@
+sequenceDiagram
+    autonumber
+    actor Client as Hadoop Client / Daemon
+    participant Server as Target Service (HTTPS/RPC)
+
+    Client->>Server: TLS ClientHello (TLS Version, Supported Cipher Suites, Random Key)
+    Server-->>Client: TLS ServerHello (Selected TLS Version, Selected Cipher Suite, Server Random Key)
+    Server-->>Client: Server Certificate (Signed by CA)
+    Note over Client: Validates Certificate in truststore.jks
+    Client->>Server: ClientKeyExchange (Pre-Master Secret encrypted with Server Public Key)
+    Client->>Server: ChangeCipherSpec (Signals symmetrical encryption start)
+    Server-->>Client: ChangeCipherSpec (Acknowledges symmetrical session)
+    Note over Client, Server: Symmetrical Transport Channel Secured (AES-GCM)
+    Client->>Server: Encrypted RPC / HTTPS Requests (WebHDFS, IPC Calls)
+    Server-->>Client: Encrypted Server Payload

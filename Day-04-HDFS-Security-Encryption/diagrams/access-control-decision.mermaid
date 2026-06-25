@@ -1,0 +1,35 @@
+graph TD
+    Request["HDFS File Access Request"] --> CheckOwner{"Is client user the owner?"}
+    
+    CheckOwner -- Yes --> EvalOwner["Check POSIX Owner Permissions (rwx)"]
+    EvalOwner --> OwnerOk{"Is access granted?"}
+    OwnerOk -- Yes --> Permit["Access Granted"]
+    OwnerOk -- No --> Deny["Access Denied"]
+    
+    CheckOwner -- No --> CheckACL{"Are HDFS Extended ACLs enabled?"}
+    
+    CheckACL -- Yes --> CheckNamedUser{"Is user matching Named User ACL?"}
+    CheckNamedUser -- Yes --> EvalNamedUser["Check User ACL (Mask Applied)"]
+    EvalNamedUser --> UserAclOk{"Is access granted?"}
+    UserAclOk -- Yes --> Permit
+    UserAclOk -- No --> Deny
+    
+    CheckNamedUser -- No --> CheckGroups{"Is user in target groups?"}
+    CheckGroups -- Yes --> CheckNamedGroups{"Are Named Groups configured in ACLs?"}
+    
+    CheckNamedGroups -- Yes --> EvalNamedGroup["Check Named Group ACL (Mask Applied)"]
+    EvalNamedGroup --> NamedGroupOk{"Is access granted?"}
+    NamedGroupOk -- Yes --> Permit
+    NamedGroupOk -- No --> Deny
+    
+    CheckNamedGroups -- No --> EvalPOSIXGroup["Check standard POSIX Group Permissions (rwx)"]
+    EvalPOSIXGroup --> POSIXGroupOk{"Is access granted?"}
+    POSIXGroupOk -- Yes --> Permit
+    POSIXGroupOk -- No --> Deny
+    
+    CheckGroups -- No --> EvalOthers["Check POSIX Others Permissions (rwx)"]
+    EvalOthers --> OthersOk{"Is access granted?"}
+    OthersOk -- Yes --> Permit
+    OthersOk -- No --> Deny
+    
+    CheckACL -- No --> CheckGroups

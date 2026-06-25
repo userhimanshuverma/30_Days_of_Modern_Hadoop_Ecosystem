@@ -1,0 +1,16 @@
+graph TD
+    Client["Client / User"]
+    
+    subgraph KDC ["Key Distribution Center (KDC)"]
+        AS["Authentication Service (AS)"]
+        TGS["Ticket Granting Service (TGS)"]
+    end
+    
+    TargetService["Hadoop Service (e.g., NameNode)"]
+
+    Client -->|1. AS Request (Requires TGT)| AS
+    AS -->|2. AS Response (TGT + Client-TGS Session Key)| Client
+    Client -->|3. TGS Request (TGT + Authenticator + Service Name)| TGS
+    TGS -->|4. TGS Response (Service Ticket + Client-Server Session Key)| Client
+    Client -->|5. Service Request (Service Ticket + Client Authenticator)| TargetService
+    TargetService -->|6. Establish Secure Session / Grant Access| Client
