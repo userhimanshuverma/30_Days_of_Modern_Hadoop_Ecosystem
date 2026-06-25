@@ -209,13 +209,13 @@ graph TB
         DN["DataNode"]
     end
 
-    EC -->|1. Authenticate / Request TGT| KDC
-    EC -->|2. REST Call| Knox
-    Knox -->|3. Forward Secure Call| NN
-    EC -->|4. Client HDFS Command| NN
-    NN -->|5. Fetch Access Policy| Ranger
-    NN -->|6. Get EEK / Decrypt| KMS
-    EC -->|7. Secure Data Transfer (SASL)| DN
+    EC -->|"1. Authenticate / Request TGT"| KDC
+    EC -->|"2. REST Call"| Knox
+    Knox -->|"3. Route to NameNode"| NN
+    EC -->|"4. Client HDFS Command"| NN
+    NN -->|"5. Fetch Access Policy"| Ranger
+    NN -->|"6. Get EEK / Decrypt"| KMS
+    EC -->|"7. Secure Data Transfer (SASL)"| DN
 ```
 
 ### Component Details
