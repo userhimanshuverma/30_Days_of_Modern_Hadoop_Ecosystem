@@ -1,0 +1,23 @@
+graph TD
+    subgraph ClientHost ["Client Machine (Writes Block)"]
+        Client["HDFS Client"]
+    end
+
+    subgraph Rack1 ["Rack /rack1"]
+        node1["DataNode 1 - Replica 1: Local"]
+        node2["DataNode 2"]
+    end
+
+    subgraph Rack2 ["Rack /rack2 (Remote Rack)"]
+        node3["DataNode 3 - Replica 2: Remote Rack Node A"]
+        node4["DataNode 4 - Replica 3: Remote Rack Node B"]
+    end
+
+    Client -->|1. Writes locally| node1
+    node1 -->|2. Replicates inter-rack| node3
+    node3 -->|3. Replicates intra-rack| node4
+
+    style node1 fill:#1f77b4,stroke:#333,stroke-width:2px,color:#fff
+    style node3 fill:#aec7e8,stroke:#333,stroke-width:2px
+    style node4 fill:#aec7e8,stroke:#333,stroke-width:2px
+    style Client fill:#2ca02c,stroke:#333,stroke-width:2px,color:#fff

@@ -1,0 +1,11 @@
+FROM apache/hadoop:3.3.6
+
+USER root
+
+# Install Python3, curl, procps (for system resources monitoring) and utilities
+RUN yum install -y python3 curl procps-ng net-tools iproute && yum clean all
+
+COPY bootstrap-hadoop.sh /bootstrap-hadoop.sh
+RUN chmod +x /bootstrap-hadoop.sh
+
+ENTRYPOINT ["/bootstrap-hadoop.sh"]

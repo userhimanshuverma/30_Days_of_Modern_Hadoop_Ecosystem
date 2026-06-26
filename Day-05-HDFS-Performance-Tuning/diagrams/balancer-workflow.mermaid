@@ -1,0 +1,21 @@
+flowchart TD
+    Start([1. Start HDFS Balancer]) --> GetUtil[2. Contact NameNode for Node Storage Utilization]
+    GetUtil --> CompareThreshold{"3. Utilization Delta > Threshold?"}
+    
+    CompareThreshold -- No --> SystemBalanced([Cluster Balanced - Terminate])
+    CompareThreshold -- Yes --> ClassifyNodes[4. Classify nodes: Over-utilized, Under-utilized, Average]
+    
+    ClassifyNodes --> PairNodes[5. Pair over-utilized sources with under-utilized targets]
+    PairNodes --> MoveBlocks[6. Schedule replica moves via target DataNode proxy]
+    
+    subgraph Execution ["Block Data Copy Phase"]
+        MoveBlocks --> BandwidthLimit{7. Check dfs.datanode.balance.bandwidthPerSec}
+        BandwidthLimit -->|Throttle enforced| DirectCopy[8. Copy block bytes from Source DN to Target DN]
+        DirectCopy --> ReportNN[9. Update NameNode with new replica location]
+    end
+    
+    ReportNN --> LoopBack[10. Sleep and evaluate next iteration]
+    LoopBack --> GetUtil
+    
+    style SystemBalanced fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style BandwidthLimit fill:#fff3cd,stroke:#ffc107,stroke-width:2px

@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile.hadoop
+    image: local/hadoop-perf:latest
+    hostname: namenode.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=namenode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - dn-socket-vol:/var/lib/hadoop-hdfs
+    ports:
+      - "9870:9870" # NameNode Web UI (Native HTTP Metrics)
+      - "9904:9904" # NameNode JVM JMX port
+    networks:
+      hadoop-perf-net:
+        aliases:
+          - namenode.hadoop.local
+
+  datanode1:
+    image: local/hadoop-perf:latest
+    hostname: datanode1.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=datanode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - dn-socket-vol:/var/lib/hadoop-hdfs
+    ports:
+      - "9864:9864" # DataNode 1 HTTP
+      - "9905:9905" # DataNode 1 JVM JMX
+    depends_on:
+      - namenode
+    networks:
+      hadoop-perf-net:
+        aliases:
+          - datanode1.hadoop.local
+
+  datanode2:
+    image: local/hadoop-perf:latest
+    hostname: datanode2.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=datanode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - dn-socket-vol:/var/lib/hadoop-hdfs
+    ports:
+      - "9865:9864" # DataNode 2 HTTP mapped to 9865
+    depends_on:
+      - namenode
+    networks:
+      hadoop-perf-net:
+        aliases:
+          - datanode2.hadoop.local
+
+  datanode3:
+    image: local/hadoop-perf:latest
+    hostname: datanode3.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=datanode
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - dn-socket-vol:/var/lib/hadoop-hdfs
+    ports:
+      - "9866:9864" # DataNode 3 HTTP mapped to 9866
+    depends_on:
+      - namenode
+    networks:
+      hadoop-perf-net:
+        aliases:
+          - datanode3.hadoop.local
+
+  client:
+    image: local/hadoop-perf:latest
+    hostname: client.hadoop.local
+    domainname: hadoop.local
+    environment:
+      - SERVICE_TYPE=client
+    volumes:
+      - ../configs:/tmp/configs:ro
+      - ./bootstrap-hadoop.sh:/tmp/docker/bootstrap-hadoop.sh:ro
+      - dn-socket-vol:/var/lib/hadoop-hdfs
+      - ../scripts:/tmp/scripts:ro
+      - ../benchmark:/tmp/benchmark:ro
+    depends_on:
+      - datanode1
+      - datanode2
+      - datanode3
+    networks:
+      hadoop-perf-net:
+        aliases:
+          - client.hadoop.local
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      hadoop-perf-net:
+
+  grafana:
+    image: grafana/grafana-oss:9.5.2
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./grafana-dashboards-provider.yml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./grafana-dashboard.json:/var/lib/grafana/dashboards/grafana-dashboard.json:ro
+    depends_on:
+      - prometheus
+    networks:
+      hadoop-perf-net:
+
+volumes:
+  dn-socket-vol:
+
+networks:
+  hadoop-perf-net:
+    name: hadoop-perf-net
+    driver: bridge

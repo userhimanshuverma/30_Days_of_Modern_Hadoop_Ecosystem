@@ -1,0 +1,20 @@
+graph TD
+    subgraph Case1 ["PROBLEM: Millions of Small Files (e.g., 10,000 x 10KB)"]
+        F1["File A (10KB) -> 1 Block"]
+        F2["File B (10KB) -> 1 Block"]
+        F3["File C (10KB) -> 1 Block"]
+        
+        F1 & F2 & F3 -->|Exhausts namespace| NN1["NameNode JVM Memory (RAM) - 150B per inode + 150B per block metadata - RAM bloated by millions of pointers."]
+        F1 & F2 & F3 -->|Compute Overhead| MR1["MapReduce / Spark Clients - Creates 10,000 splits - Exhausts YARN container allocation and JVM start overhead."]
+    end
+
+    subgraph Case2 ["OPTIMIZED: Single Consolidated Large File (e.g., 1 x 100MB)"]
+        LF["Large File (100MB) -> 1 Block (256MB boundary)"]
+        LF -->|Efficient storage| NN2["NameNode JVM Memory (RAM) - Uses only 1 Inode + 1 Block metadata entry - Extremely light RAM utilization."]
+        LF -->|Efficient processing| MR2["MapReduce / Spark Clients - Creates exactly 1 split - Streams contiguously at hardware limits."]
+    end
+
+    style NN1 fill:#ff9999,stroke:#333,stroke-width:2px
+    style MR1 fill:#ff9999,stroke:#333,stroke-width:2px
+    style NN2 fill:#99ff99,stroke:#333,stroke-width:2px
+    style MR2 fill:#99ff99,stroke:#333,stroke-width:2px

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Common Filesystem Configurations -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://namenode:9000</value>
+        <description>The primary HDFS NameNode URI endpoint</description>
+    </property>
+
+    <!-- Buffer Sizes for Optimized Disk and Stream I/O -->
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>131072</value> <!-- 128 KB -->
+        <description>Size of read/write buffer used in sequence files. Must be a multiple of hardware page size (4KB). 128KB is standard for modern network/storage systems.</description>
+    </property>
+
+    <!-- IPC Server and Queue Configurations -->
+    <property>
+        <name>ipc.server.handler.queue.size</name>
+        <value>250</value>
+        <description>Number of call queue items per handler thread. Prevents Client RPC requests from being dropped under high load.</description>
+    </property>
+
+    <property>
+        <name>ipc.client.connection.maxidletime</name>
+        <value>10000</value> <!-- 10 seconds -->
+        <description>Max idle time in milliseconds before client drops connection.</description>
+    </property>
+
+    <property>
+        <name>ipc.client.connect.max.retries</name>
+        <value>10</value>
+        <description>Max retries for IPC connections before throwing connection exception.</description>
+    </property>
+
+    <!-- Topology Configuration for Rack Awareness -->
+    <property>
+        <name>net.topology.script.file.name</name>
+        <value>/etc/hadoop/rack-topology.sh</value>
+        <description>Script mapping hostnames to rack locations for block replica placement.</description>
+    </property>
+</configuration>

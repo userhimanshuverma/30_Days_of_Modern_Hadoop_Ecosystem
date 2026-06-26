@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    actor Client as HDFS Client
+    participant NN as "NameNode (Metadata)"
+    participant DN1 as "DataNode 1 (Local Rack)"
+    participant DN2 as "DataNode 2 (Local Rack)"
+    participant DN3 as "DataNode 3 (Remote Rack)"
+
+    Client->>NN: create(filePath, blocksize, replication)
+    activate NN
+    NN->>NN: Validate namespace and permissions
+    NN->>NN: Allocate block and select pipeline target nodes
+    NN-->>Client: Return targets DN1, DN2, DN3
+    deactivate NN
+
+    Note over Client, DN3: Pipeline Setup
+    Client->>DN1: TCP Connect - Request pipeline setup
+    DN1->>DN2: TCP Connect - Setup pipeline
+    DN2->>DN3: TCP Connect - Setup pipeline
+    DN3-->>DN2: Pipeline ACK OK
+    DN2-->>DN1: Pipeline ACK OK
+    DN1-->>Client: Pipeline Ready
+
+    Note over Client, DN3: Data Streaming - 64KB packets
+    rect rgb(30, 45, 60)
+        Client->>DN1: Stream Packet - chunk and CRC checksum
+        DN1->>DN2: Forward Packet
+        DN1->>DN1: Write to local replica buffer and flush to disk
+        DN2->>DN3: Forward Packet
+        DN2->>DN2: Write to local replica buffer and flush to disk
+        DN3->>DN3: Write to local replica buffer and flush to disk
+    end
+
+    Note over Client, DN3: Acknowledgements - Upstream
+    DN3-->>DN2: Packet ACK OK
+    DN2-->>DN1: Packet ACK OK
+    DN1-->>Client: Packet ACK OK
+
+    Client->>NN: complete(file)

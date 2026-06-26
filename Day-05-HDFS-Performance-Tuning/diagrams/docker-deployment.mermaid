@@ -1,0 +1,36 @@
+graph TD
+    subgraph Net ["hadoop-perf-net Bridge Network"]
+        NN["NameNode Container - namenode.hadoop.local - Ports: 9870, 9904 JMX"]
+        DN1["DataNode 1 Container - datanode1.hadoop.local - Ports: 9864, 9905 JMX"]
+        DN2["DataNode 2 Container - datanode2.hadoop.local - Ports: 9865"]
+        DN3["DataNode 3 Container - datanode3.hadoop.local - Ports: 9866"]
+        
+        Client["Client Container - client.hadoop.local - Runs benchmarks"]
+        
+        Prom["Prometheus Container - prometheus - Port: 9090"]
+        Graf["Grafana Container - grafana - Port: 3000"]
+    end
+
+    subgraph Volumes ["Docker Named Volumes"]
+        Vol["dn-socket-vol - Unix Domain Socket - /var/lib/hadoop-hdfs"]
+    end
+
+    %% Network links
+    Client -->|Writes / Reads| NN
+    Client -->|Streams block data| DN1
+    Client -->|Streams block data| DN2
+    Client -->|Streams block data| DN3
+
+    %% Vol shares
+    DN1 & DN2 & DN3 & Client & NN ==>|Mounts| Vol
+
+    %% Scrapes
+    Prom -->|Scrapes /prom HTTP| NN
+    Prom -->|Scrapes /prom HTTP| DN1 & DN2 & DN3
+    
+    %% Grafana
+    Graf -->|Queries metrics| Prom
+
+    style Vol fill:#e2e3e5,stroke:#383d41,stroke-width:2px
+    style Prom fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style Graf fill:#f8d7da,stroke:#dc3545,stroke-width:2px

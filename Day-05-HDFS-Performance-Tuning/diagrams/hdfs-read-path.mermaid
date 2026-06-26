@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    actor Client as HDFS Client
+    participant NN as "NameNode (Metadata)"
+    participant DN_Local as "DataNode (Local Host)"
+    participant DN_Remote as "DataNode (Remote Rack)"
+
+    Client->>NN: open(filePath)
+    activate NN
+    NN-->>Client: Return Block Locations (LocatedBlocks sorted by distance)
+    deactivate NN
+    
+    rect rgb(30, 40, 60)
+        Note over Client, DN_Local: If Short-Circuit Read is Enabled (Local)
+        Client->>DN_Local: Request Short-Circuit Read via Domain Socket
+        DN_Local-->>Client: Share file descriptor (Direct local disk access)
+        Client->>Client: Read block directly bypassing TCP stack
+    end
+
+    rect rgb(40, 50, 70)
+        Note over Client, DN_Remote: Fallback to TCP Socket (Remote Node)
+        Client->>DN_Remote: Establish TCP connection (Port 9866)
+        Client->>DN_Remote: Request Block Data
+        DN_Remote-->>Client: Stream block data packet-by-packet (64KB packets)
+    end
+    
+    Client->>Client: Verify checksum (CRC32)
+    Client->>Client: Close stream

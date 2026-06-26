@@ -1,0 +1,26 @@
+graph TD
+    Tuning["HDFS Performance Tuning Checklist"]
+    
+    Tuning --> Meta["1. Namespace & Memory Sizing"]
+    Meta --> M1["NN Heap: 1 GB RAM per 1 million blocks"]
+    Meta --> M2["JVM GC: G1GC or ZGC configuration"]
+    
+    Tuning --> IO["2. I/O Optimization"]
+    IO --> IO1["Set dfs.blocksize=256MB for large files"]
+    IO --> IO2["Enable dfs.client.read.shortcircuit=true"]
+    IO --> IO3["Set io.file.buffer.size=131072 (128KB)"]
+    
+    Tuning --> Net["3. Concurrency & Network"]
+    Net --> N1["Set dfs.datanode.max.transfer.threads=8192"]
+    Net --> N2["Configure dfs.namenode.handler.count=64 (Scale with nodes)"]
+    Net --> N3["Enable Rack Awareness (Topology script)"]
+    
+    Tuning --> Ops["4. Operations & Housekeeping"]
+    Ops --> O1["Tune dfs.datanode.balance.bandwidthPerSec=100MB/s"]
+    Ops --> O2["Mitigate small files via HAR or SequenceFiles"]
+    
+    style Tuning fill:#f8d7da,stroke:#dc3545,stroke-width:2px,font-weight:bold
+    style Meta fill:#fff3cd,stroke:#ffc107,stroke-width:1px
+    style IO fill:#d4edda,stroke:#28a745,stroke-width:1px
+    style Net fill:#cce5ff,stroke:#004085,stroke-width:1px
+    style Ops fill:#e2e3e5,stroke:#383d41,stroke-width:1px

@@ -1,0 +1,16 @@
+flowchart TD
+    Start([1. Start Benchmark Suite]) --> SpinCluster[2. Provision 3-node HDFS Cluster via Docker Compose]
+    SpinCluster --> CheckHealth["3. Verify DataNodes and Rack Assignments"]
+    
+    CheckHealth --> RunDFSIO[4. Execute TestDFSIO Read/Write Baseline]
+    RunDFSIO --> RunBlocksizes[5. Upload 512MB payload using 32MB, 128MB, 256MB blocks]
+    RunBlocksizes --> RunSmallFiles[6. Upload 2000 x 10KB files sequentially vs 1 x 20MB file]
+    
+    RunSmallFiles --> GatherLogs[7. Extract JMX queue and NameNode statistics]
+    GatherLogs --> ReportSummary[8. Generate Console Summary & metrics in Grafana]
+    ReportSummary --> CleanData[9. Run TestDFSIO -clean and remove temp directories]
+    CleanData --> Stop([10. Stop Benchmarking])
+    
+    style RunDFSIO fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px
+    style RunBlocksizes fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px
+    style RunSmallFiles fill:#f8d7da,stroke:#dc3545,stroke-width:2px

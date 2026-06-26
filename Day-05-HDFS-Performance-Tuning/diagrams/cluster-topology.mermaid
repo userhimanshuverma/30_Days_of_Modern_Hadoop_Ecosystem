@@ -1,0 +1,27 @@
+graph TD
+    NN["NameNode - Metadata Broker - namenode.hadoop.local"]
+
+    subgraph Switch1 ["Top-of-Rack Switch 1"]
+        Rack1["/rack1"]
+        DN1["DataNode 1 - datanode1.hadoop.local"]
+        DN2["DataNode 2 - datanode2.hadoop.local"]
+    end
+
+    subgraph Switch2 ["Top-of-Rack Switch 2"]
+        Rack2["/rack2"]
+        DN3["DataNode 3 - datanode3.hadoop.local"]
+    end
+
+    %% Logical mapping control
+    NN -.->|Rack Resolution Script| Rack1
+    NN -.->|Rack Resolution Script| Rack2
+
+    Rack1 --- DN1
+    Rack1 --- DN2
+    Rack2 --- DN3
+
+    classDef switch fill:#e2e3e5,stroke:#383d41,stroke-width:2px;
+    classDef node fill:#cce5ff,stroke:#004085,stroke-width:2px;
+    
+    class Switch1,Switch2 switch;
+    class DN1,DN2,DN3,NN node;

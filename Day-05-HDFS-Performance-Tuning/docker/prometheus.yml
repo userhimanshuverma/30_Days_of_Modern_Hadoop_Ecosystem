@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'hdfs-namenode'
+    metrics_path: '/prom'
+    static_configs:
+      - targets: ['namenode.hadoop.local:9870']
+        labels:
+          role: 'namenode'
+
+  - job_name: 'hdfs-datanodes'
+    metrics_path: '/prom'
+    static_configs:
+      - targets:
+          - 'datanode1.hadoop.local:9864'
+          - 'datanode2.hadoop.local:9864'
+          - 'datanode3.hadoop.local:9864'
+        labels:
+          role: 'datanode'

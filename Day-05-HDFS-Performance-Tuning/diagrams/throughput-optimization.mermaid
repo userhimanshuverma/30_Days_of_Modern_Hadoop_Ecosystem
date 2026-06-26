@@ -1,0 +1,28 @@
+graph TB
+    subgraph Client ["HDFS Client (Spark / Impala)"]
+        CC["Client Cache / Buffer"]
+    end
+
+    subgraph DN ["DataNode Host"]
+        subgraph RAM ["Operating System RAM"]
+            Cache["Page Cache (OS Kernel)"]
+            JVMHeap["JVM Heap Memory - G1GC Optimizations"]
+        end
+        
+        subgraph Storage ["Physical Storage"]
+            SSD["High-Throughput SSDs - Write-heavy metadata"]
+            HDD["Capacity HDDs - Cold block files"]
+        end
+
+        DN_Proc["DataNode Daemon Process"]
+    end
+
+    Client -->|1. Short-Circuit Reads: Direct Socket| Cache
+    Client -->|2. Parallel streaming: Max Transfer Threads| DN_Proc
+    DN_Proc -->|3. GC Isolation: Pauses under 200ms| JVMHeap
+    DN_Proc -->|4. Storage Tiering: dfs.datanode.data.dir| SSD
+    DN_Proc -->|4. Storage Tiering: dfs.datanode.data.dir| HDD
+
+    style Cache fill:#ffeeba,stroke:#ffc107,stroke-width:2px
+    style SSD fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style JVMHeap fill:#cce5ff,stroke:#004085,stroke-width:2px
