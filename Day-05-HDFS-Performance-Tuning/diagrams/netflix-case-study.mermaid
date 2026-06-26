@@ -1,0 +1,19 @@
+graph TD
+    subgraph NetflixCluster ["Netflix Petabyte-Scale HDFS Architecture"]
+        ClientApp["Spark / Trino Client"]
+        NN_HA["High Availability Active NameNode - 128GB JVM Heap, G1GC tuned"]
+        
+        subgraph Rack_01 ["Rack /rack1"]
+            DN_A["DataNode A - SSD-backed metadata cache"]
+            DN_B["DataNode B"]
+        end
+        
+        subgraph Rack_02 ["Rack /rack2"]
+            DN_C["DataNode C - HDD capacity drives"]
+            DN_D["DataNode D"]
+        end
+    end
+
+    ClientApp -->|1. Request block mapping| NN_HA
+    ClientApp -->|2. Direct read - Short-circuit| DN_A
+    DN_A -->|3. Replicate across racks| DN_C

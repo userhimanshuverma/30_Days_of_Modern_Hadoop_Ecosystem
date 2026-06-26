@@ -29,7 +29,8 @@ This module provides a comprehensive production engineering guide. We will analy
 │   ├── docker-deployment.mermaid
 │   ├── benchmark-workflow.mermaid
 │   ├── cluster-topology.mermaid
-│   └── performance-tuning-checklist.mermaid
+│   ├── performance-tuning-checklist.mermaid
+│   └── netflix-case-study.mermaid
 ├── docker/
 │   ├── docker-compose.yml         # Namenode, 3x DataNodes, Client, Prometheus, Grafana
 │   ├── Dockerfile.hadoop          # Extended Hadoop image with diagnostics tools
@@ -618,7 +619,7 @@ graph TD
     end
 
     ClientApp -->|1. Request block mapping| NN_HA
-    ClientApp -->|2. Direct read (Short-circuit)| DN_A
+    ClientApp -->|2. Direct read - Short-circuit| DN_A
     DN_A -->|3. Replicate across racks| DN_C
 ```
 
