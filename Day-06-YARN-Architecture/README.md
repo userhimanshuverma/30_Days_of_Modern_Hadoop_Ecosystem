@@ -71,14 +71,14 @@ This led to severe underutilization: a cluster could be completely idle with 0 m
 
 ```mermaid
 graph TD
-    subgraph MRv1 Architecture (Hadoop 1.x)
+    subgraph "MRv1 Architecture (Hadoop 1.x)"
         JT[Monolithic JobTracker] -->|Schedules Map/Reduce Slots| TT1[TaskTracker 1]
         JT -->|Schedules Map/Reduce Slots| TT2[TaskTracker 2]
         TT1 -->|Slot limits| S1[Static Map Slots]
         TT1 -->|Slot limits| S2[Static Reduce Slots]
     end
 
-    subgraph YARN Architecture (Hadoop 2.x+)
+    subgraph "YARN Architecture (Hadoop 2.x+)"
         RM[ResourceManager] -->|Dynamically Allocates| NM1[NodeManager 1]
         RM -->|Dynamically Allocates| NM2[NodeManager 2]
         NM1 -->|Flexible limits| C1[Dynamic Container: Map]
@@ -98,7 +98,7 @@ YARN introduces a master-slave control plane that separates resource allocation 
 
 ```mermaid
 graph TB
-    subgraph Active ResourceManager Host
+    subgraph "Active ResourceManager Host"
         RM[ResourceManager]
         RS[ResourceScheduler]
         ASM[ApplicationsManager]
@@ -108,7 +108,7 @@ graph TB
         RM ---> RT
     end
 
-    subgraph Worker Host 1
+    subgraph "Worker Host 1"
         NM1[NodeManager]
         AM1[ApplicationMaster - App A]
         C1[Container 1 - Task 1]
@@ -116,7 +116,7 @@ graph TB
         AM1 -->|Resource Alloc Request| ASM
     end
 
-    subgraph Worker Host 2
+    subgraph "Worker Host 2"
         NM2[NodeManager]
         C2[Container 2 - Task 2]
         NM2 -->|Status Heartbeat| RT
@@ -299,18 +299,18 @@ To prevent the ResourceManager from being a Single Point of Failure (SPOF), prod
 
 ```mermaid
 graph TB
-    subgraph Client Space
+    subgraph "Client Space"
         C[YARN Client]
     end
 
-    subgraph RM HA Cluster
+    subgraph "RM HA Cluster"
         RM1[RM 1 - Active]
         RM2[RM 2 - Standby]
         ZKFC1[ZKFC Elector]
         ZKFC2[ZKFC Elector]
     end
 
-    subgraph ZooKeeper Coordination
+    subgraph "ZooKeeper Coordination"
         ZK[ZooKeeper Quorum]
     end
 
@@ -408,7 +408,7 @@ The local cluster environment is configured using Docker Compose.
 
 ```mermaid
 graph TD
-    subgraph Docker Network Boundary: day06-network
+    subgraph "Docker Network Boundary: day06-network"
         NN[namenode-day06]
         DN[datanode-day06]
         RM[resourcemanager-day06]
@@ -493,8 +493,8 @@ Consider an enterprise Hadoop platform shared by three departments with differen
 
 ```mermaid
 graph TD
-    subgraph Multi-Tenant YARN Cluster
-        subgraph Queue: root
+    subgraph "Multi-Tenant YARN Cluster"
+        subgraph "Queue: root"
             Q_Prod[Queue: production - Capacity 50%]
             Q_BI[Queue: BI - Capacity 30%]
             Q_Dev[Queue: dev - Capacity 20%]

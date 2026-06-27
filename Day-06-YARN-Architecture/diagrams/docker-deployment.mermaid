@@ -5,7 +5,7 @@ graph TD
         P19888[Port 19888]
     end
 
-    subgraph day06-network (Docker Bridge)
+    subgraph "day06-network (Docker Bridge)"
         NN[namenode-day06] --- DN[datanode-day06]
         RM[resourcemanager-day06] --- NM[nodemanager-day06]
         JHS[historyserver-day06] --- RM

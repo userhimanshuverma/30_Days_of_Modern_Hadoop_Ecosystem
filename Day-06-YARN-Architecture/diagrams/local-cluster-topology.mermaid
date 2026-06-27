@@ -1,5 +1,5 @@
 graph TD
-    subgraph Master Nodes (Control Plane)
+    subgraph "Master Nodes (Control Plane)"
         subgraph Master Node 1
             RM_A[Active ResourceManager]
             NN_A[Active NameNode]
@@ -19,7 +19,7 @@ graph TD
         end
     end
 
-    subgraph Worker Nodes (Compute/Storage Plane)
+    subgraph "Worker Nodes (Compute/Storage Plane)"
         subgraph Worker Node 1
             NM1[NodeManager]
             DN1[DataNode]

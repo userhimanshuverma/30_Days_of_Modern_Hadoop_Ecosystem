@@ -1,15 +1,15 @@
 graph TB
-    subgraph Clients & NodeManagers
+    subgraph "Clients & NodeManagers"
         C[YARN Client]
         NM[NodeManager]
     end
 
-    subgraph RM Host 1 (Active)
+    subgraph "RM Host 1 (Active)"
         RM1[ResourceManager]
         ZKFC1[ZKFC Elector]
     end
 
-    subgraph RM Host 2 (Standby)
+    subgraph "RM Host 2 (Standby)"
         RM2[ResourceManager]
         ZKFC2[ZKFC Elector]
     end
