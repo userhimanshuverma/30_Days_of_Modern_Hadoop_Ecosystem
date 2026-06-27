@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Instruct Hadoop to use YARN as the MapReduce execution engine -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+
+    <!-- JobHistory Server addresses (IPC RPC and Web UI) -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>historyserver:10020</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>historyserver:19888</value>
+    </property>
+
+    <!-- Resource allocations for Mapper and Reducer containers -->
+    <property>
+        <name>mapreduce.map.memory.mb</name>
+        <value>1024</value> <!-- Container limits: 1GB memory -->
+    </property>
+    <property>
+        <name>mapreduce.reduce.memory.mb</name>
+        <value>1024</value> <!-- Container limits: 1GB memory -->
+    </property>
+
+    <!-- JVM Heap allocations for Map and Reduce tasks (approx. 80% of container limits) -->
+    <property>
+        <name>mapreduce.map.java.opts</name>
+        <value>-Xmx819m</value>
+    </property>
+    <property>
+        <name>mapreduce.reduce.java.opts</name>
+        <value>-Xmx819m</value>
+    </property>
+
+    <!-- MapReduce Classpaths required for finding Hadoop libraries inside containers -->
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_HOME/share/hadoop/common/*,$HADOOP_HOME/share/hadoop/common/lib/*,$HADOOP_HOME/share/hadoop/hdfs/*,$HADOOP_HOME/share/hadoop/hdfs/lib/*,$HADOOP_HOME/share/hadoop/mapreduce/*,$HADOOP_HOME/share/hadoop/mapreduce/lib/*,$HADOOP_HOME/share/hadoop/yarn/*,$HADOOP_HOME/share/hadoop/yarn/lib/*</value>
+    </property>
+</configuration>

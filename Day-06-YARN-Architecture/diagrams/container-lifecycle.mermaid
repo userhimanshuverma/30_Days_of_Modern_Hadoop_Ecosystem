@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> NEW: ApplicationMaster requests resource
+    NEW --> ALLOCATED: Scheduler assigns resource & generates token
+    ALLOCATED --> ACQUIRED: AM receives token in heartbeat response
+    ACQUIRED --> STARTING: AM calls NM StartContainers() & localization begins
+    STARTING --> RUNNING: Local resources ready, process launched under CGroups
+    RUNNING --> COMPLETED: Task completes successfully (exit code 0)
+    RUNNING --> FAILED: Task crashes / OOMs / fails (exit code != 0)
+    RUNNING --> KILLED: AM / RM cancels container task
+    COMPLETED --> [*]
+    FAILED --> [*]
+    KILLED --> [*]

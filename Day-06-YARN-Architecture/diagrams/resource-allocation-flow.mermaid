@@ -1,0 +1,8 @@
+graph TD
+    AM[ApplicationMaster] -->|1. Resource Request via Heartbeat| RM[ResourceManager / Scheduler]
+    RM -->|2. Check Queue Allocation & Limits| Q[Scheduler Queues]
+    Q -->|3. Evaluate Locality: Node-Local -> Rack-Local -> Off-Switch| L[Locality Manager]
+    L -->|4. Reserve / Allocate Resource| C[Container Allocator]
+    C -->|5. Generate Container Token| S[Security / Token Manager]
+    S -->|6. Return Container in Heartbeat Response| AM
+    AM -->|7. Connect with Token & Launch Command| NM[NodeManager]

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Default Filesystem URI pointing to the active NameNode -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://namenode:9000</value>
+    </property>
+
+    <!-- Buffer size used in sequence files and read/write stream operations -->
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>131072</value> <!-- 128 KB -->
+    </property>
+
+    <!-- ZooKeeper Connection details for coordination and HA state management -->
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>zookeeper:2181</value>
+    </property>
+</configuration>

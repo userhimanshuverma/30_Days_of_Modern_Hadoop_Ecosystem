@@ -1,0 +1,24 @@
+graph TD
+    subgraph Failures
+        F_NM[NodeManager Fails / Timeout]
+        F_AM[ApplicationMaster Crashes]
+        F_RM[Active ResourceManager Fails]
+    end
+
+    subgraph NM Recovery
+        F_NM -->|RM detects missing heartbeat| RM_Detect[RM marks Node as LOST]
+        RM_Detect -->|Container reschedule| RM_Resched[RM rescheduled tasks on other NMs]
+    end
+
+    subgraph AM Recovery
+        F_AM -->|RM Container Allocator detects exit| RM_AM_Detect[RM allocates new AM container]
+        RM_AM_Detect -->|AM bootstrapping| AM_Boot[New AM starts & queries RM for status]
+        AM_Boot -->|Sync status & re-run| AM_Sync[AM syncs with running containers or re-runs failed tasks]
+    end
+
+    subgraph RM Recovery
+        F_RM -->|ZKFC detects loss of lease| ZK_Trigger[ZK removes active lock]
+        ZK_Trigger -->|Standby promoted| RM_Standby_Promote[Standby RM becomes Active]
+        RM_Standby_Promote -->|Load state from ZK| State_Load[Load active applications from ZKStateStore]
+        State_Load -->|NMs sync| NM_Sync[NodeManagers send status to new Active RM]
+    end

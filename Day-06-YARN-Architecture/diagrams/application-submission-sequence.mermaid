@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor Client
+    participant RM as ResourceManager
+    participant NM1 as NodeManager (Node 1)
+    participant AM as ApplicationMaster
+    participant NM2 as NodeManager (Node 2)
+    participant C2 as Container (Node 2)
+
+    Client->>RM: Submit Application (ApplicationSubmissionContext)
+    RM->>RM: Allocate Application ID & select queue
+    RM->>RM: Schedule AM Container
+    RM->>NM1: Launch ApplicationMaster Container
+    activate NM1
+    NM1->>AM: Spin up AM Process (JVM)
+    deactivate NM1
+    activate AM
+    AM->>RM: Register ApplicationMaster (RPC: RegisterApplicationMasterRequest)
+    AM->>RM: Request Resource Containers (RPC: AllocateRequest)
+    RM->>AM: Allocate Containers (RPC: AllocateResponse)
+    AM->>NM2: Launch Task Container (RPC: StartContainersRequest)
+    activate NM2
+    NM2->>C2: Spin up Task Container
+    deactivate NM2
+    C2->>AM: Send Status/Execution Updates
+    AM->>Client: Send Execution Updates (Optional status query)
+    AM->>RM: Unregister ApplicationMaster (RPC: FinishApplicationMasterRequest)
+    deactivate AM
+    RM->>NM1: Terminate AM Container
+    RM->>NM2: Terminate Task Containers

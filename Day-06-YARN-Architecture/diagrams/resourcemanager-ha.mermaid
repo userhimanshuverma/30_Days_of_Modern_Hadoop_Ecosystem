@@ -1,0 +1,37 @@
+graph TB
+    subgraph Clients & NodeManagers
+        C[YARN Client]
+        NM[NodeManager]
+    end
+
+    subgraph RM Host 1 (Active)
+        RM1[ResourceManager]
+        ZKFC1[ZKFC Elector]
+    end
+
+    subgraph RM Host 2 (Standby)
+        RM2[ResourceManager]
+        ZKFC2[ZKFC Elector]
+    end
+
+    subgraph ZooKeeper Quorum
+        ZK[ZooKeeper Cluster]
+    end
+
+    subgraph Shared State Store
+        ZKStore[ZKRMStateStore /hadoop-ha/rm-store]
+    end
+
+    C -->|Sends requests to active RM| RM1
+    C -.->|Fails over to standby RM if active fails| RM2
+    NM -->|Sends heartbeats to active RM| RM1
+    NM -.->|Sends heartbeats to standby RM if failover happens| RM2
+
+    ZKFC1 --- |Active Lock check & Ephemeral lease| ZK
+    ZKFC2 --- |Standby Lock check| ZK
+    
+    RM1 -->|Write app state & tokens| ZKStore
+    RM2 -.->|Reads state on promotion| ZKStore
+    
+    RM1 --- |Health Check| ZKFC1
+    RM2 --- |Health Check| ZKFC2

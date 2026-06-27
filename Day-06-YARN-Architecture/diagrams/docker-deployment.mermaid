@@ -1,0 +1,26 @@
+graph TD
+    subgraph Host Network
+        P9870[Port 9870]
+        P8088[Port 8088]
+        P19888[Port 19888]
+    end
+
+    subgraph day06-network (Docker Bridge)
+        NN[namenode-day06] --- DN[datanode-day06]
+        RM[resourcemanager-day06] --- NM[nodemanager-day06]
+        JHS[historyserver-day06] --- RM
+        JHS --- NN
+        NM --- DN
+        NM --- NN
+        RM --- NN
+    end
+
+    P9870 --- |Web UI| NN
+    P8088 --- |Web UI| RM
+    P19888 --- |Web UI| JHS
+
+    subgraph Named Volumes
+        NN_Vol[(namenode_data_day06)] ---> NN
+        DN_Vol[(datanode_data_day06)] ---> DN
+        JHS_Vol[(historyserver_data_day06)] ---> JHS
+    end

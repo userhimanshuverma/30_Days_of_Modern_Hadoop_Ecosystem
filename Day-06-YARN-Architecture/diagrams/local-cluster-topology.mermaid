@@ -1,0 +1,42 @@
+graph TD
+    subgraph Master Nodes (Control Plane)
+        subgraph Master Node 1
+            RM_A[Active ResourceManager]
+            NN_A[Active NameNode]
+            ZK1[ZooKeeper 1]
+            JN1[JournalNode 1]
+        end
+        subgraph Master Node 2
+            RM_S[Standby ResourceManager]
+            NN_S[Standby NameNode]
+            ZK2[ZooKeeper 2]
+            JN2[JournalNode 2]
+        end
+        subgraph Master Node 3
+            ZK3[ZooKeeper 3]
+            JN3[JournalNode 3]
+            JHS[JobHistoryServer]
+        end
+    end
+
+    subgraph Worker Nodes (Compute/Storage Plane)
+        subgraph Worker Node 1
+            NM1[NodeManager]
+            DN1[DataNode]
+        end
+        subgraph Worker Node 2
+            NM2[NodeManager]
+            DN2[DataNode]
+        end
+        subgraph Worker Node 3
+            NM3[NodeManager]
+            DN3[DataNode]
+        end
+    end
+
+    RM_A --- NM1
+    RM_A --- NM2
+    RM_A --- NM3
+    NN_A --- DN1
+    NN_A --- DN2
+    NN_A --- DN3

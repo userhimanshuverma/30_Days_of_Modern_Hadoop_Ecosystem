@@ -1,0 +1,66 @@
+graph TB
+    subgraph Clients
+        C[HDFS/YARN Client]
+    end
+
+    subgraph ZooKeeper Cluster
+        ZK1[ZooKeeper 1]
+        ZK2[ZooKeeper 2]
+        ZK3[ZooKeeper 3]
+    end
+
+    subgraph Control Plane (ResourceManager HA)
+        direction LR
+        RM_Active[Active ResourceManager]
+        RM_Standby[Standby ResourceManager]
+        ZKFC1[ZKFC Elector]
+        ZKFC2[ZKFC Elector]
+
+        RM_Active --- ZKFC1
+        RM_Standby --- ZKFC2
+    end
+
+    subgraph Worker Node 1
+        NM1[NodeManager 1]
+        subgraph NM1 Containers
+            AM1[ApplicationMaster - App A]
+            C1[Container 1 - Task 1]
+        end
+    end
+
+    subgraph Worker Node 2
+        NM2[NodeManager 2]
+        subgraph NM2 Containers
+            C2[Container 2 - Task 2]
+            C3[Container 3 - Task 3]
+        end
+    end
+
+    subgraph Worker Node 3
+        NM3[NodeManager 3]
+        subgraph NM3 Containers
+            AM2[ApplicationMaster - App B]
+            C4[Container 4 - Task 4]
+        end
+    end
+
+    %% Client Interactions
+    C -->|1. Submit App| RM_Active
+    C -.->|Failover Retry| RM_Standby
+
+    %% HA Elector Interactions
+    ZKFC1 --- |Active Lock check & Ephemeral lease| ZK1
+    ZKFC2 --- |Standby Lock check & standby lease| ZK1
+    RM_Active --- |State Sync / Active RM State Store| ZK2
+
+    %% NM Heartbeats
+    NM1 -->|Heartbeats & Node Status| RM_Active
+    NM2 -->|Heartbeats & Node Status| RM_Active
+    NM3 -->|Heartbeats & Node Status| RM_Active
+
+    %% ApplicationMaster Orchestration
+    AM1 -->|2. Allocate Containers| RM_Active
+    AM1 -->|3. Launch Container| NM2
+    AM1 -->|3. Launch Container| NM1
+    AM2 -->|2. Allocate Containers| RM_Active
+    AM2 -->|3. Launch Container| NM3

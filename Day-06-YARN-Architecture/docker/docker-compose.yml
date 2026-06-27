@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. HDFS NAMENODE (METADATA MASTER)
+  # =========================================================================
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode-day06
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # NameNode RPC Port
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ../configs/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ../configs/mapred-site.xml:/etc/hadoop/mapred-site.xml
+      - ../configs/capacity-scheduler.xml:/etc/hadoop/capacity-scheduler.xml
+      - namenode_data_day06:/hadoop/dfs/name
+    networks:
+      - day06-network
+
+  # =========================================================================
+  # 2. HDFS DATANODE (BLOCK STORAGE WORKER)
+  # =========================================================================
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode-day06
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # DataNode Web UI
+    env_file:
+      - ./hadoop.env
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ../configs/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ../configs/mapred-site.xml:/etc/hadoop/mapred-site.xml
+      - ../configs/capacity-scheduler.xml:/etc/hadoop/capacity-scheduler.xml
+      - datanode_data_day06:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - day06-network
+
+  # =========================================================================
+  # 3. YARN RESOURCEMANAGER (COMPUTE MASTER)
+  # =========================================================================
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager-day06
+    restart: unless-stopped
+    ports:
+      - "8088:8088"  # ResourceManager Web UI
+      - "8032:8032"  # ResourceManager Applications Manager RPC
+      - "8030:8030"  # ResourceManager Scheduler IPC RPC
+      - "8031:8031"  # ResourceManager Resource Tracker RPC
+    env_file:
+      - ./hadoop.env
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 namenode:9870 datanode:9864
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ../configs/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ../configs/mapred-site.xml:/etc/hadoop/mapred-site.xml
+      - ../configs/capacity-scheduler.xml:/etc/hadoop/capacity-scheduler.xml
+    depends_on:
+      - namenode
+      - datanode
+    networks:
+      - day06-network
+
+  # =========================================================================
+  # 4. YARN NODEMANAGER (COMPUTE WORKER)
+  # =========================================================================
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager-day06
+    restart: unless-stopped
+    ports:
+      - "8042:8042"  # NodeManager Web UI
+    env_file:
+      - ./hadoop.env
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ../configs/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ../configs/mapred-site.xml:/etc/hadoop/mapred-site.xml
+      - ../configs/capacity-scheduler.xml:/etc/hadoop/capacity-scheduler.xml
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+    networks:
+      - day06-network
+
+  # =========================================================================
+  # 5. MAPREDUCE JOB HISTORY SERVER (ARCHIVE RECORDINGS)
+  # =========================================================================
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver-day06
+    restart: unless-stopped
+    ports:
+      - "19888:19888"  # JobHistory Web UI
+    env_file:
+      - ./hadoop.env
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088
+    volumes:
+      - ../configs/core-site.xml:/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
+      - ../configs/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ../configs/mapred-site.xml:/etc/hadoop/mapred-site.xml
+      - ../configs/capacity-scheduler.xml:/etc/hadoop/capacity-scheduler.xml
+      - historyserver_data_day06:/hadoop/yarn/timeline
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+    networks:
+      - day06-network
+
+# ===========================================================================
+# NETWORKS & VOLUMES DEFINITIONS
+# ===========================================================================
+networks:
+  day06-network:
+    name: day06-network
+    driver: bridge
+
+volumes:
+  namenode_data_day06:
+  datanode_data_day06:
+  historyserver_data_day06:

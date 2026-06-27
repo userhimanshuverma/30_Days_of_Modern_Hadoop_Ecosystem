@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- ResourceManager RPC & Web API settings -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>resourcemanager</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>${yarn.resourcemanager.hostname}:8032</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>${yarn.resourcemanager.hostname}:8030</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.resource-tracker.address</name>
+        <value>${yarn.resourcemanager.hostname}:8031</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.webapp.address</name>
+        <value>${yarn.resourcemanager.hostname}:8088</value>
+    </property>
+
+    <!-- NodeManager Shuffle Auxiliary Service (required for MapReduce) -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+
+    <!-- Node Resource limits (Memory & CPU) -->
+    <property>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>4096</value> <!-- 4 GB allocation limit per node -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>4</value> <!-- 4 vCores allocation limit per node -->
+    </property>
+
+    <!-- Container sizing thresholds -->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>4096</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.minimum-allocation-vcores</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-vcores</name>
+        <value>4</value>
+    </property>
+
+    <!-- JVM Verification parameters (Physical & Virtual Memory limits) -->
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value> <!-- Disabled inside Docker to avoid virtual memory overshoot failures -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-pmem-ratio</name>
+        <value>2.1</value>
+    </property>
+
+    <!-- Scheduler selection: CapacityScheduler -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+
+    <!-- Heartbeat interval settings -->
+    <property>
+        <name>yarn.nodemanager.heartbeat.interval-ms</name>
+        <value>1000</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.nm.liveness-monitor.expiry-interval-ms</name>
+        <value>600000</value> <!-- 10 mins NM timeout -->
+    </property>
+
+    <!-- Production Log Aggregation -->
+    <property>
+        <name>yarn.log-aggregation-enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value> <!-- Keep aggregation logs for 7 days -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.remote-app-log-dir</name>
+        <value>/var/log/hadoop-yarn/apps</value>
+    </property>
+
+    <!-- High Availability Toggle (Disabled by default for local single-cluster) -->
+    <property>
+        <name>yarn.resourcemanager.ha.enabled</name>
+        <value>false</value>
+    </property>
+</configuration>

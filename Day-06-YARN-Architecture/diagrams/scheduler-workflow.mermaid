@@ -1,0 +1,18 @@
+flowchart TD
+    Start[Node Heartbeat Triggers Scheduler] --> Traverse{Start at root Queue}
+    Traverse --> CheckChildQueues[Sort child queues by Capacity/Fairness metric]
+    CheckChildQueues --> ChooseChild[Select queue furthest below capacity/share]
+    ChooseChild --> IsLeaf{Is Leaf Queue?}
+    IsLeaf -- No --> Traverse
+    IsLeaf -- Yes --> CheckUserLimits{Does user exceed limit?}
+    CheckUserLimits -- Yes --> SkipQueue[Skip Queue/App and evaluate next]
+    CheckUserLimits -- No --> SortApps[Sort applications in Leaf Queue]
+    SortApps --> CheckLocality{Evaluate app's resource requests against Node's locality}
+    CheckLocality -- Node-Local Match --> Allocate[Allocate Node-Local Container]
+    CheckLocality -- Rack-Local Match --> Allocate
+    CheckLocality -- No Match --> HoldOrOffSwitch{Locality Delay Active?}
+    HoldOrOffSwitch -- Yes --> SkipApp[Skip app to wait for locality Match]
+    HoldOrOffSwitch -- No --> AllocateOff[Allocate Off-Switch Container]
+    Allocate --> UpdateUsage[Update Queue & User Usage Metrics]
+    AllocateOff --> UpdateUsage
+    UpdateUsage --> End[Return Container Token in Heartbeat response]

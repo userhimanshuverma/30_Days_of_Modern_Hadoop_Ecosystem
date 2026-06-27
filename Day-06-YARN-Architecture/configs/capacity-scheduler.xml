@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Define the queue hierarchy at the root level -->
+    <property>
+        <name>yarn.scheduler.capacity.root.queues</name>
+        <value>default,production,sandbox</value>
+    </property>
+
+    <!-- Configure base queue resource allocation percentages (Sum must equal 100%) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.capacity</name>
+        <value>30</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.production.capacity</name>
+        <value>50</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.sandbox.capacity</name>
+        <value>20</value>
+    </property>
+
+    <!-- Configure maximum elasticity (how much a queue can grow if other queues are idle) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
+        <value>50</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.production.maximum-capacity</name>
+        <value>100</value> <!-- Can consume the entire cluster if idle -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.sandbox.maximum-capacity</name>
+        <value>40</value>
+    </property>
+
+    <!-- Queue state controls (RUNNING allows jobs submission, STOPPED drains queue) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.production.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.sandbox.state</name>
+        <value>RUNNING</value>
+    </property>
+
+    <!-- User limits within queues (determines minimum resource guarantees per active user) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
+        <value>1</value> <!-- Single user can use up to 1x the configured capacity -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.production.user-limit-factor</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.sandbox.user-limit-factor</name>
+        <value>1</value>
+    </property>
+
+    <!-- Maximum active applications in the cluster -->
+    <property>
+        <name>yarn.scheduler.capacity.maximum-applications</name>
+        <value>10000</value>
+    </property>
+
+    <!-- Resource calculation logic configuration -->
+    <property>
+        <name>yarn.scheduler.capacity.resource-calculator</name>
+        <value>org.apache.hadoop.yarn.util.resource.DominantResourceCalculator</value>
+        <description>Use dominant resource calculator (DRC) to schedule CPU vcores along with memory</description>
+    </property>
+</configuration>

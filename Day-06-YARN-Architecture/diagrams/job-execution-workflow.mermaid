@@ -1,0 +1,36 @@
+graph TD
+    subgraph Client & Storage
+        C[MapReduce Client]
+        HDFS[(HDFS)]
+    end
+
+    subgraph Resource Allocation
+        RM[ResourceManager]
+    end
+
+    subgraph Task Execution
+        AM[MRAppMaster]
+        M1[Map Task Container 1]
+        M2[Map Task Container 2]
+        R1[Reduce Task Container]
+    end
+
+    C -->|1. Submit Job & upload resources| HDFS
+    C -->|2. Submit Application| RM
+    RM -->|3. Start MRAppMaster| AM
+    AM -->|4. Read input splits| HDFS
+    AM -->|5. Request Map Containers| RM
+    RM -->|6. Allocate Map Containers| AM
+    AM -->|7. Launch Map Tasks| M1
+    AM -->|7. Launch Map Tasks| M2
+    M1 -->|8. Read Split| HDFS
+    M2 -->|8. Read Split| HDFS
+    M1 -->|9. Write intermediate partitions| M1
+    M2 -->|9. Write intermediate partitions| M2
+    AM -->|10. Request Reduce Containers| RM
+    RM -->|11. Allocate Reduce Containers| AM
+    AM -->|12. Launch Reduce Task| R1
+    R1 -->|13. Shuffle-Sort: HTTP Pull partitions| M1
+    R1 -->|13. Shuffle-Sort: HTTP Pull partitions| M2
+    R1 -->|14. Write Final Output| HDFS
+    AM -->|15. Unregister & Exit| RM
