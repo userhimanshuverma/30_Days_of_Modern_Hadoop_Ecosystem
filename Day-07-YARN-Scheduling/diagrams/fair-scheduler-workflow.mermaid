@@ -1,0 +1,11 @@
+graph TD
+    A[Node NM Heartbeat reports resources] --> B[Scheduler scans root queue allocations]
+    B --> C[Compute Fair Share for each active queue based on weight]
+    C --> D[Identify queues running below their Fair Share]
+    D --> E[Sort child queues by resource deficiency: MinShare-Ratio or FairShare-Ratio]
+    E --> F[Select queue with greatest resource deficiency relative to weight]
+    F --> G[Sort applications within selected queue by Fair Share or FIFO]
+    G --> H[Check if application exceeds queue maxResources]
+    H -- Yes --> I[Skip application, go to next]
+    H -- No --> J[Allocate containers to satisfy application requests]
+    J --> K[Update instantaneous resource allocations]

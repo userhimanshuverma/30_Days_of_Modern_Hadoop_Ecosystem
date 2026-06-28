@@ -1,0 +1,30 @@
+graph TD
+    subgraph "Tenants / Teams"
+        F[Finance Team]
+        M[Marketing Team]
+        DS[Data Science Team]
+    end
+
+    subgraph "YARN ResourceManager queues"
+        RQ[root] --> PQ[root.prod]
+        RQ --> DQ[root.dev]
+        
+        PQ --> FQ[prod.finance]
+        PQ --> MQ[prod.marketing]
+        
+        DQ --> DSQ[dev.datascience]
+    end
+
+    subgraph "Worker Nodes Cluster"
+        NM1["NodeManager 1 (4GB, 4 vCores)"]
+        NM2["NodeManager 2 (4GB, 4 vCores)"]
+    end
+
+    F -->|Submits SLA Workloads| FQ
+    M -->|Submits Analytics| MQ
+    DS -->|Submits ML/R Experiments| DSQ
+
+    FQ -->|Leases resources| NM1
+    MQ -->|Leases resources| NM2
+    DSQ -->|Leases resources| NM1
+    DSQ -->|Leases resources| NM2

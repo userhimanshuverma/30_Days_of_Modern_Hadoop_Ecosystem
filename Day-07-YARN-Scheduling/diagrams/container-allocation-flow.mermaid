@@ -1,0 +1,12 @@
+flowchart TD
+    A["NM Heartbeat arrives at RM"] --> B{"Does NM match requested Node Local?"}
+    B -->|Yes| C["Allocate Node-Local Container"]
+    B -->|No| D{"Does NM match requested Rack Local?"}
+    D -->|Yes| E["Allocate Rack-Local Container"]
+    D -->|No| F{"Is Rack-locality delay expired?"}
+    F -->|Yes| G["Allocate Off-Switch / Any Container"]
+    F -->|No| H["Skip allocation on this node, wait for next heartbeat"]
+    C --> I["Acquire Container Token"]
+    E --> I
+    G --> I
+    I --> J["Return Token in next AllocateResponse to AM"]

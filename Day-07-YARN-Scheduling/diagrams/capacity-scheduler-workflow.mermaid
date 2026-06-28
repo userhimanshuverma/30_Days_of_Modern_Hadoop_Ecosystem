@@ -1,0 +1,14 @@
+graph TD
+    A["Node NM Heartbeat reports free resources"] --> B["Scheduler scans Root Queue"]
+    B --> C["Sort Child Queues by Usage Ratio: Used / Configured Capacity"]
+    C --> D["Select Queue with lowest Usage Ratio"]
+    D --> E{"Is queue capacity exceeded?"}
+    E -- Yes --> F{"Is elasticity allowed? (current usage less than max capacity)"}
+    F -- No --> G["Skip queue, check next"]
+    F -- Yes --> H["Proceed to select applications"]
+    E -- No --> H
+    H --> I["Sort active jobs in queue by priority/submit time"]
+    I --> J["Apply User Limits check"]
+    J --> K["Select highest priority application"]
+    K --> L["Allocate containers matching locality requests: Node-Local -> Rack-Local -> Any"]
+    L --> M["Return Container Token in AllocateResponse"]

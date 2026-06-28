@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements. See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<configuration>
+    <!-- ResourceManager Address Configuration -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>resourcemanager</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>${yarn.resourcemanager.hostname}:8032</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>${yarn.resourcemanager.hostname}:8030</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.resource-tracker.address</name>
+        <value>${yarn.resourcemanager.hostname}:8031</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.webapp.address</name>
+        <value>${yarn.resourcemanager.hostname}:8088</value>
+    </property>
+
+    <!-- NodeManager Configuration -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+
+    <!-- Physical Resource Limits per NodeManager (Optimized for Multi-Node Docker) -->
+    <property>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>4096</value> <!-- 4 GB available resource capacity per worker -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>4</value> <!-- 4 virtual CPU cores available per worker -->
+    </property>
+
+    <!-- Dynamic Container Allocation Range Limits -->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>4096</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.minimum-allocation-vcores</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-vcores</name>
+        <value>4</value>
+    </property>
+
+    <!-- Memory Isolation Checks -->
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value> <!-- Disabled in Docker environments to prevent startup crash on virtual memory scale limits -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-pmem-ratio</name>
+        <value>2.1</value>
+    </property>
+
+    <!-- ACTIVE SCHEDULER: Capacity Scheduler -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+
+    <!-- Active Scheduler monitoring & preemption configurations (For Multi-Tenancy demonstration) -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.monitor.enable</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.monitor.policies</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.monitor.capacity.ProportionalCapacityPreemptionPolicy</value>
+    </property>
+
+    <!-- Preemption Mechanics Intervals -->
+    <property>
+        <name>yarn.resourcemanager.monitor.capacity.preemption.monitoring_interval</name>
+        <value>3000</value> <!-- Preemption scan interval in milliseconds -->
+    </property>
+    <property>
+        <name>yarn.resourcemanager.monitor.capacity.preemption.max_wait_before_kill</name>
+        <value>15000</value> <!-- Grace period before preemption container kill (15 seconds) -->
+    </property>
+    <property>
+        <name>yarn.resourcemanager.monitor.capacity.preemption.total_preemption_per_round</name>
+        <value>0.1</value> <!-- Max resource fraction reclaimed per scan cycle -->
+    </property>
+
+    <!-- Node Labels Setup (To demonstrate advanced partitioning) -->
+    <property>
+        <name>yarn.node-labels.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.node-labels.fs-store.impl</name>
+        <value>org.apache.hadoop.yarn.nodelabels.CommonNodeLabelsManager</value>
+    </property>
+    <property>
+        <name>yarn.node-labels.configuration.type</name>
+        <value>delegated-centralized</value>
+    </property>
+
+    <!-- Log Aggregation -->
+    <property>
+        <name>yarn.log-aggregation-enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>86400</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.remote-app-log-dir</name>
+        <value>/var/log/hadoop-yarn/apps</value>
+    </property>
+
+    <!-- Heartbeats -->
+    <property>
+        <name>yarn.nodemanager.heartbeat.interval-ms</name>
+        <value>1000</value>
+    </property>
+</configuration>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements. See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<configuration>
+    <!-- Define the queue hierarchy under root -->
+    <property>
+        <name>yarn.scheduler.capacity.root.queues</name>
+        <value>default,prod,dev</value>
+    </property>
+
+    <!-- Configure base queue resource allocation percentages (Sum must equal 100%) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.capacity</name>
+        <value>20.0</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.capacity</name>
+        <value>60.0</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.capacity</name>
+        <value>20.0</value>
+    </property>
+
+    <!-- Configure maximum elasticity (how much a queue can grow if other queues are idle) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
+        <value>50.0</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.maximum-capacity</name>
+        <value>100.0</value> <!-- Can consume the entire cluster if other queues are idle -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.maximum-capacity</name>
+        <value>40.0</value>
+    </property>
+
+    <!-- Define sub-queues for the 'prod' parent queue -->
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.queues</name>
+        <value>finance,marketing</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.finance.capacity</name>
+        <value>40.0</value> <!-- 40% of parent 'prod' capacity, i.e. 24% of cluster -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.finance.maximum-capacity</name>
+        <value>80.0</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.marketing.capacity</name>
+        <value>60.0</value> <!-- 60% of parent 'prod' capacity, i.e. 36% of cluster -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.marketing.maximum-capacity</name>
+        <value>100.0</value>
+    </property>
+
+    <!-- Define sub-queues for the 'dev' parent queue -->
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.queues</name>
+        <value>datascience</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.datascience.capacity</name>
+        <value>100.0</value> <!-- 100% of parent 'dev' capacity, i.e. 20% of cluster -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.datascience.maximum-capacity</name>
+        <value>100.0</value>
+    </property>
+
+    <!-- Queue state controls (RUNNING allows jobs submission, STOPPED drains queue) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.finance.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.marketing.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.state</name>
+        <value>RUNNING</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.datascience.state</name>
+        <value>RUNNING</value>
+    </property>
+
+    <!-- User limits within queues (determines minimum resource guarantees per active user) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.finance.user-limit-factor</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.marketing.user-limit-factor</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.datascience.user-limit-factor</name>
+        <value>1</value>
+    </property>
+
+    <!-- Configure Queue Ordering Policy (FIFO by default, or Fair) -->
+    <property>
+        <name>yarn.scheduler.capacity.root.prod.ordering-policy</name>
+        <value>fair</value> <!-- Uses fair ordering for jobs within the prod queue -->
+    </property>
+    <property>
+        <name>yarn.scheduler.capacity.root.dev.ordering-policy</name>
+        <value>fifo</value> <!-- First-in-first-out within the dev queue -->
+    </property>
+
+    <!-- Maximum active applications in the cluster -->
+    <property>
+        <name>yarn.scheduler.capacity.maximum-applications</name>
+        <value>10000</value>
+    </property>
+
+    <!-- Resource calculation logic configuration -->
+    <property>
+        <name>yarn.scheduler.capacity.resource-calculator</name>
+        <value>org.apache.hadoop.yarn.util.resource.DominantResourceCalculator</value>
+        <description>Use dominant resource calculator (DRC) to schedule CPU vcores along with memory</description>
+    </property>
+</configuration>

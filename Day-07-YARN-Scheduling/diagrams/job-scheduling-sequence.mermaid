@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor Client
+    participant RM as ResourceManager
+    participant NM as NodeManager
+    participant AM as ApplicationMaster
+
+    Client->>RM: Submit Application (Specify queue: root.prod.finance)
+    RM->>RM: Queue Placement Policy validates and assigns queue
+    RM->>NM: Launch Container #1 (ApplicationMaster JVM)
+    NM->>AM: Start AM JVM
+    AM->>RM: Register ApplicationMaster (RegisterApplicationMasterRequest)
+    
+    loop Resource Negotiation
+        AM->>RM: Resource Allocation Request (AllocateRequest: Memory, CPU, Locality)
+        NM->>RM: Heartbeat (Resource status: Memory free, CPU free)
+        Note over RM: Scheduler evaluates Queue Allocation tree
+        RM->>AM: Resource Allocation Response (AllocateResponse: Container Tokens)
+    end
+
+    AM->>NM: Launch Containers (StartContainersRequest)
+    NM->>NM: Execute Tasks (Mappers/Reducers inside CGroups)
+    
+    rect rgb(240, 240, 240)
+        Note over RM, AM: Preemption Event (If prod queue needs capacity and default is over cap)
+        RM->>AM: Notify Preemption request (Wait 15s grace period)
+        AM->>AM: Save state & release container voluntarily
+        Note over RM: If AM ignores, RM forcefully kills default container
+    end
+
+    AM->>RM: Unregister ApplicationMaster (FinishApplicationMasterRequest)
+    RM->>NM: Cleanup Task Containers

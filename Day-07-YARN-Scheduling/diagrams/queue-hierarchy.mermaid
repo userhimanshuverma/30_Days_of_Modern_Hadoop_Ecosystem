@@ -1,0 +1,18 @@
+graph TD
+    root["root (100% Capacity)"] --> default["root.default (20% Min / 50% Max)"]
+    root --> prod["root.prod (60% Min / 100% Max)"]
+    root --> dev["root.dev (20% Min / 40% Max)"]
+
+    prod --> finance["prod.finance (40% of Parent / 80% Max)"]
+    prod --> marketing["prod.marketing (60% of Parent / 100% Max)"]
+
+    dev --> datascience["dev.datascience (100% of Parent / 100% Max)"]
+
+    classDef default fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef prod fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef dev fill:#bfb,stroke:#333,stroke-width:2px;
+    classDef leaf fill:#ffb,stroke:#333,stroke-width:1px;
+
+    class root default;
+    class prod,finance,marketing prod;
+    class dev,datascience dev;

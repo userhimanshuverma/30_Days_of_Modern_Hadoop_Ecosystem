@@ -1,0 +1,35 @@
+graph TB
+    subgraph "Active ResourceManager Host"
+        RM[ResourceManager]
+        ASM[ApplicationsManager]
+        RT[ResourceTracker]
+        
+        subgraph "ResourceScheduler (RS)"
+            CS["CapacityScheduler / FairScheduler"]
+            DRC["Resource Calculator: DRC / Default"]
+            QE["Queue Manager & Hierarchy"]
+            CS --> DRC
+            CS --> QE
+        end
+        
+        RM ---> ASM
+        RM ---> RT
+        RM ---> CS
+    end
+
+    subgraph "Worker Host 1"
+        NM1[NodeManager]
+        AM1["ApplicationMaster - App A"]
+        C1["Container 1 - Task 1"]
+        NM1 -->|Status Heartbeat| RT
+        AM1 -->|Resource Request RPC| ASM
+    end
+
+    subgraph "Worker Host 2"
+        NM2[NodeManager]
+        C2["Container 2 - Task 2"]
+        NM2 -->|Status Heartbeat| RT
+    end
+
+    C1 -.->|Task status updates| AM1
+    C2 -.->|Task status updates| AM1

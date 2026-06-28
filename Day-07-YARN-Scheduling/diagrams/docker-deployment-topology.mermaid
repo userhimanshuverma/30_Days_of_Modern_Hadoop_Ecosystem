@@ -1,0 +1,27 @@
+graph LR
+    subgraph "day07-network (Bridge)"
+        NN[namenode-day07]
+        DN[datanode-day07]
+        RM[resourcemanager-day07]
+        NM1[nodemanager1-day07]
+        NM2[nodemanager2-day07]
+        HS[historyserver-day07]
+    end
+
+    subgraph "Exposed Ports"
+        NN_P["9870 / 9000"] <--> NN
+        RM_P["8088 / 8032"] <--> RM
+        NM1_P["8042"] <--> NM1
+        NM2_P["8043 (Mapped from 8042)"] <--> NM2
+        HS_P["19888"] <--> HS
+    end
+
+    subgraph "Shared Volume Mounts"
+        C_XML["configs/ *.xml"]
+        C_XML -->|Mounted read-only to /etc/hadoop/| NN
+        C_XML -->|Mounted read-only to /etc/hadoop/| DN
+        C_XML -->|Mounted read-only to /etc/hadoop/| RM
+        C_XML -->|Mounted read-only to /etc/hadoop/| NM1
+        C_XML -->|Mounted read-only to /etc/hadoop/| NM2
+        C_XML -->|Mounted read-only to /etc/hadoop/| HS
+    end

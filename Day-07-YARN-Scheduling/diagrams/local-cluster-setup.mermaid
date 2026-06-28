@@ -1,0 +1,7 @@
+graph TD
+    A[Start Docker Compose: docker compose up -d] --> B[Wait for NameNode and HDFS to exit Safemode]
+    B --> C[Verify active nodes count via REST API or CLI]
+    C --> D[Run verify-capacity-scheduler.sh]
+    D --> E[Run verify-queues.sh to inspect initial state]
+    E --> F[Run submit-multi-tenant-demo.sh to launch simulation]
+    F --> G[Inspect real-time schedules in RM Web UI http://localhost:8088]

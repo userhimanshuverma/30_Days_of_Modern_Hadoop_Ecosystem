@@ -1,0 +1,14 @@
+flowchart TD
+    A["ResourceManager receives Application resource requests"] --> B["Scheduler scans queue hierarchy from root"]
+    B --> C{"Which queue has lowest used / configured capacity ratio?"}
+    C -->|Queue X| D{"Is Queue X running and under its maxCapacity?"}
+    D -- No --> E["Skip Queue X and select next best queue"]
+    D -- Yes --> F["Assess active applications in Queue X"]
+    F --> G{"Is queue ordering-policy fair or fifo?"}
+    G -- fifo --> H["Sort applications by submission time"]
+    G -- fair --> I["Sort applications by fair resource share allocation ratios"]
+    H --> J["Select top application"]
+    I --> J
+    J --> K{"Is user resource limit exceeded for top application owner?"}
+    K -- Yes --> L["Skip application, assess next in queue"]
+    K -- No --> M["Assign container lease and generate security container token"]
