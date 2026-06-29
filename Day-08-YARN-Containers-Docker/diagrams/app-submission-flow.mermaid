@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor Client as YARN Client
+    participant RM as ResourceManager
+    participant NM as NodeManager
+    participant AM as ApplicationMaster
+    participant Docker as Docker Daemon
+    
+    Client->>RM: Submit Application (w/ Docker Runtime Env Vars)
+    RM->>NM: Launch Container 1 (ApplicationMaster JVM)
+    NM->>AM: Bootstrap AM Process
+    activate AM
+    AM->>RM: Register with RM ApplicationsManager
+    AM->>RM: Request worker containers (Memory, vCores, Locality)
+    RM-->>AM: Return Container Lease tokens
+    AM->>NM: Start container lease request (StartContainersRequest)
+    NM->>Docker: Pull image & Launch Container (docker run)
+    Docker-->>NM: Container Started
+    AM-->>Client: Report Application Status
+    deactivate AM

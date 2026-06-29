@@ -1,0 +1,10 @@
+graph TD
+    AM["ApplicationMaster"] -->|1. Requests 4GB RAM / 2 vCores| RM["ResourceManager Scheduler"]
+    RM -->|2. Validates Queue Capacity & Allocates Lease| AM
+    AM -->|3. Container Launch Protocol| NM["NodeManager Worker"]
+    NM -->|4. Checks CGroups Configuration| CG["CGroups Subsystem"]
+    CG -->|5. Sets memory.limit_in_bytes = 4GB| CG_Mem["Memory CGroup"]
+    CG -->|6. Sets cpu.shares = 2048| CG_CPU["CPU CGroup"]
+    NM -->|7. Launches container via docker run| Docker["Docker Daemon Container"]
+    CG_Mem -.->|8. Enforces RAM limit| Docker
+    CG_CPU -.->|8. Restricts CPU cores| Docker

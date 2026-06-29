@@ -1,0 +1,26 @@
+graph TD
+    subgraph Cluster["Multi-Tenant YARN Cluster"]
+        RM["ResourceManager Scheduler"]
+        
+        subgraph NM1["NodeManager Node 1"]
+            NM_Daemon1["NodeManager Daemon"]
+            NM_Daemon1 --> LCE1["LinuxContainerExecutor"]
+            LCE1 -->|Tenant A workload| C1["Docker Container: Spark (Tenant A)"]
+            LCE1 -->|Tenant B workload| C2["Docker Container: PySpark (Tenant B)"]
+        end
+
+        subgraph NM2["NodeManager Node 2"]
+            NM_Daemon2["NodeManager Daemon"]
+            NM_Daemon2 --> LCE2["LinuxContainerExecutor"]
+            LCE2 -->|Tenant A workload| C3["Docker Container: Hive-Tez (Tenant A)"]
+            LCE2 -->|Tenant B workload| C4["Docker Container: Python ML (Tenant B)"]
+        end
+
+        RM -->|Manage leases| NM_Daemon1
+        RM -->|Manage leases| NM_Daemon2
+    end
+    
+    classDef TenantA fill:#3399ff,stroke:#005cbf,stroke-width:2px,color:#fff;
+    classDef TenantB fill:#ff9933,stroke:#e67300,stroke-width:2px,color:#fff;
+    class C1,C3 TenantA;
+    class C2,C4 TenantB;

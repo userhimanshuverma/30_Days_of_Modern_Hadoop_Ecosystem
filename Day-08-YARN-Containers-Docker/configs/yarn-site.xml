@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- ==================================================================== -->
+    <!-- GENERAL YARN SETTINGS                                                -->
+    <!-- ==================================================================== -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>resourcemanager</value>
+    </property>
+
+    <!-- ==================================================================== -->
+    <!-- CONTAINER EXECUTOR CONFIGURATIONS (LCE + DOCKER)                     -->
+    <!-- ==================================================================== -->
+    <property>
+        <description>Use the LinuxContainerExecutor for advanced security and docker runtimes.</description>
+        <name>yarn.nodemanager.container-executor.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+    </property>
+
+    <property>
+        <description>The Unix group associated with the Hadoop YARN cluster.</description>
+        <name>yarn.nodemanager.linux-container-executor.group</name>
+        <value>yarn</value>
+    </property>
+
+    <property>
+        <description>Path to the container-executor binary (must be owned by root, permissions 6050).</description>
+        <name>yarn.nodemanager.linux-container-executor.path</name>
+        <value>/usr/bin/container-executor</value>
+    </property>
+
+    <property>
+        <description>Enable non-secure mode container execution limits if Kerberos is disabled.</description>
+        <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users</name>
+        <value>false</value>
+    </property>
+
+    <!-- ==================================================================== -->
+    <!-- DOCKER RUNTIME PROPERTIES                                            -->
+    <!-- ==================================================================== -->
+    <property>
+        <description>Allowed runtimes for the Linux Container Executor.</description>
+        <name>yarn.nodemanager.runtime.linux.allowed-runtimes</name>
+        <value>default,docker</value>
+    </property>
+
+    <property>
+        <description>Allowed Docker networks for launched containers.</description>
+        <name>yarn.nodemanager.runtime.linux.docker.allowed-container-networks</name>
+        <value>host,bridge,none,hadoop-network</value>
+    </property>
+
+    <property>
+        <description>Default network used for Docker containers if none is requested.</description>
+        <name>yarn.nodemanager.runtime.linux.docker.default-container-network</name>
+        <value>hadoop-network</value>
+    </property>
+
+    <property>
+        <description>Strictly disable privileged containers for multi-tenant security.</description>
+        <name>yarn.nodemanager.runtime.linux.docker.privileged-containers.allowed</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <description>Whether to allow mounting host directories inside Docker containers.</description>
+        <name>yarn.nodemanager.runtime.linux.docker.host-writes.allowed</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <description>Docker capabilities allowed for launched containers.</description>
+        <name>yarn.nodemanager.runtime.linux.docker.capabilities</name>
+        <value>CHOWN,DAC_OVERRIDE,FOWNER,SETGID,SETUID</value>
+    </property>
+
+    <!-- ==================================================================== -->
+    <!-- RESOURCE ISOLATION & CGROUPS SETTINGS                                -->
+    <!-- ==================================================================== -->
+    <property>
+        <description>Use cgroups for resource control (CPU, Memory, Disk).</description>
+        <name>yarn.nodemanager.resource.cgroups.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <description>The resource handler class for cgroups.</description>
+        <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+    </property>
+
+    <property>
+        <description>The directory path under which cgroups are mounted on the host.</description>
+        <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
+        <value>/sys/fs/cgroup</value>
+    </property>
+
+    <property>
+        <description>Mount cgroups automatically if they are not already mounted.</description>
+        <name>yarn.nodemanager.linux-container-executor.cgroups.mount</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <description>The cgroups hierarchy prefix for YARN containers.</description>
+        <name>yarn.nodemanager.linux-container-executor.cgroups.hierarchy</name>
+        <value>/hadoop-yarn</value>
+    </property>
+
+    <property>
+        <description>Strict CPU limits. If true, containers will be throttled if they exceed their cores.</description>
+        <name>yarn.nodemanager.resource.cpu.control-enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- ==================================================================== -->
+    <!-- LOG AGGREGATION & STORAGE                                            -->
+    <!-- ==================================================================== -->
+    <property>
+        <name>yarn.log-aggregation-enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.log-dirs</name>
+        <value>/var/log/hadoop-yarn/containers</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.local-dirs</name>
+        <value>/var/lib/hadoop-yarn/cache</value>
+    </property>
+</configuration>

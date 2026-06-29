@@ -1,0 +1,20 @@
+graph TB
+    subgraph HostNode["YARN NodeManager Host"]
+        NM["NodeManager Daemon"]
+        LCE["LinuxContainerExecutor (root SetUID)"]
+        DRT["Docker Container Runtime"]
+        DE["Docker Engine Daemon"]
+        CGRP["Linux CGroups Resource Controller"]
+        
+        NM -->|1. Invokes| LCE
+        LCE -->|2. Delegates| DRT
+        DRT -->|3. Commands via socket| DE
+        DE -->|4. Launches| Container["Docker Container (User Workload)"]
+        LCE -.->|Limits CPU/Memory| CGRP
+        CGRP -.->|Enforces limits| Container
+    end
+    
+    subgraph MasterNode["ResourceManager Host"]
+        RM["ResourceManager"]
+        RM -->|Status / Heartbeats| NM
+    end

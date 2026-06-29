@@ -1,0 +1,15 @@
+sequenceDiagram
+    autonumber
+    participant NM as "NodeManager (Java)"
+    participant LCE as "container-executor (Binary)"
+    participant Config as container-executor.cfg
+    participant Socket as Docker Unix Socket
+    participant Daemon as Docker Daemon
+
+    NM->>LCE: Launch Container with Docker arguments
+    LCE->>Config: Read configuration constraints (registries, capabilities)
+    Note over LCE: Validate user, group, capability restrictions
+    LCE->>Socket: Write Docker commands (REST over unix://var/run/docker.sock)
+    Socket->>Daemon: Create & Start Container
+    Daemon-->>LCE: Container Process ID (PID)
+    LCE->>NM: Return Container PID

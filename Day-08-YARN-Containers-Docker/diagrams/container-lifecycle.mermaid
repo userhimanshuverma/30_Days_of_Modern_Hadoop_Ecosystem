@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> NEW : Client submits container spec
+    NEW --> LOCALIZING : Local resources (configs, files) download
+    LOCALIZING --> LOCALIZED : Resources ready
+    LOCALIZED --> LAUNCHING : NodeManager runs LinuxContainerExecutor
+    LAUNCHING --> IMAGE_PULL : Docker daemon pulls container image (if missing)
+    IMAGE_PULL --> CONTAINER_RUNNING : Docker starts task process
+    CONTAINER_RUNNING --> CRITICAL_OUT_OF_MEMORY : Exceeds hardware memory limits
+    CONTAINER_RUNNING --> SUCCESSFULLY_FINISHED : Process exits code 0
+    CONTAINER_RUNNING --> CONTAINER_FAILED : Process crashes (non-zero code)
+    CRITICAL_OUT_OF_MEMORY --> CLEANING_UP : NodeManager terminates container
+    CONTAINER_FAILED --> CLEANING_UP
+    SUCCESSFULLY_FINISHED --> CLEANING_UP
+    CLEANING_UP --> [*] : Log aggregation & release resources

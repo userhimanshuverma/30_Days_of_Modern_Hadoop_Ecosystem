@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    participant NM as NodeManager
+    participant LCE as LinuxContainerExecutor
+    participant Docker as Docker Daemon
+    participant Container as Docker Container
+    
+    NM->>LCE: Launch Container (Execute container-executor)
+    LCE->>Docker: REST: POST /containers/create
+    Docker-->>LCE: Container ID
+    LCE->>Docker: REST: POST /containers/start
+    Docker->>Container: Spawn CMD (e.g. process.py)
+    activate Container
+    Container-->>Docker: Heartbeat/Logs
+    Container-->>NM: Local stats (via host mount /proc)
+    Container->>Container: Complete calculations
+    Container-->>Docker: Exit status 0
+    deactivate Container
+    Docker-->>LCE: Container Stopped (Exit Code 0)
+    LCE-->>NM: Report Container Completed (Exit Code 0)

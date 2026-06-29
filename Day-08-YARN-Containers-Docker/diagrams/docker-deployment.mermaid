@@ -1,0 +1,16 @@
+graph TD
+    subgraph Host["Docker-in-Docker / Sibling Host"]
+        DockerSock["Host /var/run/docker.sock"]
+        DockerCLI["Host /usr/bin/docker"]
+        
+        subgraph Day08Cluster["Docker Compose Network: day08-network"]
+            NN["NameNode Container"]
+            DN["DataNode Container"]
+            RM["ResourceManager Container"]
+            NM["NodeManager Container (Privileged root user)"]
+        end
+        
+        DockerSock -.->|Bind Mounted| NM
+        DockerCLI -.->|Bind Mounted| NM
+        NM -.->|Launches sibling container| SC["Sibling App Container"]
+    end

@@ -1,0 +1,13 @@
+graph TD
+    Start["Container Execution Failure"] --> QueryYarn["1. Run: yarn logs -applicationId"]
+    QueryYarn --> CheckError{"What is the error class?"}
+    
+    CheckError -->|Exit Code 137 / OOM| VerifyMemory["2. Check CGroups Memory configuration in yarn-site.xml"]
+    CheckError -->|Exit Code 1 / Launch Fail| VerifyDaemon["2. Run: docker info and systemctl status docker"]
+    CheckError -->|Prelaunch / Image Not Found| VerifyImage["2. Run: docker pull image_name and check registry rules"]
+    CheckError -->|Permission Denied| VerifyCE["2. Run: container-executor --checksetup and inspect CFG permissions"]
+    
+    VerifyMemory --> FixMemory["Solution: Increase container memory limits"]
+    VerifyDaemon --> FixDaemon["Solution: Adjust Unix Socket permissions / start daemon"]
+    VerifyImage --> FixImage["Solution: Pre-pull image or update docker.allowed.registries"]
+    VerifyCE --> FixCE["Solution: Fix folder ownership and run chmod 6050 container-executor"]

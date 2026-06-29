@@ -1,0 +1,7 @@
+graph LR
+    subgraph Topology["Local / Single-Node Cluster Topology"]
+        Client["YARN Client (Host)"] -->|Submit Jobs| RM["ResourceManager Container (Port 8088/8032)"]
+        RM -->|Task Assignment| NM["NodeManager Container"]
+        NM -->|Mount Socket| HostDocker["Host Docker Daemon"]
+        HostDocker -->|Launches Sibling Container| Workload["Workload Container"]
+    end
