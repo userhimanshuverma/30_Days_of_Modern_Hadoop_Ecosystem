@@ -112,7 +112,7 @@ graph TB
         DE["Docker Engine (dockerd)"]
         CG["Host CGroups Subsystem"]
         
-        NM -->|1. Launch Task (RPC)| LCE
+        NM -->|1. Launch Task via RPC| LCE
         LCE -->|2. Validate and Construct command| DCR
         DCR -->|3. Call socket api| DE
         DE -->|4. Launch Sibling Container| Container["Docker Container (Workload)"]
