@@ -112,18 +112,20 @@ If multiple nodes try to acquire a shared resource without a centralized atomic 
 
 ```mermaid
 graph TD
-    subgraph Before: Decoupled Coordination (Split-Brain Hazard)
-        M1[Master A - Network Partitioned] -->|Writes Metadata| Storage1[(Shared Storage)]
-        M2[Master B - Assumes Master Role] -->|Writes Metadata| Storage1
-        Note over M1, M2: Both nodes believe they are Active primary. Storage corrupted!
+    subgraph BeforeCoord ["Before: Decoupled Coordination (Split-Brain Hazard)"]
+        M1["Master A (Network Partitioned)"] -->|"Writes Metadata"| Storage1[("Shared Storage")]
+        M2["Master B (Assumes Master Role)"] -->|"Writes Metadata"| Storage1
+        Note1["Note: Both nodes believe they are Active primary. Storage corrupted!"]
+        M1 -.-> Note1
+        M2 -.-> Note1
     end
 
-    subgraph After: ZooKeeper-Centric Coordination (Safe CP)
-        ZK1[ZooKeeper Quorum]
-        AM1[Master A - Active] <-->|Acquires Lock / Ephemeral Node| ZK1
-        AM2[Master B - Standby] <-->|Watches Active Ephemeral Node| ZK1
-        AM1 -->|Writes Metadata| Storage2[(Shared Storage)]
-        AM2 -.->|Blocked from writes| Storage2
+    subgraph AfterCoord ["After: ZooKeeper-Centric Coordination (Safe CP)"]
+        ZK1["ZooKeeper Quorum"]
+        AM1["Master A (Active)"] <--->|"Acquires Lock / Ephemeral Node"| ZK1
+        AM2["Master B (Standby)"] <--->|"Watches Active Ephemeral Node"| ZK1
+        AM1 -->|"Writes Metadata"| Storage2[("Shared Storage")]
+        AM2 -.->|"Blocked from writes"| Storage2
     end
 ```
 
