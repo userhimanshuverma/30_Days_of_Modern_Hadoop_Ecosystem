@@ -1,0 +1,24 @@
+flowchart TD
+    subgraph FailoverProcess ["Failover Process"]
+        Start([Leader Node Crashes]) --> HeartbeatTimeout[Followers miss tickTime heartbeat]
+        HeartbeatTimeout --> LoseQuorum[Followers drop active session]
+        LoseQuorum --> StateLooking[Change state to LOOKING]
+        StateLooking --> RunElection[Trigger Fast Leader Election]
+        RunElection --> VoteComparison[Compare Zxids and Server IDs]
+        VoteComparison --> MajorityAgreed{Quorum majority secured?}
+        MajorityAgreed -->|"Yes"| ElectLeader[Elect new Leader]
+    end
+
+    subgraph SyncPhase ["Sync Phase"]
+        ElectLeader --> LeaderSync[New Leader transitions to LEADING, sends Sync]
+        LeaderSync --> FollowerUpdate[Survivors transition to FOLLOWING, run sync protocol]
+    end
+
+    subgraph RecoveryPhase ["Recovery Phase"]
+        FollowerUpdate --> OldLeaderReboot[Old Leader comes back online]
+        OldLeaderReboot --> OldLeaderLooking[Old Leader boots in LOOKING state]
+        OldLeaderLooking --> QueryActive[Queries active cluster nodes]
+        QueryActive --> DiscoverLeader[Discovers current LEADING node]
+        DiscoverLeader --> ConnectSync[Initiates state synchronization with new Leader]
+        ConnectSync --> JoinFollower[Old Leader joins as FOLLOWING]
+    end

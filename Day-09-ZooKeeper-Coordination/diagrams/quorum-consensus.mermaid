@@ -1,0 +1,35 @@
+flowchart TD
+    subgraph QuorumMath ["Quorum Math"]
+        N3["N = 3 (Ensemble Size)"] --> Q3["Quorum = 2 (Floor(3/2)+1)"]
+        N5["N = 5 (Ensemble Size)"] --> Q5["Quorum = 3 (Floor(5/2)+1)"]
+    end
+
+    subgraph NormalStatus ["3-Node Example Status"]
+        direction TB
+        Node1{Node 1: Online}
+        Node2{Node 2: Online}
+        Node3{Node 3: Offline}
+        
+        Node1 -->|Communicating| Node2
+        Node2 -->|Communicating| Node1
+        
+        ActiveCount["Active Nodes = 2"]
+        Node1 -.-> ActiveCount
+        Node2 -.-> ActiveCount
+        
+        ActiveCount --> CompareQ3{Active >= Quorum?}
+        CompareQ3 -->|"Yes: 2 >= 2"| QuorumOK["Cluster Functional (Consensus Achieved)"]
+    end
+
+    subgraph DegradedStatus ["Degraded Example Status"]
+        direction TB
+        DNode1{Node 1: Online}
+        DNode2{Node 2: Offline}
+        DNode3{Node 3: Offline}
+        
+        DActiveCount["Active Nodes = 1"]
+        DNode1 -.-> DActiveCount
+        
+        DActiveCount --> DCompareQ3{Active >= Quorum?}
+        DCompareQ3 -->|"No: 1 is less than 2"| QuorumLost["Cluster Suspends Operations (No writes/reads served)"]
+    end

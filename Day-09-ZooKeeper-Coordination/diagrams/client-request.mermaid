@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Follower
+    participant Leader
+    participant Quorum as "Followers Quorum"
+
+    alt Read Request
+        Client->>Follower: Read /config (local read)
+        Note over Follower: Serves from local in-memory DB
+        Follower-->>Client: Return current data
+    else Write Request
+        Client->>Follower: Create /node (data)
+        Note over Follower: Recognizes write request
+        Follower->>Leader: Forward Write Request
+        Note over Leader: Generates transactional proposal (Txid)
+        Leader->>Quorum: Propose (Txid, Create /node)
+        Note over Quorum: Write proposal to transaction log on disk
+        Quorum-->>Leader: ACK (Acknowledge proposal)
+        Note over Leader: Secures majority ACKs (Quorum)
+        Leader->>Leader: Commit locally
+        Leader->>Quorum: Commit transaction
+        Leader->>Follower: Acknowledge client write finished
+        Follower-->>Client: Success (Created /node)
+    end

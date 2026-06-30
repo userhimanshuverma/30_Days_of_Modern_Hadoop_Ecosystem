@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- logback.xml for Apache ZooKeeper -->
+<configuration>
+    <property name="zookeeper.log.dir" value="/logs" />
+    <property name="zookeeper.log.file" value="zookeeper.log" />
+    <property name="zookeeper.log.threshold" value="INFO" />
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${zookeeper.log.threshold}</level>
+        </filter>
+    </appender>
+
+    <!-- Rolling File Appender -->
+    <appender name="ROLLINGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${zookeeper.log.dir}/${zookeeper.log.file}</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${zookeeper.log.dir}/${zookeeper.log.file}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+            <!-- total size of all archive files, delete oldest if exceeded -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Root Logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ROLLINGFILE" />
+    </root>
+
+    <!-- Silence verbose logs in dependencies if necessary -->
+    <logger name="org.apache.zookeeper" level="INFO" />
+    <logger name="org.jboss.netty" level="WARN" />
+</configuration>

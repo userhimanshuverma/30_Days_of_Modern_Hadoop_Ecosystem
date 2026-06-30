@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    actor Client
+    participant ZKServer as "ZooKeeper Server"
+    
+    Client->>ZKServer: get("/config", watch=True)
+    Note over ZKServer: Store Watch in WatchManager<br/>(Client Session to /config)
+    ZKServer-->>Client: Returns current config data
+    
+    actor AnotherClient
+    AnotherClient->>ZKServer: set("/config", "new-data")
+    Note over ZKServer: Apply state change.<br/>Locate watch for "/config"
+    ZKServer->>Client: WatchedEvent (type=NodeDataChanged, path=/config)
+    Note over ZKServer: Watch is REMOVED from memory (one-time trigger)
+    Note over Client: Handle event: Trigger reload local cache
+    
+    Client->>ZKServer: get("/config", watch=True)
+    Note over ZKServer: Re-register new Watch
+    ZKServer-->>Client: Returns updated data

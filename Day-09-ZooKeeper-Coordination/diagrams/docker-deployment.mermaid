@@ -1,0 +1,38 @@
+graph TD
+    subgraph HostMachine ["Host Machine"]
+        subgraph DockerNet ["Docker Compose Network: zk-net"]
+            zk1[zookeeper1<br/>IP: 172.20.0.11]
+            zk2[zookeeper2<br/>IP: 172.20.0.12]
+            zk3[zookeeper3<br/>IP: 172.20.0.13]
+        end
+        
+        subgraph PersistentVolumes ["Persistent Volumes"]
+            v1[(zk1_data & zk1_datalog)]
+            v2[(zk2_data & zk2_datalog)]
+            v3[(zk3_data & zk3_datalog)]
+        end
+
+        subgraph LocalConfigs ["Local Configurations"]
+            c1[configs/zoo1.cfg]
+            c2[configs/zoo2.cfg]
+            c3[configs/zoo3.cfg]
+            l1[configs/logback.xml]
+        end
+    end
+
+    %% Mounting
+    c1 -->|"Mount to /conf/zoo.cfg"| zk1
+    c2 -->|"Mount to /conf/zoo.cfg"| zk2
+    c3 -->|"Mount to /conf/zoo.cfg"| zk3
+    l1 -->|"Mount to /conf/logback.xml"| zk1
+    l1 -->|"Mount to /conf/logback.xml"| zk2
+    l1 -->|"Mount to /conf/logback.xml"| zk3
+
+    zk1 <--->|"Volume Bind"| v1
+    zk2 <--->|"Volume Bind"| v2
+    zk3 <--->|"Volume Bind"| v3
+
+    %% Intra-cluster communications
+    zk1 <--->|"Ports 2888 & 3888"| zk2
+    zk2 <--->|"Ports 2888 & 3888"| zk3
+    zk3 <--->|"Ports 2888 & 3888"| zk1

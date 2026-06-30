@@ -1,0 +1,23 @@
+graph TD
+    Root["/ (Root ZNode)"] --> Config["/config (Persistent)"]
+    Root --> Services["/services (Persistent)"]
+    Root --> Elections["/elections (Persistent)"]
+
+    Config --> AppSettings["/config/app_settings (Persistent)"]
+    Config --> DbConfig["/config/db_pool (Persistent)"]
+    
+    Services --> Service1["/services/user-service (Persistent)"]
+    Service1 --> Inst1["instance_0000000001 (Ephemeral, Sequential)"]
+    Service1 --> Inst2["instance_0000000002 (Ephemeral, Sequential)"]
+    
+    Elections --> WorkerPool["/elections/worker-pool (Persistent)"]
+    WorkerPool --> Cand1["guid-n_0000000001 (Ephemeral, Sequential)"]
+    WorkerPool --> Cand2["guid-n_0000000002 (Ephemeral, Sequential)"]
+
+    style Inst1 fill:#e1f5fe,stroke:#0288d1
+    style Inst2 fill:#e1f5fe,stroke:#0288d1
+    style Cand1 fill:#e1f5fe,stroke:#0288d1
+    style Cand2 fill:#e1f5fe,stroke:#0288d1
+    
+    classDef ephemeral stroke-dasharray: 5 5;
+    class Inst1,Inst2,Cand1,Cand2 ephemeral;

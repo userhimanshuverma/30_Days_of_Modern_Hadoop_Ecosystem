@@ -1,0 +1,29 @@
+graph LR
+    subgraph Microservices ["Microservice Instances"]
+        S1[User Service Instance 1]
+        S2[User Service Instance 2]
+    end
+
+    subgraph CoordLayer ["Coordination Layer"]
+        ZK[ZooKeeper Cluster]
+        ZNode["/services/user-service/"]
+        ZK --- ZNode
+        ZNode1["instance_001 (Ephemeral)"]
+        ZNode2["instance_002 (Ephemeral)"]
+        ZNode --- ZNode1
+        ZNode --- ZNode2
+    end
+
+    subgraph ConsumersSpace ["Consumers"]
+        C[Gateway Client]
+    end
+
+    %% Flow
+    S1 -->|"1. Register Ephemeral Node"| ZNode1
+    S2 -->|"1. Register Ephemeral Node"| ZNode2
+    
+    C -->|"2. Get Children & Set Watch"| ZNode
+    ZK -.->|"3. Notify on membership change"| C
+    
+    C -->|"4. Direct RPC Routing"| S1
+    C -->|"4. Direct RPC Routing"| S2

@@ -1,0 +1,34 @@
+graph TB
+    subgraph ClientSpace ["Client Space"]
+        C1[Client App A]
+        C2[Client App B]
+    end
+
+    subgraph QuorumSpace ["ZooKeeper Ensemble (Quorum)"]
+        L1((Leader))
+        F1((Follower 1))
+        F2((Follower 2))
+    end
+
+    subgraph ReadScaleNodes ["Read-Scale Nodes"]
+        OB1((Observer 1))
+        OB2((Observer 2))
+    end
+
+    %% Client Interactions
+    C1 -.->|"Read / Write"| L1
+    C2 -.->|"Read / Forward Write"| F1
+    C2 -.->|"Read Only"| OB1
+
+    %% Core Consensus Sync
+    L1 ===>|"Zab Atomic Broadcast"| F1
+    L1 ===>|"Zab Atomic Broadcast"| F2
+    
+    %% Observer Update Sync (No Voting)
+    L1 -.->|"Inform Commit"| OB1
+    L1 -.->|"Inform Commit"| OB2
+    
+    %% Peer-to-Peer Communication
+    F1 <-->|"Sync / Election"| L1
+    F2 <-->|"Sync / Election"| L1
+    F1 <-->|"Election"| F2

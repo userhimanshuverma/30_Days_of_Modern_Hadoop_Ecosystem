@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    participant Follower
+    participant Leader
+    
+    Note over Follower, Leader: PHASE 1: DISCOVERY (LEADER ELECTION)
+    Follower->>Leader: Send Last Epoch (AcceptedEpoch)
+    Leader->>Follower: Establish New Epoch (NewEpoch)
+    
+    Note over Follower, Leader: PHASE 2: SYNCHRONIZATION (RECOVERY)
+    Follower->>Leader: Send History of Transactions (Txids)
+    alt Sync via DIFF (Follower slightly behind)
+        Leader->>Follower: Send DIFF (Missing Transactions)
+    else Sync via SNAP/TRUNC (Follower far behind or split)
+        Leader->>Follower: Send TRUNC + SNAP (Snapshot state)
+    end
+    Follower->>Follower: Apply state locally
+    Follower->>Leader: ACK synchronization complete
+    Note over Leader: Receives ACKs from Quorum. Transitions to active broadcast.
+    
+    Note over Follower, Leader: PHASE 3: BROADCAST (TRANSACTIONS)
+    Leader->>Follower: Propose Transaction (Txid, Epoch)
+    Follower->>Follower: Append to transaction log on SSD
+    Follower-->>Leader: ACK Proposal
+    Note over Leader: Majority ACK secured
+    Leader->>Leader: Commit locally
+    Leader->>Follower: Broadcast COMMIT
+    Follower->>Follower: Apply change to memory state machine

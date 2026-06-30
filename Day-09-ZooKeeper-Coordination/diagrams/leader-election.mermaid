@@ -1,0 +1,25 @@
+flowchart TD
+    Start([Node Starts / Loses Leader]) --> StateLook{State == LOOKING}
+    StateLook --> VoteSelf[Propose Self: Vote = ServerID, Last Zxid]
+    VoteSelf --> Broadcast[Broadcast Vote to All Nodes]
+    Broadcast --> ReceiveVotes[Receive Votes from Peers]
+    
+    ReceiveVotes --> Compare{Compare Vote: Received vs Self}
+    
+    %% Comparison logic
+    Compare -->|"Received Zxid > Self Zxid"| AcceptBetter[Accept Received Vote: Update Vote]
+    Compare -->|"Received Zxid == Self Zxid AND Received ID > Self ID"| AcceptBetter
+    Compare -->|"Otherwise"| KeepCurrent[Keep Current Vote]
+    
+    AcceptBetter --> Rebcast[Rebroadcast New Vote]
+    KeepCurrent --> CheckQuorum{Has Vote secured Quorum Majority?}
+    Rebcast --> CheckQuorum
+    
+    CheckQuorum -->|"No"| ReceiveVotes
+    CheckQuorum -->|"Yes: Majority Agreed"| Finalize{Is My ID the winner?}
+    
+    Finalize -->|"Yes"| SetLeaderState[Set State = LEADING]
+    Finalize -->|"No"| SetFollowerState[Set State = FOLLOWING]
+    
+    SetLeaderState --> End([Ready to Serve primary transactions])
+    SetFollowerState --> End

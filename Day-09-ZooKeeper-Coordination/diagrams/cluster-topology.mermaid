@@ -1,0 +1,33 @@
+graph LR
+    subgraph Node1 ["Node 1: zookeeper1"]
+        c1[Port 2181: Client]
+        p1[Port 2888: Peer Sync]
+        e1[Port 3888: Election]
+    end
+
+    subgraph Node2 ["Node 2: zookeeper2"]
+        c2[Port 2181: Client]
+        p2[Port 2888: Peer Sync]
+        e2[Port 3888: Election]
+    end
+
+    subgraph Node3 ["Node 3: zookeeper3"]
+        c3[Port 2181: Client]
+        p3[Port 2888: Peer Sync]
+        e3[Port 3888: Election]
+    end
+
+    %% Connect peer sync
+    p1 <---> p2
+    p2 <---> p3
+    p3 <---> p1
+
+    %% Connect election
+    e1 <---> e2
+    e2 <---> e3
+    e3 <---> e1
+    
+    %% Client interfaces
+    Client1((Client APP)) -.->|"Port 2181"| c1
+    Client2((Client APP)) -.->|"Port 2182"| c2
+    Client3((Client APP)) -.->|"Port 2183"| c3

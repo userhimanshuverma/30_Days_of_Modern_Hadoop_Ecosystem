@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  zookeeper1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zookeeper1
+    hostname: zookeeper1
+    environment:
+      ZOO_MY_ID: 1
+      JVMFLAGS: "-Xmx512m -Xms512m -Dlogback.configurationFile=/conf/logback.xml"
+      ZOO_4LW_COMMANDS_WHITELIST: "stat,ruok,conf,isrv,mntr,ruok,wchs"
+    volumes:
+      - ../configs/zoo1.cfg:/conf/zoo.cfg
+      - ../configs/logback.xml:/conf/logback.xml
+      - zk1_data:/data
+      - zk1_datalog:/datalog
+    ports:
+      - "2181:2181"
+      - "8081:8080"
+      - "7001:7000"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      zk-net:
+        ipv4_address: 172.20.0.11
+
+  zookeeper2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zookeeper2
+    hostname: zookeeper2
+    environment:
+      ZOO_MY_ID: 2
+      JVMFLAGS: "-Xmx512m -Xms512m -Dlogback.configurationFile=/conf/logback.xml"
+      ZOO_4LW_COMMANDS_WHITELIST: "stat,ruok,conf,isrv,mntr,ruok,wchs"
+    volumes:
+      - ../configs/zoo2.cfg:/conf/zoo.cfg
+      - ../configs/logback.xml:/conf/logback.xml
+      - zk2_data:/data
+      - zk2_datalog:/datalog
+    ports:
+      - "2182:2181"
+      - "8082:8080"
+      - "7002:7000"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      zk-net:
+        ipv4_address: 172.20.0.12
+
+  zookeeper3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zookeeper3
+    hostname: zookeeper3
+    environment:
+      ZOO_MY_ID: 3
+      JVMFLAGS: "-Xmx512m -Xms512m -Dlogback.configurationFile=/conf/logback.xml"
+      ZOO_4LW_COMMANDS_WHITELIST: "stat,ruok,conf,isrv,mntr,ruok,wchs"
+    volumes:
+      - ../configs/zoo3.cfg:/conf/zoo.cfg
+      - ../configs/logback.xml:/conf/logback.xml
+      - zk3_data:/data
+      - zk3_datalog:/datalog
+    ports:
+      - "2183:2181"
+      - "8083:8080"
+      - "7003:7000"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      zk-net:
+        ipv4_address: 172.20.0.13
+
+networks:
+  zk-net:
+    name: zk-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  zk1_data:
+  zk1_datalog:
+  zk2_data:
+  zk2_datalog:
+  zk3_data:
+  zk3_datalog:
