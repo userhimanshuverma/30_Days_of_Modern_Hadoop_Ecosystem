@@ -1,0 +1,42 @@
+graph TB
+    subgraph Cluster ["Kafka Cluster (3-Node KRaft Quorum)"]
+        direction LR
+        subgraph Node1 ["Broker 1"]
+            B1[Broker Process]
+            T1_P0[Topic A - Partition 0 - Leader]
+            T1_P1[Topic A - Partition 1 - Follower]
+        end
+        subgraph Node2 ["Broker 2"]
+            B2[Broker Process]
+            T1_P0_F[Topic A - Partition 0 - Follower]
+            T1_P2[Topic A - Partition 2 - Leader]
+        end
+        subgraph Node3 ["Broker 3"]
+            B3[Broker Process]
+            T1_P1_L[Topic A - Partition 1 - Leader]
+            T1_P2_F[Topic A - Partition 2 - Follower]
+        end
+    end
+
+    %% Client Layer
+    subgraph ClientSpace ["Clients"]
+        direction TB
+        P[Producer Client]
+        subgraph GroupA ["Consumer Group A"]
+            C1[Consumer Client 1]
+            C2[Consumer Client 2]
+        end
+    end
+
+    %% Interactions
+    P -->|Write to Partition Leader| T1_P0
+    P -->|Write to Partition Leader| T1_P2
+    
+    C1 -->|Fetch from Partition 0| T1_P0
+    C2 -->|Fetch from Partition 1| T1_P1_L
+    C2 -->|Fetch from Partition 2| T1_P2
+    
+    %% Replication Links
+    T1_P0 ===>|Replicate Log| T1_P0_F
+    T1_P1_L ===>|Replicate Log| T1_P1
+    T1_P2 ===>|Replicate Log| T1_P2_F

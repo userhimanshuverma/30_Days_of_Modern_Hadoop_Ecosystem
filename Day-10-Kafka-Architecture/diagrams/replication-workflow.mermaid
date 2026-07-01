@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    participant Producer as Producer Client
+    participant Leader as Leader Replica (Broker 1)
+    participant Follower as Follower Replica (Broker 2)
+
+    Producer->>Leader: ProduceRequest (Message Offset=10)
+    Note over Leader: Append Offset=10 to Local Log (LEO=11)
+    
+    par Async Fetch Protocol
+        Follower->>Leader: FetchRequest (Offset=10)
+        Leader-->>Follower: FetchResponse (Message Offset=10, HWM=9)
+        Note over Follower: Append Offset=10 to Local Log (LEO=11)
+    end
+
+    Follower->>Leader: FetchRequest (Offset=11)
+    Note over Leader: Acknowledged by all members in ISR.
+    Note over Leader: Advance High Watermark (HWM=10)
+    Leader-->>Follower: FetchResponse (Empty, HWM=10)
+    Note over Follower: Advance High Watermark (HWM=10)
+    
+    Leader-->>Producer: ProduceResponse (Offset=10, Status=ACK)

@@ -1,0 +1,26 @@
+graph LR
+    subgraph Producers ["Event Producers"]
+        P1[Web Server Log App]
+        P2[Database CDC App]
+    end
+
+    subgraph Cluster ["Kafka Cluster"]
+        direction TB
+        subgraph Broker1 ["Broker 1"]
+            L1[Topic-A Partition-0 Leader]
+        end
+        subgraph Broker2 ["Broker 2"]
+            L2[Topic-A Partition-1 Leader]
+        end
+    end
+
+    subgraph Consumers ["Consumer Group G1"]
+        C1[Consumer Thread 1]
+        C2[Consumer Thread 2]
+    end
+
+    P1 -->|Produce Key=UserA| L1
+    P2 -->|Produce Key=UserB| L2
+
+    L1 -->|Consume| C1
+    L2 -->|Consume| C2
