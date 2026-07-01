@@ -395,7 +395,7 @@ sequenceDiagram
             Cons->>Coordinator: OffsetCommitRequest (Topic, Partition, Offset)
         else Manual Commit
             Cons->>Coordinator: OffsetCommitRequest (Synchronous/Asynchronous)
-        fi
+        end
         Coordinator-->>Cons: OffsetCommitResponse (ACK)
     end
 ```
