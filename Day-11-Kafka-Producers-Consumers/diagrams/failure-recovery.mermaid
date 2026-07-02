@@ -1,0 +1,13 @@
+graph TD
+    A[Active Consumer Processing Partitions] --> B["Consumer Node Crashes or GC Pause"]
+    B --> C[Consumer fails to send heartbeat]
+    C --> D{"Heartbeat Timeout? (time > session.timeout.ms)"}
+    D -- No --> C
+    D -- Yes --> E[Group Coordinator Marks Consumer Dead]
+    E --> F[Group coordinator flags need-rebalance]
+    F --> G[On next poll call, active consumers get rebalance code]
+    G --> H[Active consumers stop polling & commit current offsets]
+    H --> I["Rebalance sequence: JoinGroup and SyncGroup"]
+    I --> J[Orphaned partitions reassigned to healthy consumers]
+    J --> K[Consumers resume polling from committed offsets]
+    K --> L[Normal operations restored - Zero message loss]

@@ -1,0 +1,23 @@
+graph TD
+    A[Start Consumer Poll Loop] --> B[poll Duration]
+    B --> C{Records Returned?}
+    C -- No --> B
+    C -- Yes --> D[Process Records Batch]
+    
+    subgraph Processing Block
+        D --> E[Loop: For Record in Records]
+        E --> F[Deserialize & Parse JSON]
+        F -- Success --> G[Execute Business Logic]
+        F -- Failure/Poison Pill --> H[Route to DLQ / Log & Skip]
+        G --> I[Store Offset + 1 in currentOffsets Map]
+        H --> I
+        I --> E
+    end
+    
+    E -- All Records Processed --> J{enable.auto.commit = false?}
+    J -- Yes --> K[commitSync currentOffsets]
+    J -- No --> L[Background Auto-Commit Thread Handles It]
+    
+    K --> M[Clear currentOffsets Map]
+    M --> B
+    L --> B

@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    participant C1 as Consumer 1 (Existing)
+    participant C2 as Consumer 2 (New Joiner)
+    participant GC as Group Coordinator (Broker)
+
+    Note over C2: Consumer 2 Starts Up
+    C2->>GC: JoinGroup Request (State: Empty/Join)
+    Note over GC: Coordinator pauses group, triggers rebalance
+    GC->>C1: JoinGroup Response (on next Heartbeat check)
+    
+    C1->>GC: JoinGroup Request
+    Note over GC: Coordinator receives all JoinGroup requests
+    Note over GC: Coordinator elects Group Leader (Consumer 1)
+    
+    GC->>C1: JoinGroup Response (Leader, Member Metadata)
+    GC->>C2: JoinGroup Response (Follower)
+
+    Note over C1: Leader runs Partition Assignor Strategy
+    C1->>GC: SyncGroup Request (contains calculated assignments)
+    C2->>GC: SyncGroup Request (empty assignment request)
+
+    Note over GC: Coordinator persists assignments
+    GC->>C1: SyncGroup Response (with assigned partitions)
+    GC->>C2: SyncGroup Response (with assigned partitions)
+    
+    Note over C1,C2: Consumers begin polling their assigned partitions

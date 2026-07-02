@@ -1,0 +1,24 @@
+graph TD
+    A[ProducerRecord] --> B["Serializer: Key and Value"]
+    B --> C["Partitioner: Default or Custom"]
+    C --> D["Record Accumulator: In-Memory Buffer"]
+    
+    subgraph Record Accumulator
+        D --> E1[Partition 0 Batch]
+        D --> E2[Partition 1 Batch]
+        D --> E3[Partition 2 Batch]
+    end
+
+    E1 --> F{"Batch Ready? (size >= batch.size OR time >= linger.ms)"}
+    E2 --> F
+    E3 --> F
+
+    F -- Yes --> G[Sender Thread]
+    F -- No/Waiting --> D
+
+    G --> H[Kafka Broker Network Buffer]
+    H --> I{"Broker ACK? (acks=all/1/0)"}
+    I -- Success --> J[Callback Success handler]
+    I -- Failure/Retryable --> K["Retry Loop (retries = Integer.MAX_VALUE)"]
+    K --> G
+    I -- Fatal Error --> L[Callback Failure handler]

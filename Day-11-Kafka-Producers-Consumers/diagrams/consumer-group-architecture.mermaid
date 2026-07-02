@@ -1,0 +1,22 @@
+graph TD
+    subgraph Topic: orders
+        P0[(Partition 0)]
+        P1[(Partition 1)]
+        P2[(Partition 2)]
+        P3[(Partition 3)]
+    end
+
+    subgraph Consumer Group: order-processing-group
+        C1[Consumer Member 1]
+        C2[Consumer Member 2]
+        C3[Consumer Member 3]
+        C4[Consumer Member 4]
+        C5[Consumer Member 5 - IDLE]
+    end
+
+    P0 --> C1
+    P1 --> C2
+    P2 --> C3
+    P3 --> C4
+    
+    style C5 fill:#f99,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5

@@ -1,0 +1,27 @@
+graph TD
+    subgraph Host Network
+        Port8080["Host Port 8080"]
+        Port19092["Host Port 19092"]
+        Port29092["Host Port 29092"]
+        Port39092["Host Port 39092"]
+    end
+
+    subgraph Docker Network: day11-network
+        AKHQ["AKHQ UI Container (akhq-day11)"]
+        K1["Kafka Broker 1 (kafka1-day11:9092)"]
+        K2["Kafka Broker 2 (kafka2-day11:9092)"]
+        K3["Kafka Broker 3 (kafka3-day11:9092)"]
+    end
+
+    Port8080 -->|Route| AKHQ
+    Port19092 -->|Route| K1
+    Port29092 -->|Route| K2
+    Port39092 -->|Route| K3
+
+    AKHQ -->|Read Metadata| K1
+    AKHQ -->|Read Metadata| K2
+    AKHQ -->|Read Metadata| K3
+
+    K1 <-->|Sync Metadata / KRaft Quorum| K2
+    K2 <-->|Sync Metadata / KRaft Quorum| K3
+    K3 <-->|Sync Metadata / KRaft Quorum| K1

@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  kafka1:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka1-day11
+    hostname: kafka1-day11
+    restart: unless-stopped
+    ports:
+      - "19092:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-day11:9093,2@kafka2-day11:9093,3@kafka3-day11:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:19092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1-day11:9092,EXTERNAL://localhost:19092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.coordinator=INFO,state.change.logger=INFO"
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day11-network
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka2-day11
+    hostname: kafka2-day11
+    restart: unless-stopped
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-day11:9093,2@kafka2-day11:9093,3@kafka3-day11:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka2-day11:9092,EXTERNAL://localhost:29092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.coordinator=INFO,state.change.logger=INFO"
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day11-network
+
+  kafka3:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka3-day11
+    hostname: kafka3-day11
+    restart: unless-stopped
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1-day11:9093,2@kafka2-day11:9093,3@kafka3-day11:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:39092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka3-day11:9092,EXTERNAL://localhost:39092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_CLUSTER_ID: '5L62ZDwCQIK-GGy4aG37wB'
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.coordinator=INFO,state.change.logger=INFO"
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day11-network
+
+  akhq:
+    image: tchiotludo/akhq:0.25.0
+    container_name: akhq-day11
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            kafka-cluster:
+              properties:
+                bootstrap.servers: "kafka1-day11:9092,kafka2-day11:9092,kafka3-day11:9092"
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+    networks:
+      - day11-network
+
+volumes:
+  kafka1-data:
+  kafka2-data:
+  kafka3-data:
+
+networks:
+  day11-network:
+    name: day11-network
+    driver: bridge

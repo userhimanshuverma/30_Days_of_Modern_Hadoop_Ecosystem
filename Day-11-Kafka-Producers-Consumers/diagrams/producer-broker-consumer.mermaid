@@ -1,0 +1,26 @@
+graph LR
+    subgraph Producers
+        P1[Order Service]
+        P2[Inventory Service]
+    end
+
+    subgraph Kafka Brokers
+        subgraph Topic: orders
+            Part0[(Partition 0)]
+            Part1[(Partition 1)]
+            Part2[(Partition 2)]
+        end
+    end
+
+    subgraph Consumer Group
+        C1[Consumer Instance 1]
+        C2[Consumer Instance 2]
+    end
+
+    P1 -- Key: cust_1 --> Part0
+    P1 -- Key: cust_2 --> Part1
+    P2 -- Key: cust_3 --> Part2
+
+    Part0 --> C1
+    Part1 --> C1
+    Part2 --> C2

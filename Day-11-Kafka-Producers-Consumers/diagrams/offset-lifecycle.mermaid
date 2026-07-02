@@ -1,0 +1,24 @@
+graph TD
+    subgraph Log Segment
+        Msg0["Msg 0: Offset 0 (COMMITTED)"]
+        Msg1["Msg 1: Offset 1 (COMMITTED)"]
+        Msg2["Msg 2: Offset 2 (COMMITTED)"]
+        Msg3["Msg 3: Offset 3 (CURRENT POLL BATCH)"]
+        Msg4["Msg 4: Offset 4 (UNREAD IN BROKER)"]
+        Msg5["Msg 5: Offset 5 (LOG END OFFSET)"]
+        
+        Msg0 --> Msg1 --> Msg2 --> Msg3 --> Msg4 --> Msg5
+    end
+
+    subgraph Consumer Group Offset Pointers
+        CurrentPosition["Current Position Pointer (Points to 3)"] --> Msg3
+        CommittedOffset["Last Committed Offset Pointer (Points to 3)"] --> Msg3
+        LEO["Log End Offset LEO Pointer (Points to 6)"] --> Msg5
+    end
+
+    style Msg0 fill:#d4edda,stroke:#28a745
+    style Msg1 fill:#d4edda,stroke:#28a745
+    style Msg2 fill:#d4edda,stroke:#28a745
+    style Msg3 fill:#fff3cd,stroke:#ffc107
+    style Msg4 fill:#f8d7da,stroke:#dc3545
+    style Msg5 fill:#e2e3e5,stroke:#383d41
