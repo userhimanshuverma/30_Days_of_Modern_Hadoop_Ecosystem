@@ -51,13 +51,13 @@ sequenceDiagram
     ServiceA->>ServiceB: Validate Payment (Blocking RPC)
     activate ServiceB
     ServiceB-->>ServiceA: Success Response
-    deallocate ServiceB
+    deactivate ServiceB
     ServiceA->>ServiceC: Deduct Stock (Blocking RPC)
     activate ServiceC
     ServiceC-->>ServiceA: Success Response
-    deallocate ServiceC
+    deactivate ServiceC
     ServiceA-->>User: Order Confirmed
-    deallocate ServiceA
+    deactivate ServiceA
 ```
 
 If Service C slows down, Service A's connection pool fills up, causing a cascade failure back to the User.
@@ -76,7 +76,7 @@ sequenceDiagram
     activate ServiceA
     ServiceA->>Broker: Publish "OrderCreated" (Async)
     ServiceA-->>User: Order Accepted (ID: 991)
-    deallocate ServiceA
+    deactivate ServiceA
 
     Note over ServiceB, ServiceC: Consumers poll independently
     Broker->>ServiceB: Fetch "OrderCreated"
@@ -416,7 +416,7 @@ We deploy a 3-broker KRaft cluster and AKHQ UI on the host machine. We compile a
 graph LR
     subgraph Host Engine
         JProd[Java OrderProducer] -->|Write localhost:19092| KB1[Broker 1]
-        JCons[Java OrderConsumer] <--|Read localhost:29092| KB2[Broker 2]
+        KB2[Broker 2] -->|Read localhost:29092| JCons[Java OrderConsumer]
         KB3[Broker 3]
         AKHQ[AKHQ Web UI] -->|Monitor| KB1
     end
