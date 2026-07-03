@@ -1,0 +1,28 @@
+graph TD
+    Start(Developer creates Schema Draft v2) --> Edit[Add/Remove field or change type]
+    Edit --> ValidateLocal[Local validation: syntax and formatting tests]
+    
+    subgraph CI/CD Pipeline
+        ValidateLocal --> Commit[Commit to Git Repository]
+        Commit --> SchemaLint[Schema Linter check]
+        SchemaLint --> SRCompatCheck["Registry Compatibility API Check: POST /compatibility"]
+    end
+
+    SRCompatCheck -->|Fails Validation| Fix[Reject PR / Developer fixes schema]
+    Fix --> Edit
+
+    SRCompatCheck -->|Passes Validation| Approve[Merge PR to Main]
+    Approve --> DeploySR[Deploy Schema Registry: Auto-register or CLI deploy]
+    
+    DeploySR --> ProdRun[Production Execution]
+    
+    subgraph Runtime Evolution
+        ProdRun --> ProdProduce[Producers write v2 payloads]
+        ProdProduce --> ProdConsume[Consumers read v1 & v2 events typesafely]
+    end
+
+    ProdConsume --> End(Cycle Complete)
+
+    style SRCompatCheck fill:#f96,stroke:#333,stroke-width:2px
+    style Fix fill:#fbf,stroke:#333,stroke-width:1px
+    style DeploySR fill:#bfb,stroke:#333,stroke-width:2px

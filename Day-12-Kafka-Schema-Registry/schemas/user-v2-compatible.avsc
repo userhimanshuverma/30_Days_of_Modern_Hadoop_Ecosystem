@@ -1,0 +1,43 @@
+{
+  "type": "record",
+  "name": "User",
+  "namespace": "com.hadoop.schema",
+  "doc": "Schema Registry Day 12 - User Account Event Schema v2 Compatible",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique identifier for the user account"
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "doc": "Full name of the user"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "doc": "Primary email address of the user"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "Epoch millisecond timestamp of the event registration"
+    },
+    {
+      "name": "phoneNumber",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null,
+      "doc": "Optional contact phone number for the user"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "default": "ACTIVE",
+      "doc": "Current status of the user account"
+    }
+  ]
+}

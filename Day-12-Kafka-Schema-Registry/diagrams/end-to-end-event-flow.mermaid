@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph Data Producer
+        ClientApp[Producer App] -->|1. Parse Event| Serializer[KafkaAvroSerializer]
+    end
+
+    subgraph Governance Core
+        Registry[Schema Registry]
+    end
+
+    subgraph Messaging Fabric
+        Broker[Kafka Cluster]
+    end
+
+    subgraph Data Consumer
+        Deserializer[KafkaAvroDeserializer] -->|4. Parse Object| ConsumerApp[Consumer App]
+    end
+
+    %% Flow Steps
+    Serializer ---|2. Register/Query Schema & Get ID| Registry
+    Serializer -->|3. Write Avro Message: 5-byte header + binary payload| Broker
+    Broker -->|4. Consume raw binary| Deserializer
+    Deserializer ---|5. Lookup Schema ID| Registry
+
+    style Registry fill:#f9f,stroke:#333,stroke-width:2px
+    style Broker fill:#bbf,stroke:#333,stroke-width:2px

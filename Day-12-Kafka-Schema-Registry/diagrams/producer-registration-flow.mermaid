@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant App as Producer App
+    participant Ser as KafkaAvroSerializer
+    participant Cache as Local Schema Cache
+    participant SR as Schema Registry
+    participant Broker as Kafka Broker
+
+    App->>Ser: send(Topic, Key, ValueRecord)
+    Ser->>Cache: Check if schema exists in local cache
+    
+    alt Schema exists in Cache (Cache Hit)
+        Cache-->>Ser: Return Schema ID (e.g., ID 42)
+    else Schema not in Cache (Cache Miss)
+        Ser->>SR: POST /subjects/topic-value/versions (Schema JSON)
+        SR->>SR: Validate schema compatibility
+        SR->>SR: Save schema to _schemas topic
+        SR-->>Ser: Return Schema ID (ID 42)
+        Ser->>Cache: Save schema details and ID 42 to Cache
+    end
+
+    Ser->>Ser: Prepend magic byte (0x00) + Schema ID (ID 42, 4 bytes)
+    Ser->>Ser: Serialize payload using Avro schema into binary
+    Ser-->>App: Return serialized binary byte array
+    App->>Broker: Publish message to Kafka topic

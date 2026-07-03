@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    participant App as "Client Application"
+    participant F as "Follower SR Node"
+    participant L as "Primary SR Node (Crashes)"
+    participant K as "Kafka KRaft Coordinator"
+    
+    App->>F: POST /subjects/users-value/versions (Register request)
+    F->>L: Forward write request to Primary
+    Note over L: Primary Node Crashes / Network Partition
+    F-->>F: Forward request times out after kafkastore.timeout.ms
+    
+    %% Election
+    F->>K: Heartbeat lost / Initiate new leader election
+    K->>K: Select Node 1 (Follower) as new Primary
+    K-->>F: Elect Node 1 as Primary (Promoted)
+    
+    %% Re-route
+    App->>F: Retry write request
+    Note over F: Node 1 is now Primary. Handles write locally.
+    F->>K: Publish schema to _schemas topic
+    F-->>App: Return Schema ID (Registration Successful)

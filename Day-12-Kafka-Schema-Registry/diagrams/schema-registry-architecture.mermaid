@@ -1,0 +1,47 @@
+graph TD
+    subgraph Client Application Layer
+        Producer[Kafka Avro Producer]
+        Consumer[Kafka Avro Consumer]
+    end
+
+    subgraph Schema Registry Cluster
+        LB[Load Balancer / Reverse Proxy]
+        SR1["Schema Registry Node 1 (Follower/Replica)"]
+        SR2["Schema Registry Node 2 (Primary/Leader)"]
+        
+        SR1_Cache[(Local Cache)]
+        SR2_Cache[(Local Cache)]
+    end
+
+    subgraph Kafka Storage Layer
+        KB1[Kafka Broker 1]
+        KB2[Kafka Broker 2]
+        KB3[Kafka Broker 3]
+        
+        SchemasTopic[("Compact Topic: _schemas (Partition 1)")]
+    end
+
+    %% Client Interactions
+    Producer -->|1. Register/Retrieve Schema via HTTP| LB
+    Consumer -->|2. Fetch Schema by ID via HTTP| LB
+    
+    LB -->|Forward Request| SR1
+    LB -->|Forward Request| SR2
+    
+    SR1 ---|Forward Write Operations| SR2
+    
+    %% Cache Relationships
+    SR1 --- SR1_Cache
+    SR2 --- SR2_Cache
+    
+    %% Storage Interactions
+    SR2 -->|Publish schema changelog| SchemasTopic
+    SchemasTopic -.->|Replicate and Consume to rebuild cache| SR1
+    SchemasTopic -.->|Replicate and Consume to rebuild cache| SR2
+    
+    KB1 --- SchemasTopic
+    KB2 --- SchemasTopic
+    KB3 --- SchemasTopic
+
+    style SR2 fill:#f9f,stroke:#333,stroke-width:2px
+    style SchemasTopic fill:#bbf,stroke:#333,stroke-width:2px

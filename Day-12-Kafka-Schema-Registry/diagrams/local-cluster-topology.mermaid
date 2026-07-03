@@ -1,0 +1,39 @@
+graph TD
+    subgraph Client Application Layer
+        Clients[Producers / Consumers]
+    end
+
+    subgraph Load Balancing Layer
+        LB[HAProxy / NGINX Load Balancer: Port 80]
+    end
+
+    subgraph Schema Registry Cluster
+        SR1[Schema Registry Node 1 - Follower]
+        SR2[Schema Registry Node 2 - Primary]
+        SR3[Schema Registry Node 3 - Follower]
+    end
+
+    subgraph Kafka Cluster KRaft Mode
+        KB1[Kafka Broker 1]
+        KB2[Kafka Broker 2]
+        KB3[Kafka Broker 3]
+    end
+
+    %% Network links
+    Clients -->|HTTP traffic| LB
+    LB -->|Round Robin / Health Checks| SR1
+    LB -->|Round Robin / Health Checks| SR2
+    LB -->|Round Robin / Health Checks| SR3
+
+    SR1 -->|Internal metadata / writes| SR2
+    SR3 -->|Internal metadata / writes| SR2
+
+    SR1 -->|Bootstrap link| KB1
+    SR2 -->|Bootstrap link| KB2
+    SR3 -->|Bootstrap link| KB3
+
+    style LB fill:#fff,stroke:#333,stroke-width:2px
+    style SR2 fill:#f9f,stroke:#333,stroke-width:2px
+    style KB1 fill:#bbf,stroke:#333,stroke-width:2px
+    style KB2 fill:#bbf,stroke:#333,stroke-width:2px
+    style KB3 fill:#bbf,stroke:#333,stroke-width:2px

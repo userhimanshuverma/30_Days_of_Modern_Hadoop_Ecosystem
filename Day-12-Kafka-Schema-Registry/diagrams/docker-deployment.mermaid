@@ -1,0 +1,31 @@
+graph TD
+    subgraph Host Network
+        Port8081[Host Port 8081]
+        Port8082[Host Port 8082]
+        Port19092[Host Port 19092]
+    end
+
+    subgraph Docker Network: day12-network
+        Kafka["kafka-day12:9092"]
+        SR["schema-registry-day12:8081"]
+        AKHQ["akhq-day12:8080"]
+        
+        Vol[(Volume: kafka-data)]
+    end
+
+    %% Mappings
+    Port19092 --- Kafka
+    Port8081 --- SR
+    Port8082 --- AKHQ
+
+    %% Internal Communication
+    SR -->|Connects to bootstrap| Kafka
+    AKHQ -->|Reads metrics| Kafka
+    AKHQ -->|Queries schemas| SR
+    
+    %% Storage
+    Kafka --- Vol
+
+    style Kafka fill:#bbf,stroke:#333,stroke-width:2px
+    style SR fill:#f9f,stroke:#333,stroke-width:2px
+    style AKHQ fill:#bfb,stroke:#333,stroke-width:2px

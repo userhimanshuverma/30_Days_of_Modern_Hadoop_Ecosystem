@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant Broker as Kafka Broker
+    participant Deser as KafkaAvroDeserializer
+    participant Cache as Local Schema Cache
+    participant SR as Schema Registry
+    participant App as Consumer App
+
+    Broker->>Deser: Consume raw binary record value
+    Deser->>Deser: Read 1st byte (confirm Magic Byte = 0x00)
+    
+    alt Magic Byte is Missing
+        Deser-->>App: Throw SerializationException ('Unknown Magic Byte')
+    else Magic Byte Valid
+        Deser->>Deser: Read next 4 bytes (extract Schema ID, e.g., ID 42)
+        Deser->>Cache: Query cache for Schema ID 42
+        
+        alt Schema ID 42 in Cache
+            Cache-->>Deser: Return parsed Avro schema
+        else Schema ID 42 NOT in Cache
+            Deser->>SR: GET /schemas/ids/42
+            SR-->>Deser: Return raw Avro schema JSON
+            Deser->>Deser: Parse and compile Avro schema
+            Deser->>Cache: Cache Schema ID 42 with compiled schema
+        end
+        
+        Deser->>Deser: Deserialize remaining bytes using Avro schema
+        Deser-->>App: Return deserialized Java Object / Python Dict
+    end

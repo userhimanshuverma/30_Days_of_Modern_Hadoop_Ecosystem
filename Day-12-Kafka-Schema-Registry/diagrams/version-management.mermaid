@@ -1,0 +1,29 @@
+classDiagram
+    class SchemaRegistry {
+        +Map subjects
+        +Map schemas
+        +registerSchema(String subject, String schema) int
+        +getSchemaById(int id) String
+        +getLatestVersion(String subject) Version
+    }
+
+    class Subject {
+        +String name
+        +String compatibilityLevel
+    }
+
+    class Version {
+        +int versionNumber
+        +int schemaId
+    }
+
+    class SchemaRecord {
+        +int id
+        +String schemaDefinitionJson
+        +String fingerprint
+    }
+
+    SchemaRegistry "1" *-- "many" Subject : manages
+    Subject "1" *-- "many" Version : tracks
+    Version "1" --> "1" SchemaRecord : resolves to
+    SchemaRegistry "1" *-- "many" SchemaRecord : caches

@@ -1,0 +1,26 @@
+graph TD
+    Request(New Schema Version Submitted) --> SubjectCheck{Does Subject exist?}
+    
+    SubjectCheck -->|No| RegisterNew[Register as Version 1 / Schema ID assigned]
+    SubjectCheck -->|Yes| FetchRule{Read Subject Compatibility Rule}
+    
+    FetchRule -->|NONE| SaveSchema[Accept and Register New Version]
+    
+    FetchRule -->|BACKWARD| BackwardCheck{"Can new schema parse data written by latest version?"}
+    BackwardCheck -->|Yes| SaveSchema
+    BackwardCheck -->|No| RejectSchema[Reject registration / Return 409 Conflict]
+    
+    FetchRule -->|FORWARD| ForwardCheck{"Can latest schema parse data written by new version?"}
+    ForwardCheck -->|Yes| SaveSchema
+    ForwardCheck -->|No| RejectSchema
+    
+    FetchRule -->|FULL| FullCheck{"Is schema both BACKWARD and FORWARD compatible?"}
+    FullCheck -->|Yes| SaveSchema
+    FullCheck -->|No| RejectSchema
+    
+    SaveSchema --> Success(Return new Schema ID to Client)
+    RejectSchema --> Error(Throw SerializationException / Client write fails)
+
+    style FetchRule fill:#ff9,stroke:#333,stroke-width:2px
+    style SaveSchema fill:#bfb,stroke:#333,stroke-width:2px
+    style RejectSchema fill:#fbb,stroke:#333,stroke-width:2px
