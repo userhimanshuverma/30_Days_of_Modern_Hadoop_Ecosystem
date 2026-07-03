@@ -59,7 +59,7 @@ Timeline of Serialization Formats:
 graph TD
     subgraph Event Producer
         AppP[Producer Client] -->|1. Register Schema| SR[Schema Registry REST API]
-        SR --x|Reject Incompatible| AppP
+        SR -.->|Reject Incompatible| AppP
         SR -->|2. Return Schema ID| AppP
         AppP -->|3. Serialize & Publish Value| Broker[Kafka Broker]
     end
