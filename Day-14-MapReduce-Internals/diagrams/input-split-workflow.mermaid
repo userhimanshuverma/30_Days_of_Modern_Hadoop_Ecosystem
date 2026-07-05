@@ -1,0 +1,45 @@
+graph TD
+    subgraph HDFS Physical Layer
+        File[Large Data File in HDFS]
+        B1["Block 1 (128 MB)<br>Host: Node A, B"]
+        B2["Block 2 (128 MB)<br>Host: Node C, D"]
+        B3["Block 3 (45 MB)<br>Host: Node A, D"]
+        File --> B1
+        File --> B2
+        File --> B3
+    end
+
+    subgraph MapReduce Logical Layer
+        InputFormat["InputFormat (e.g., TextInputFormat)"]
+        Split1["InputSplit 1<br>(Logical: Offset 0-128MB)"]
+        Split2["InputSplit 2<br>(Logical: Offset 128-256MB)"]
+        Split3["InputSplit 3<br>(Logical: Offset 256-301MB)"]
+        
+        InputFormat -->|Calculates Splits| Split1
+        InputFormat -->|Calculates Splits| Split2
+        InputFormat -->|Calculates Splits| Split3
+    end
+
+    subgraph Record Reader Execution
+        RR1["RecordReader 1<br>(TextInputFormat uses LineRecordReader)"]
+        RR2["RecordReader 2"]
+        RR3["RecordReader 3"]
+
+        Split1 --> RR1
+        Split2 --> RR2
+        Split3 --> RR3
+    end
+
+    subgraph Processing Phase
+        Map1[Mapper Task 1]
+        Map2[Mapper Task 2]
+        Map3[Mapper Task 3]
+
+        RR1 -->|Emits K1, V1 e.g., offset, line| Map1
+        RR2 -->|Emits K1, V1| Map2
+        RR3 -->|Emits K1, V1| Map3
+    end
+
+    B1 -.- Split1
+    B2 -.- Split2
+    B3 -.- Split3

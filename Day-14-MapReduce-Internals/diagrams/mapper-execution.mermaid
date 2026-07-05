@@ -1,0 +1,16 @@
+graph TD
+    RecordReader[RecordReader K1, V1] -->|Input| Mapper[TokenizerMapper]
+    Mapper -->|context.write K2, V2| Buffer["Circular In-Memory Buffer<br>(mapreduce.task.io.sort.mb: 256MB)"]
+    
+    subgraph In-Memory Spill Pipeline
+        Buffer -->|80% Threshold reached| SpillThread[Spill Thread]
+        SpillThread -->|1. Partition| Partitioner[AlphabetPartitioner]
+        Partitioner -->|2. Sort| QuickSort[In-Memory QuickSort]
+        QuickSort -->|3. Local Reduce| Combiner[IntSumReducer / Combiner]
+        Combiner -->|4. Spill to Local Disk| LocalSpillFile["spillN.out + spillN.index"]
+    end
+
+    subgraph Final Map Output Merge
+        LocalSpillFile -->|Merge Sort all spills| Merger[Merger Process]
+        Merger -->|Single Sorted & Partitioned File| FinalMapOut["file.out + file.out.index"]
+    end

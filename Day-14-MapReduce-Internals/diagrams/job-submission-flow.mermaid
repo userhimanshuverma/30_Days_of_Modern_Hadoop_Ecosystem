@@ -1,0 +1,18 @@
+sequenceDiagram
+    autonumber
+    actor Client as Job Client
+    participant RM as YARN ResourceManager
+    participant HDFS as HDFS Storage
+    participant NM as YARN NodeManager
+    participant AM as MRAppMaster
+
+    Client->>RM: Get new Application ID
+    RM-->>Client: Return Application ID
+    Client->>HDFS: Upload Job resources (JAR, config, splits) to staging folder
+    Client->>RM: Submit Application (Job Submission)
+    RM->>NM: Allocate and launch container for MRAppMaster
+    NM->>AM: Start MRAppMaster
+    AM->>HDFS: Read InputSplits details from staging folder
+    AM->>RM: Register and request Map & Reduce containers
+    RM-->>AM: Allocate container allocations (tokens)
+    AM->>NM: Launch Map/Reduce Task Containers

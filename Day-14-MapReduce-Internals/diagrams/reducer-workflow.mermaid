@@ -1,0 +1,13 @@
+graph TD
+    Input["Sorted & Grouped Input<br>(e.g., 'hadoop', [1, 1, 1])"] -->|1. Setup Called| ReducerSetup["setup(context)"]
+    ReducerSetup -->|2. Loop each unique key| ReducerLoop["reduce(key, Iterable<val>, context)"]
+    
+    subgraph Aggregate & Write
+        ReducerLoop -->|3. Sum values| SumVal["sum = 3"]
+        SumVal -->|4. Emit K3, V3| contextWrite["context.write('hadoop', 3)"]
+    end
+    
+    contextWrite -->|5. Output Format serialization| OutputFormat["TextOutputFormat<br>(Gzip Codec compression)"]
+    OutputFormat -->|6. HDFS block write| HDFS["HDFS file<br>/output/part-r-00000.gz"]
+    
+    ReducerLoop -->|7. Post-execution cleanup| ReducerCleanup["cleanup(context)"]

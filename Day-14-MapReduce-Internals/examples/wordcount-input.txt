@@ -1,0 +1,10 @@
+Hadoop is an open-source framework that allows to store and process big data in a distributed environment.
+MapReduce is the core engine of distributed batch processing in the Hadoop ecosystem.
+MapReduce processes data in parallel by splitting tasks into Map and Reduce jobs.
+The shuffle and sort phases are critical in MapReduce internals.
+They transfer intermediate map outputs to mappers' corresponding reducers.
+In this lab, we build WordCount from scratch and inspect the MapReduce pipeline.
+We will see how mappers parse text, how combiners optimize network IO, and how partitioners route key-value pairs.
+Understanding MapReduce internals is vital for big data engineering and performance tuning.
+MapReduce is powerful, MapReduce is scale-out, MapReduce is fault-tolerant.
+🚀 Let the Hadoop MapReduce Internals exploration begin!

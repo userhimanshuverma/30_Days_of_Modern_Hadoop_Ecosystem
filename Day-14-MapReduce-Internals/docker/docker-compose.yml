@@ -1,0 +1,178 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. HDFS NAMENODE
+  # =========================================================================
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: namenode-day14
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # Web UI
+      - "9000:9000"  # HDFS RPC
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - namenode_data:/hadoop/dfs/name
+      - ../:/workspace
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        if [ ! -d "/hadoop/dfs/name/current" ]; then
+          echo "Formatting NameNode metadata directory..."
+          /opt/hadoop/bin/hdfs namenode -format -force
+        fi
+        /opt/hadoop/bin/hdfs namenode
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day14-network
+
+  # =========================================================================
+  # 2. HDFS DATANODE
+  # =========================================================================
+  datanode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datanode-day14
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - datanode_data:/hadoop/dfs/data
+      - ../:/workspace
+    command: ["/opt/hadoop/bin/hdfs", "datanode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day14-network
+
+  # =========================================================================
+  # 3. YARN RESOURCEMANAGER
+  # =========================================================================
+  resourcemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resourcemanager-day14
+    restart: unless-stopped
+    ports:
+      - "8088:8088"  # ResourceManager Web UI
+      - "8032:8032"  # Application Manager RPC
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../:/workspace
+    command: ["/opt/hadoop/bin/yarn", "resourcemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day14-network
+
+  # =========================================================================
+  # 4. YARN NODEMANAGER
+  # =========================================================================
+  nodemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodemanager-day14
+    restart: unless-stopped
+    ports:
+      - "8042:8042"  # NodeManager Web UI
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../:/workspace
+    command: ["/opt/hadoop/bin/yarn", "nodemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day14-network
+
+  # =========================================================================
+  # 5. MAPREDUCE JOB HISTORY SERVER
+  # =========================================================================
+  historyserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: historyserver-day14
+    restart: unless-stopped
+    ports:
+      - "19888:19888"  # Web UI
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - historyserver_data:/hadoop/yarn/timeline
+      - ../:/workspace
+    command: ["/opt/hadoop/bin/mapred", "historyserver"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:19888/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day14-network
+
+networks:
+  day14-network:
+    name: day14-network
+    driver: bridge
+
+volumes:
+  namenode_data:
+  datanode_data:
+  historyserver_data:

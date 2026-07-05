@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Framework Configuration -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+        <description>The runtime framework for executing MapReduce jobs. Set to yarn to run on YARN resource manager.</description>
+    </property>
+
+    <!-- Memory Configurations (Mappers & Reducers) -->
+    <property>
+        <name>mapreduce.map.memory.mb</name>
+        <value>2048</value>
+        <description>The resource limit (in MB) for each Mapper container.</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.memory.mb</name>
+        <value>4096</value>
+        <description>The resource limit (in MB) for each Reducer container.</description>
+    </property>
+    <property>
+        <name>mapreduce.map.java.opts</name>
+        <value>-Xmx1638m</value>
+        <description>JVM heap options for Mappers (typically 80% of map.memory.mb).</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.java.opts</name>
+        <value>-Xmx3276m</value>
+        <description>JVM heap options for Reducers (typically 80% of reduce.memory.mb).</description>
+    </property>
+
+    <!-- MapReduce Map-side Spilling & Buffer Configurations -->
+    <property>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>256</value>
+        <description>The size of the serialization buffer (in MB) used while sorting mapper outputs.</description>
+    </property>
+    <property>
+        <name>mapreduce.task.io.sort.factor</name>
+        <value>100</value>
+        <description>The limit of stream connections used during merge sort passes (default 10, tuned to 100 for production).</description>
+    </property>
+    <property>
+        <name>mapreduce.map.sort.spill.percent</name>
+        <value>0.80</value>
+        <description>The threshold limit of mapreduce.task.io.sort.mb at which spilling begins.</description>
+    </property>
+
+    <!-- Reducer Shuffle Settings -->
+    <property>
+        <name>mapreduce.reduce.shuffle.parallelcopies</name>
+        <value>10</value>
+        <description>Number of parallel fetchers spawned by reducers during shuffle stage.</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.shuffle.input.buffer.percent</name>
+        <value>0.70</value>
+        <description>Percentage of reducer heap allocated for caching fetched map outputs during shuffle.</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.shuffle.merge.percent</name>
+        <value>0.66</value>
+        <description>Usage threshold of the map output buffer at which an active merge sort to disk starts.</description>
+    </property>
+
+    <!-- Speculative Execution -->
+    <property>
+        <name>mapreduce.map.speculative</name>
+        <value>true</value>
+        <description>Run speculative copies of mappers that execute slower than averages.</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.speculative</name>
+        <value>true</value>
+        <description>Run speculative copies of reducers that execute slower than averages.</description>
+    </property>
+
+    <!-- History Server Web Address -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>historyserver:10020</value>
+        <description>The IPC server address of the Job History Server (JHS).</description>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>historyserver:19888</value>
+        <description>The Web UI address of the Job History Server (JHS).</description>
+    </property>
+    
+    <!-- Classpath settings for YARN application submissions -->
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
+    </property>
+</configuration>

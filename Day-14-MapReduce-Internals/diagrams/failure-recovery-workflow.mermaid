@@ -1,0 +1,16 @@
+graph TD
+    subgraph Job Recovery Logic
+        TaskStart[Task Starts Execution] --> Running[Task Running on NodeManager]
+        Running -->|Normal Completion| Done[Task Succeeds]
+        
+        Running -->|Failure: JVM Crash / OOM / Exception| FailReport[NodeManager reports failure to MRAppMaster]
+        FailReport --> RetryCheck{"Retry count < 4?"}
+        RetryCheck -->|Yes| Reschedule[MRAppMaster requests new Container from RM]
+        Reschedule --> TaskStart
+        RetryCheck -->|No| JobFail[Job fails with Error]
+
+        Running -->|Slow Task: Straggler detected| SpeculativeExec[MRAppMaster starts duplicate task on another Node]
+        SpeculativeExec --> Race{"Which task finishes first?"}
+        Race -->|Original Task wins| CommitOrig[Original task commits output, speculative killed]
+        Race -->|Speculative Task wins| CommitSpec[Speculative task commits output, original killed]
+    end

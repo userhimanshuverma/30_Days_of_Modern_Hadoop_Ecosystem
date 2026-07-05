@@ -1,0 +1,46 @@
+flowchart TD
+    subgraph Input Phase
+        Input1["Line 1: hadoop is scaleout"]
+        Input2["Line 2: hadoop is faulttolerant"]
+    end
+
+    subgraph Map Phase
+        Map1["Mapper 1 Output:<br>(hadoop, 1)<br>(is, 1)<br>(scaleout, 1)"]
+        Map2["Mapper 2 Output:<br>(hadoop, 1)<br>(is, 1)<br>(faulttolerant, 1)"]
+        Input1 --> Map1
+        Input2 --> Map2
+    end
+
+    subgraph Combiner Phase
+        Comb1["Combiner 1 Output:<br>(hadoop, 1)<br>(is, 1)<br>(scaleout, 1)"]
+        Comb2["Combiner 2 Output:<br>(hadoop, 1)<br>(is, 1)<br>(faulttolerant, 1)"]
+        Map1 --> Comb1
+        Map2 --> Comb2
+    end
+
+    subgraph Partitioner Phase
+        Part1["Partitioner (Alphabet):<br>a-m -> Reducer 0<br>n-z -> Reducer 1"]
+        Comb1 --> Part1
+        Comb2 --> Part1
+    end
+
+    subgraph Shuffle & Sort Phase
+        R0Group["Reducer 0 Inputs:<br>(faulttolerant, [1])<br>(hadoop, [1, 1])<br>(is, [1, 1])"]
+        R1Group["Reducer 1 Inputs:<br>(scaleout, [1])"]
+        Part1 -->|a-m| R0Group
+        Part1 -->|n-z| R1Group
+    end
+
+    subgraph Reduce Phase
+        Red0["Reducer 0 Output:<br>faulttolerant 1<br>hadoop 2<br>is 2"]
+        Red1["Reducer 1 Output:<br>scaleout 1"]
+        R0Group --> Red0
+        R1Group --> Red1
+    end
+
+    subgraph Output Phase
+        Out0["HDFS File: part-r-00000.gz"]
+        Out1["HDFS File: part-r-00001.gz"]
+        Red0 --> Out0
+        Red1 --> Out1
+    end

@@ -1,0 +1,41 @@
+graph TD
+    subgraph Client Node
+        Client[MapReduce Client]
+    end
+
+    subgraph YARN Cluster
+        RM[Resource Manager]
+        NM1[Node Manager 1]
+        NM2[Node Manager 2]
+        AM[MRAppMaster Container]
+        MapTask1[Map Task Container 1]
+        MapTask2[Map Task Container 2]
+        ReduceTask[Reduce Task Container]
+    end
+
+    subgraph HDFS Cluster
+        NN[NameNode]
+        DN1[DataNode 1]
+        DN2[DataNode 2]
+    end
+
+    subgraph History Service
+        JHS[Job History Server]
+    end
+
+    Client -->|1. Submit Job| RM
+    Client -->|Get Block Locations| NN
+    RM -->|2. Allocate AM Container| NM1
+    NM1 -->|3. Launch| AM
+    AM -->|4. Request Task Containers| RM
+    RM -->|5. Allocate Containers| NM1
+    RM -->|5. Allocate Containers| NM2
+    NM1 -->|6. Run Map Task| MapTask1
+    NM2 -->|6. Run Map Task| MapTask2
+    MapTask1 -->|Read Split| DN1
+    MapTask2 -->|Read Split| DN2
+    MapTask1 -->|Shuffle Intermediate Key-Values| ReduceTask
+    MapTask2 -->|Shuffle Intermediate Key-Values| ReduceTask
+    NM2 -->|7. Run Reduce Task| ReduceTask
+    ReduceTask -->|Write Output Block| DN1
+    AM -->|8. Archive Log / Stats| JHS
