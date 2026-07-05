@@ -329,7 +329,7 @@ graph TD
             Fetcher2 --> MemBuffer
             
             MemBuffer -->|In-memory Merge Sort| DiskSpills["Local Disk Spills"]
-            DiskSpills -->|External Merge Sort<br>(io.sort.factor)| FinalMerger["Grouping & Final Merger"]
+            DiskSpills -->|"External Merge Sort<br>(io.sort.factor)"| FinalMerger["Grouping & Final Merger"]
         end
 
         subgraph Reducer Input Execution
