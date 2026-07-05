@@ -1,20 +1,20 @@
 graph TD
-    subgraph Development/Gateway Node
+    subgraph "Development/Gateway Node"
         Client[Job Driver CLI]
     end
 
-    subgraph Node A: Master Service Host
+    subgraph "Node A: Master Service Host"
         NN[NameNode Daemon]
         RM[ResourceManager Daemon]
         JHS[JobHistoryServer Daemon]
     end
 
-    subgraph Node B: Worker Node 1
+    subgraph "Node B: Worker Node 1"
         DN1[DataNode Daemon 1]
         NM1[NodeManager Daemon 1]
     end
 
-    subgraph Node C: Worker Node 2
+    subgraph "Node C: Worker Node 2"
         DN2[DataNode Daemon 2]
         NM2[NodeManager Daemon 2]
     end

@@ -1,10 +1,10 @@
 graph TD
-    subgraph Map Nodes
+    subgraph "Map Nodes"
         M1["Mapper 1 Output File<br>(Partition 0, 1)"]
         M2["Mapper 2 Output File<br>(Partition 0, 1)"]
     end
 
-    subgraph Reducer Node (Shuffle, Merge & Sort)
+    subgraph "Reducer Node (Shuffle, Merge & Sort)"
         subgraph Copy Phase
             Fetcher1["Fetcher Thread 1<br>(HTTP GET partition 0)"]
             Fetcher2["Fetcher Thread 2<br>(HTTP GET partition 0)"]

@@ -1,12 +1,12 @@
 graph TD
-    subgraph Host OS
+    subgraph "Host OS"
         HostWorkspace["Host Workspace Directory<br>(d:/30_Days_of_Modern_Hadoop_Ecosystem/Day-14-MapReduce-Internals)"]
         port9870["Port 9870 (NameNode Web UI)"]
         port8088["Port 8088 (ResourceManager Web UI)"]
         port19888["Port 19888 (JobHistoryServer Web UI)"]
     end
 
-    subgraph Docker Network: day14-network
+    subgraph "Docker Network: day14-network"
         NN["namenode-day14<br>(HDFS Master)"]
         DN["datanode-day14<br>(HDFS Block Storage)"]
         RM["resourcemanager-day14<br>(YARN Scheduler)"]

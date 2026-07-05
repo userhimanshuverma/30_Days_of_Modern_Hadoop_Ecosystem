@@ -115,7 +115,7 @@ The table below contrasts traditional central database processing with the MapRe
 
 ```mermaid
 graph TD
-    subgraph Traditional Processing (Data to Compute)
+    subgraph "Traditional Processing (Data to Compute)"
         DataStorage[Central Database Server]
         Network[Bottleneck Network Link]
         ComputeServer[Single Client / App Server]
@@ -123,7 +123,7 @@ graph TD
         Network -->|Slow / Congested| ComputeServer
     end
 
-    subgraph MapReduce Processing (Compute to Data)
+    subgraph "MapReduce Processing (Compute to Data)"
         subgraph Node 1
             D1[HDFS Block 1] -->|Local I/O| M1[Mapper Task 1]
         end
@@ -205,7 +205,9 @@ The `Combiner` (also known as the "semi-reducer") is an optional map-side optimi
 ### 3.8 Partitioner
 The `Partitioner` determines which Reducer will receive a given intermediate key-value pair.
 - **Formula**: By default, Hadoop uses `HashPartitioner`, which routes keys based on their hash code:
-$$\text{Partition Index} = (\text{key.hashCode()} \ \& \ \text{0x7FFFFFFF}) \pmod{\text{numReducers}}$$
+```text
+Partition Index = (key.hashCode() & 0x7FFFFFFF) % numReducers
+```
 - If a cluster runs with 4 reducers, the Partitioner assigns each key a partition index from `0` to `3`. All records sharing the same key are guaranteed to go to the same reducer.
 
 ### 3.9 Shuffle
@@ -309,12 +311,12 @@ This phase bridges the Mapper and Reducer tasks.
 
 ```mermaid
 graph TD
-    subgraph Map Nodes
+    subgraph "Map Nodes"
         M1["Mapper 1 Output File<br>(Partition 0, 1)"]
         M2["Mapper 2 Output File<br>(Partition 0, 1)"]
     end
 
-    subgraph Reducer Node (Shuffle, Merge & Sort)
+    subgraph "Reducer Node (Shuffle, Merge & Sort)"
         subgraph Copy Phase
             Fetcher1["Fetcher Thread 1<br>(HTTP GET partition 0)"]
             Fetcher2["Fetcher Thread 2<br>(HTTP GET partition 0)"]
@@ -637,14 +639,14 @@ The local development cluster uses a multi-container Docker setup that mirrors p
 
 ```mermaid
 graph TD
-    subgraph Host OS
+    subgraph "Host OS"
         HostWorkspace["Host Workspace Directory<br>(d:/30_Days_of_Modern_Hadoop_Ecosystem/Day-14-MapReduce-Internals)"]
         port9870["Port 9870 (NameNode Web UI)"]
         port8088["Port 8088 (ResourceManager Web UI)"]
         port19888["Port 19888 (JobHistoryServer Web UI)"]
     end
 
-    subgraph Docker Network: day14-network
+    subgraph "Docker Network: day14-network"
         NN["namenode-day14<br>(HDFS Master)"]
         DN["datanode-day14<br>(HDFS Block Storage)"]
         RM["resourcemanager-day14<br>(YARN Scheduler)"]
@@ -679,22 +681,22 @@ MapReduce jobs can run in two primary modes: Single-Node (Pseudo-Distributed) an
 
 ```mermaid
 graph TD
-    subgraph Development/Gateway Node
+    subgraph "Development/Gateway Node"
         Client[Job Driver CLI]
     end
 
-    subgraph Node A: Master Service Host
+    subgraph "Node A: Master Service Host"
         NN[NameNode Daemon]
         RM[ResourceManager Daemon]
         JHS[JobHistoryServer Daemon]
     end
 
-    subgraph Node B: Worker Node 1
+    subgraph "Node B: Worker Node 1"
         DN1[DataNode Daemon 1]
         NM1[NodeManager Daemon 1]
     end
 
-    subgraph Node C: Worker Node 2
+    subgraph "Node C: Worker Node 2"
         DN2[DataNode Daemon 2]
         NM2[NodeManager Daemon 2]
     end
@@ -792,7 +794,9 @@ graph TD
 
 #### 3. How does the default Partitioner work?
 **Answer**: By default, Hadoop uses the `HashPartitioner`. It computes the hash code of the intermediate key and assigns it to a Reducer using:
-$$\text{Partition Index} = (\text{key.hashCode()} \ \& \ \text{0x7FFFFFFF}) \pmod{\text{numReducers}}$$
+```text
+Partition Index = (key.hashCode() & 0x7FFFFFFF) % numReducers
+```
 
 #### 4. What is the role of a RecordReader?
 **Answer**: The `RecordReader` reads raw data from an `InputSplit` and converts it into key-value pairs (e.g., line numbers and line text) that are passed to the Mapper.
