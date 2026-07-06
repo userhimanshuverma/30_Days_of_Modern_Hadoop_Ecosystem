@@ -1,9 +1,9 @@
 graph TD
-    subgraph Client Node
+    subgraph "Client Node"
         Client[Tez Client API] -->|1. Submit DAG| AM[Tez ApplicationMaster]
     end
 
-    subgraph YARN Cluster
+    subgraph "YARN Cluster"
         AM -->|2. Request Task Containers| RM[YARN ResourceManager]
         RM -->|3. Allocate Resources| AM
         
@@ -19,7 +19,7 @@ graph TD
         end
     end
 
-    subgraph DFS
+    subgraph "DFS"
         Task1 -->|Read Input Splits| HDFS[HDFS Storage]
         Task2 -->|Write Final Output| HDFS
     end

@@ -50,7 +50,7 @@ By using DAGs, Tez can execute physical tasks concurrently, schedule downstream 
 
 ```mermaid
 graph TD
-    subgraph Tez Architecture
+    subgraph "Tez Architecture"
         Client[Tez Client API] -->|Submit DAG| RM[YARN ResourceManager]
         RM -->|Allocate AM| AM[Tez ApplicationMaster]
         AM -->|Register & Heartbeat| RM
@@ -95,7 +95,7 @@ This constant circular write-and-read behavior introduces massive, unnecessary D
 
 ```mermaid
 graph TD
-    subgraph MapReduce Pipeline (Disk Heavy)
+    subgraph "MapReduce Pipeline (Disk Heavy)"
         Input1([HDFS Input]) --> Map1[Map Job 1]
         Map1 -->|Local Disk Write| Shuffle1[Shuffle 1]
         Shuffle1 --> Reduce1[Reduce Job 1]
@@ -133,7 +133,7 @@ The following comparison table highlights the architectural differences between 
 
 ```mermaid
 graph TD
-    subgraph Tez DAG Pipeline (In-Memory Stream)
+    subgraph "Tez DAG Pipeline (In-Memory Stream)"
         Input2([HDFS Input]) --> VertexA[Vertex A: Map Tasks]
         VertexA -->|In-Memory Push / Stream| EdgeAB[Scatter-Gather Edge]
         EdgeAB --> VertexB[Vertex B: Intermediate Reduce Tasks]
@@ -308,14 +308,14 @@ Edges connect vertices and define how data is transferred. An edge requires:
 
 ```mermaid
 graph TD
-    subgraph Broadcast Edge
-        SrcB[Source Task] -->|Broadcast Output| DestB1[Task 1]
-        SrcB -->|Broadcast Output| DestB2[Task 2]
-        SrcB -->|Broadcast Output| DestB3[Task 3]
+    subgraph "Broadcast Edge"
+        B_Src[Upstream Master Task] -->|Broadcast Copy| B_Dest1[Downstream Worker Task 1]
+        B_Src -->|Broadcast Copy| B_Dest2[Downstream Worker Task 2]
+        B_Src -->|Broadcast Copy| B_Dest3[Downstream Worker Task 3]
     end
     
-    subgraph One-to-One Edge
-        SrcO1[Source Task 1] -->|Direct Pipe| DestO1[Destination Task 1]
+    subgraph "One-to-One Edge"
+        O_Src1[Upstream Task 1] -->|Direct Pipe| O_Dest1[Destination Task 1]
         SrcO2[Source Task 2] -->|Direct Pipe| DestO2[Destination Task 2]
     end
 ```
@@ -629,7 +629,7 @@ For automated local deployments, you can deploy a full cluster topology using Do
 
 ```mermaid
 graph TD
-    subgraph Docker Network
+    subgraph "Docker Network"
         NN[NameNode] <--> DN[DataNode]
         RM[ResourceManager] <--> NM[NodeManager]
         HS2[HiveServer2 Gateway] -->|Submit DAG| RM
