@@ -1,0 +1,24 @@
+graph TD
+    subgraph "Bridge Network: day15-network"
+        direction TB
+        
+        NN[namenode-day15]
+        DN[datanode-day15]
+        RM[resourcemanager-day15]
+        NM[nodemanager-day15]
+        HS2[hiveserver2-day15]
+        
+        NN <-->|RPC 9000| DN
+        RM <-->|RPC 8032| NM
+        HS2 -->|Thrift 10000| Client[External JDBC Beeline Client]
+        HS2 -->|Read/Write HDFS| NN
+        HS2 -->|Submit DAGs| RM
+    end
+
+    subgraph "Volumes & Config Mounts"
+        Configs["../configs/*"] -->|Volume Mount| NN
+        Configs -->|Volume Mount| DN
+        Configs -->|Volume Mount| RM
+        Configs -->|Volume Mount| NM
+        Configs -->|Volume Mount| HS2
+    end

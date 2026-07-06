@@ -1,0 +1,22 @@
+graph TD
+    subgraph "Classic MapReduce Execution (Chain of Jobs)"
+        MR_In([HDFS Input]) --> MR_Map1[Mapper Job 1]
+        MR_Map1 -->|Disk Write| MR_Shuffle1[Shuffle & Sort]
+        MR_Shuffle1 --> MR_Red1[Reducer Job 1]
+        MR_Red1 -->|Disk Write HDFS| MR_Mid([HDFS Temp File])
+        MR_Mid --> MR_Map2[Mapper Job 2]
+        MR_Map2 -->|Disk Write| MR_Shuffle2[Shuffle & Sort]
+        MR_Shuffle2 --> MR_Red2[Reducer Job 2]
+        MR_Red2 -->|Disk Write HDFS| MR_Out([HDFS Output])
+    end
+
+    subgraph "Apache Tez DAG Execution (Pipelined Single Job)"
+        Tez_In([HDFS Input]) --> Tez_Map[Vertex A: Map Tasks]
+        Tez_Map -->|In-Memory Pipe / Stream| Tez_Shuffle[Scatter-Gather Shuffle]
+        Tez_Shuffle --> Tez_Red1[Vertex B: Reduce Tasks]
+        Tez_Red1 -->|Direct Pipe - No Disk HDFS| Tez_Red2[Vertex C: Reduce/Map Tasks]
+        Tez_Red2 -->|Disk Write HDFS| Tez_Out([HDFS Output])
+    end
+
+    style MR_Mid fill:#e74c3c,stroke:#fff,color:#fff
+    style Tez_Red1 fill:#2ecc71,stroke:#fff,color:#fff

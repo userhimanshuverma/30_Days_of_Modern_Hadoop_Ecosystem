@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Path to the Tez tarball uploaded to HDFS -->
+    <property>
+        <name>tez.lib.uris</name>
+        <value>hdfs://namenode:9000/apps/tez/tez-0.10.2.tar.gz</value>
+    </property>
+
+    <!-- Allow Tez to use cluster-provided Hadoop libraries to reduce jar download overhead -->
+    <property>
+        <name>tez.use.cluster.hadoop-libs</name>
+        <value>true</value>
+    </property>
+
+    <!-- Tez Application Master Memory Configuration -->
+    <property>
+        <name>tez.am.resource.memory.mb</name>
+        <value>1024</value>
+    </property>
+    <property>
+        <name>tez.am.launch.cmd-opts</name>
+        <value>-server -Xmx800m -Djava.net.preferIPv4Stack=true -XX:+UseNUMA -XX:+UseParallelGC</value>
+    </property>
+
+    <!-- Tez Task Container Memory Configuration -->
+    <property>
+        <name>tez.task.resource.memory.mb</name>
+        <value>1024</value>
+    </property>
+    <property>
+        <name>tez.container.max.java.opts</name>
+        <value>-server -Xmx800m -Djava.net.preferIPv4Stack=true -XX:+UseNUMA -XX:+UseParallelGC</value>
+    </property>
+
+    <!-- Enable Container Reuse to skip JVM startup latency in Tez DAG vertices -->
+    <property>
+        <name>tez.am.container.reuse.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>tez.am.container.reuse.max-holding-time-ms</name>
+        <value>10000</value>
+    </property>
+    <property>
+        <name>tez.am.container.reuse.locating.local-only</name>
+        <value>false</value>
+    </property>
+
+    <!-- Shuffle / Sort buffer sizing -->
+    <property>
+        <name>tez.runtime.io.sort.mb</name>
+        <value>256</value>
+    </property>
+    <property>
+        <name>tez.runtime.unordered.output.buffer.size-mb</name>
+        <value>50</value>
+    </property>
+
+    <!-- History Logging and Timeline Server Integration -->
+    <property>
+        <name>tez.history.logging.class</name>
+        <value>org.apache.tez.dag.history.logging.impl.SimpleHistoryLoggingService</value>
+    </property>
+</configuration>

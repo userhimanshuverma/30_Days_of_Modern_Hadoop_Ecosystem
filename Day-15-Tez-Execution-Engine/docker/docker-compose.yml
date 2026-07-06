@@ -1,0 +1,191 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. HDFS NAMENODE
+  # =========================================================================
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: namenode-day15
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # Web UI
+      - "9000:9000"  # RPC
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../configs/tez-site.xml:/opt/tez/conf/tez-site.xml
+      - ../configs/tez-site.xml:/opt/hadoop/etc/hadoop/tez-site.xml
+      - namenode_data_day15:/hadoop/dfs/name
+      - ../:/workspace
+    command: ["namenode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day15-network
+
+  # =========================================================================
+  # 2. HDFS DATANODE
+  # =========================================================================
+  datanode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datanode-day15
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../configs/tez-site.xml:/opt/tez/conf/tez-site.xml
+      - ../configs/tez-site.xml:/opt/hadoop/etc/hadoop/tez-site.xml
+      - datanode_data_day15:/hadoop/dfs/data
+      - ../:/workspace
+    command: ["datanode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day15-network
+
+  # =========================================================================
+  # 3. YARN RESOURCEMANAGER
+  # =========================================================================
+  resourcemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resourcemanager-day15
+    restart: unless-stopped
+    ports:
+      - "8088:8088"  # Web UI
+      - "8032:8032"  # ResourceManager Scheduler RPC
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../configs/tez-site.xml:/opt/tez/conf/tez-site.xml
+      - ../configs/tez-site.xml:/opt/hadoop/etc/hadoop/tez-site.xml
+      - ../:/workspace
+    command: ["resourcemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day15-network
+
+  # =========================================================================
+  # 4. YARN NODEMANAGER
+  # =========================================================================
+  nodemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodemanager-day15
+    restart: unless-stopped
+    ports:
+      - "8042:8042"  # NodeManager Web UI
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../configs/tez-site.xml:/opt/tez/conf/tez-site.xml
+      - ../configs/tez-site.xml:/opt/hadoop/etc/hadoop/tez-site.xml
+      - ../:/workspace
+    command: ["nodemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day15-network
+
+  # =========================================================================
+  # 5. HIVE & HIVESERVER2 (GATEWAY CONTEXT RUNNING HIVE-ON-TEZ)
+  # =========================================================================
+  hiveserver2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hiveserver2-day15
+    restart: unless-stopped
+    ports:
+      - "10000:10000"  # Hive Thrift port
+      - "10002:10002"  # Hive Server2 Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_healthy
+      nodemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      - TEZ_CONF_DIR=/opt/tez/conf
+    volumes:
+      - ../configs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ../configs/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ../configs/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ../configs/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ../configs/tez-site.xml:/opt/tez/conf/tez-site.xml
+      - ../configs/tez-site.xml:/opt/hadoop/etc/hadoop/tez-site.xml
+      - ../configs/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - metastore_data_day15:/var/lib/hive
+      - ../:/workspace
+    command: ["hiveserver2"]
+    healthcheck:
+      # Use netcat check to see if thrift service is accepting connections
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/10000"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - day15-network
+
+networks:
+  day15-network:
+    name: day15-network
+    driver: bridge
+
+volumes:
+  namenode_data_day15:
+  datanode_data_day15:
+  metastore_data_day15:

@@ -1,0 +1,18 @@
+sequenceDiagram
+    autonumber
+    actor User as "Client / CLI (Beeline)"
+    participant HS2 as "HiveServer2"
+    participant Compiler as "Compiler & Catalyst Optimizer"
+    participant Client as "Tez Client API"
+    participant AM as "Tez ApplicationMaster"
+    participant Tasks as "YARN Task Containers"
+
+    User->>HS2: Submit SQL Query
+    HS2->>Compiler: Parse & Optimize SQL
+    Compiler->>Compiler: Build logical plan
+    Compiler->>Client: Generate Physical Plan (Tez DAG)
+    Client->>AM: Submit DAG for Execution
+    AM->>Tasks: Schedule & Launch Vertex Tasks
+    Tasks->>Tasks: Stream Intermediate Data
+    Tasks->>HS2: Return query result set
+    HS2->>User: Display table rows

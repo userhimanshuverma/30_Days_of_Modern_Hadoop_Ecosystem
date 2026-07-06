@@ -1,0 +1,13 @@
+graph LR
+    Input([HDFS Input Data]) -->|MRInput| V1[Vertex 1: Tokenizer Map]
+    
+    subgraph "Tez DAG Engine"
+        V1 -->|Scatter-Gather Edge - Partitioner & Sort| V2[Vertex 2: Aggregation Reduce]
+        V2 -->|One-to-One Edge - In-Memory Pipeline| V3[Vertex 3: Formatting & Filter Map]
+    end
+
+    V3 -->|MROutput| Output([HDFS Output Data])
+    
+    style V1 fill:#2c3e50,stroke:#fff,stroke-width:2px,color:#fff
+    style V2 fill:#3498db,stroke:#fff,stroke-width:2px,color:#fff
+    style V3 fill:#27ae60,stroke:#fff,stroke-width:2px,color:#fff

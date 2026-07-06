@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    participant Client as "Tez Client API"
+    participant RM as "YARN Resource Manager"
+    participant NM as "YARN Node Manager"
+    participant AM as "Tez ApplicationMaster"
+    participant Containers as "Task Containers"
+
+    Client->>RM: 1. Request Application Submission
+    RM-->>Client: 2. Return Application ID & Resource Limits
+    Client->>RM: 3. Submit Application (specifies AM settings & jars)
+    RM->>NM: 4. Launch Tez AM Container
+    NM->>AM: 5. Start Tez AM JVM
+    AM->>RM: 6. Register AM (starts heartbeat & query status)
+    AM->>RM: 7. Request allocations for Vertex Tasks
+    RM->>AM: 8. Allocate Container resources
+    AM->>NM: 9. Launch Task Containers
+    NM->>Containers: 10. Run Task JVMs
+    Containers-->>AM: 11. Report Status/Progress (Heartbeats)
+    AM->>RM: 12. Unregister AM when DAG completes

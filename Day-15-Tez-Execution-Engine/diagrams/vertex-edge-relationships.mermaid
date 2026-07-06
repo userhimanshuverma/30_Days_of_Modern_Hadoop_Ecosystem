@@ -1,0 +1,18 @@
+graph TD
+    subgraph "Scatter-Gather Edge (Shuffle)"
+        SG_Src1[Upstream Task 1] -->|Partition 1| SG_Dest1[Downstream Task 1]
+        SG_Src1 -->|Partition 2| SG_Dest2[Downstream Task 2]
+        SG_Src2[Upstream Task 2] -->|Partition 1| SG_Dest1
+        SG_Src2 -->|Partition 2| SG_Dest2
+    end
+
+    subgraph "Broadcast Edge (MapJoin)"
+        B_Src[Upstream Master Task] -->|Broadcast Copy| B_Dest1[Downstream Worker Task 1]
+        B_Src -->|Broadcast Copy| B_Dest2[Downstream Worker Task 2]
+        B_Src -->|Broadcast Copy| B_Dest3[Downstream Worker Task 3]
+    end
+
+    subgraph "One-to-One Edge (Pipeline)"
+        O_Src1[Upstream Task 1] -->|Direct Pipe| O_Dest1[Downstream Task 1]
+        O_Src2[Upstream Task 2] -->|Direct Pipe| O_Dest2[Downstream Task 2]
+    end

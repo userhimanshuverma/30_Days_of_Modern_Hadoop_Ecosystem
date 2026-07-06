@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Metastore database connection (Derby embedded for local cluster environment) -->
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:derby:;databaseName=/var/lib/hive/metastore_db;create=true</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>APP</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>mine</value>
+    </property>
+
+    <!-- Metastore warehouse folder inside HDFS -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+    </property>
+
+    <!-- CRITICAL: Set Hive execution engine to Tez -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+    </property>
+
+    <!-- Memory specifications for Hive Tez task containers -->
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>1024</value>
+    </property>
+    <property>
+        <name>hive.tez.java.opts</name>
+        <value>-server -Xmx800m -Djava.net.preferIPv4Stack=true -XX:+UseNUMA -XX:+UseParallelGC</value>
+    </property>
+
+    <!-- Automatically inject Tez dependencies into execution classpath -->
+    <property>
+        <name>hive.classpath.use.jdk.classpath</name>
+        <value>true</value>
+    </property>
+
+    <!-- Hive Server Configuration -->
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+    </property>
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>0.0.0.0</value>
+    </property>
+
+    <!-- Enable ACID transactional features (Hive 3 default) -->
+    <property>
+        <name>hive.support.concurrency</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.txn.manager</name>
+        <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+    </property>
+    <property>
+        <name>hive.compactor.initiator.on</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.compactor.worker.threads</name>
+        <value>1</value>
+    </property>
+
+    <!-- CLI Display settings -->
+    <property>
+        <name>hive.cli.print.header</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.cli.print.current.db</name>
+        <value>true</value>
+    </property>
+</configuration>

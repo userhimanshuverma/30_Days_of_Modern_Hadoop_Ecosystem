@@ -1,0 +1,22 @@
+graph TD
+    Start([Task Ready to Schedule]) --> LocalityCheck{Check Data Locality}
+    LocalityCheck -->|Local Node Available| RequestLocal[Request Container on Target Host]
+    LocalityCheck -->|Rack Local / Any| RequestAny[Request Container on Rack/Cluster]
+    
+    RequestLocal --> PoolCheck{Is there an idle container in reuse pool?}
+    RequestAny --> PoolCheck
+    
+    PoolCheck -->|Yes| ReuseContainer[Re-use Active Container JVM]
+    PoolCheck -->|No| AskYARN[Submit Resource Request to YARN ResourceManager]
+    
+    AskYARN -->|Allocate Container| InitializeContainer[Download Local Resources & Launch JVM]
+    InitializeContainer --> ExecuteTask[Execute Task Run Loop]
+    ReuseContainer -->|Skip JVM Startup| ExecuteTask
+    
+    ExecuteTask --> TaskComplete[Task Finished]
+    TaskComplete --> ReleaseCheck{More tasks in queue?}
+    ReleaseCheck -->|Yes| HoldContainer[Hold Container in Reuse Pool]
+    ReleaseCheck -->|No| ReleaseContainer[Release Container to YARN]
+    
+    HoldContainer --> Start
+    ReleaseContainer --> End([Done])

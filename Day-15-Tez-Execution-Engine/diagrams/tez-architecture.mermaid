@@ -1,0 +1,25 @@
+graph TD
+    subgraph Client Node
+        Client[Tez Client API] -->|1. Submit DAG| AM[Tez ApplicationMaster]
+    end
+
+    subgraph YARN Cluster
+        AM -->|2. Request Task Containers| RM[YARN ResourceManager]
+        RM -->|3. Allocate Resources| AM
+        
+        subgraph "NodeManager 1 (Worker)"
+            NM1[NodeManager 1] -->|Heartbeat| RM
+            AM -->|4. Launch Tasks| Task1[Tez Task Container 1]
+            Task1 -->|Stream Intermediate Data| Task2
+        end
+
+        subgraph "NodeManager 2 (Worker)"
+            NM2[NodeManager 2] -->|Heartbeat| RM
+            AM -->|4. Launch Tasks| Task2[Tez Task Container 2]
+        end
+    end
+
+    subgraph DFS
+        Task1 -->|Read Input Splits| HDFS[HDFS Storage]
+        Task2 -->|Write Final Output| HDFS
+    end

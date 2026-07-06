@@ -1,0 +1,27 @@
+graph TB
+    subgraph "Single-Node Local Cluster (Host Machine)"
+        subgraph "HDFS Layer"
+            NN[NameNode Service]
+            DN[DataNode Service]
+        end
+
+        subgraph "YARN Layer"
+            RM[ResourceManager Service]
+            NM[NodeManager Service]
+        end
+
+        subgraph "Hive & Tez Engine Layer"
+            HS2[HiveServer2 Gateway]
+            HMS[Derby Metastore]
+            TezAM[Tez ApplicationMaster JVM]
+            TezTasks[Tez Task JVMs]
+        end
+    end
+
+    NN <--> DN
+    RM <--> NM
+    HS2 <--> HMS
+    HS2 -->|DAG Submission| RM
+    TezAM -->|Resource Allocation| RM
+    TezTasks -->|Execute compute| NM
+    TezTasks -->|Read/Write Data| DN

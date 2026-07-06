@@ -1,0 +1,20 @@
+graph TD
+    TaskExec[Task Execution in Container] --> FailDetect{Failure Detected by AM?}
+    FailDetect -->|No| Success[Task Completed]
+    FailDetect -->|Yes| AnalyzeFailure{Type of Failure?}
+    
+    AnalyzeFailure -->|Container Crashed / Network| RetryTask[Re-run Task in New Container]
+    AnalyzeFailure -->|Data Read / Fetch Error| IdentifySource[Locate Upstream Task Source]
+    IdentifySource --> RescheduleUpstream[Re-run Upstream Task to Regenerate Intermediate Data]
+    
+    RetryTask --> LimitCheck{Retry Limit Reached?}
+    RescheduleUpstream --> LimitCheck
+    
+    LimitCheck -->|No| TaskExec
+    LimitCheck -->|Yes| FailVertex[Fail Active Vertex]
+    
+    FailVertex --> VertexLimit{Vertex Retry Limit Reached?}
+    VertexLimit -->|No| RerunVertex[Re-execute Vertex Tasks]
+    VertexLimit -->|Yes| FailDAG[Abort DAG Job & Notify Client]
+    
+    RerunVertex --> TaskExec
