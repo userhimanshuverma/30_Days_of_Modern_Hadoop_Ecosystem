@@ -230,7 +230,6 @@ sequenceDiagram
     Driver->>CM: Unregister Application
     Driver->>Driver: Stop SparkSession and shut down JVM
     CM->>Worker: Kill Executor containers
-    echo "Job finished."
 ```
 
 ### 4.1 Step-by-Step Execution Mechanics
