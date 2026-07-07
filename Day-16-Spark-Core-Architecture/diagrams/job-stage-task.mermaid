@@ -1,0 +1,28 @@
+graph TD
+    subgraph "Spark Application"
+        App[Spark Application Runtime]
+    end
+
+    App -->|Triggers Action 1| Job1[Job 0: count / saveAsTextFile]
+    App -->|Triggers Action 2| Job2[Job 1: collect]
+
+    subgraph "Job 0 Hierarchy"
+        Job1 -->|Split by Shuffle Boundaries| Stage1[Stage 0: Parent Stage]
+        Job1 -->|Split by Shuffle Boundaries| Stage2[Stage 1: Child Stage]
+        
+        subgraph "Stage 0 (Narrow Transformations)"
+            Stage1 -->|Partition 1| Task1[Task 1]
+            Stage1 -->|Partition 2| Task2[Task 2]
+            Stage1 -->|Partition N| Task3[Task N]
+        end
+        
+        subgraph "Stage 1 (Result / Wide Stage)"
+            Stage2 -->|Partition 1| Task4[Task N+1]
+            Stage2 -->|Partition 2| Task5[Task N+2]
+        end
+        
+        Task1 -->|Writes Shuffle Map Output| Disk[(Local Disk Shuffle Files)]
+        Task2 -->|Writes Shuffle Map Output| Disk
+        Disk -->|Reads Shuffle Fetch| Task4
+        Disk -->|Reads Shuffle Fetch| Task5
+    end

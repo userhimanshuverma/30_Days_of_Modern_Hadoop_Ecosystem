@@ -1,0 +1,26 @@
+graph TD
+    UserCode[User Program: RDD / DataFrame Code] -->|Evaluated Lazily| Lineage[Logical Plan: RDD Lineage Graph]
+    Lineage -->|Action Triggered| DAG[DAG: Directed Acyclic Graph of RDDs]
+    
+    subgraph "DAGScheduler (Logical Compilation)"
+        DAG --> StageBuilder[Build Stages]
+        StageBuilder -->|Narrow Transform| Pip[Pipeline Operations in Single Stage]
+        StageBuilder -->|Wide Transform| ShuffleBound[Create Stage Boundary at Shuffle]
+        Pip --> StageSet[List of Stages: Stage 0, Stage 1...]
+        ShuffleBound --> StageSet
+        StageSet --> TaskSetGen[Generate TaskSet for each stage]
+    end
+    
+    subgraph "TaskScheduler (Physical Execution)"
+        TaskSetGen --> Schedule[Locality-aware Task Scheduling]
+        Schedule --> ClusterManager{Cluster Manager Resources?}
+        ClusterManager -->|Available| ExecRun[Distribute Tasks to Executors]
+        ClusterManager -->|Starved| Delay[Wait for free Slots / Delay Schedule]
+    end
+    
+    subgraph "Worker Nodes"
+        ExecRun --> Run[Run Task Threads in JVM Executor]
+        Run -->|Task Success| Complete[Notify TaskScheduler]
+        Run -->|Task Failure| Retry[TaskScheduler Retries Task max 4x]
+        Retry -->|Max retries exceeded| Fail[Fail Stage / Job]
+    end

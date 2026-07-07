@@ -1,0 +1,42 @@
+graph TD
+    subgraph "Client Machine"
+        ClientApp[Spark Application] -->|Creates| SC[SparkContext / SparkSession]
+        SC -->|Spawns| Driver[Spark Driver]
+    end
+
+    subgraph "Cluster Manager (e.g., YARN, Standalone, K8s)"
+        CM[Cluster Manager / ResourceManager]
+    end
+
+    subgraph "Worker Node 1"
+        NM1[NodeManager / Worker Daemon 1]
+        subgraph "Executor 1 Container"
+            Co1[Executor JVM 1]
+            Co1 -->|Task Threads| Slot1[Slot 1]
+            Co1 -->|Task Threads| Slot2[Slot 2]
+            Co1 -->|BlockManager| BM1[(BlockManager / Cache)]
+        end
+    end
+
+    subgraph "Worker Node 2"
+        NM2[NodeManager / Worker Daemon 2]
+        subgraph "Executor 2 Container"
+            Co2[Executor JVM 2]
+            Co2 -->|Task Threads| Slot3[Slot 3]
+            Co2 -->|Task Threads| Slot4[Slot 4]
+            Co2 -->|BlockManager| BM2[(BlockManager / Cache)]
+        end
+    end
+
+    Driver -->|1. Register Application| CM
+    CM -->|2. Allocate Containers / Workers| NM1
+    CM -->|2. Allocate Containers / Workers| NM2
+    NM1 -->|3. Launch Executor| Co1
+    NM2 -->|3. Launch Executor| Co2
+    Co1 -->|4. Register Executor / Heartbeat| Driver
+    Co2 -->|4. Register Executor / Heartbeat| Driver
+    Driver -->|5. Send Tasks| Slot1
+    Driver -->|5. Send Tasks| Slot3
+    Slot1 -->|Task Status Updates| Driver
+    Slot3 -->|Task Status Updates| Driver
+    Co1 <-->|Shuffle Data Exchange| Co2

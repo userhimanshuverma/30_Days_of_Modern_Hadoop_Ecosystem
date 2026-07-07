@@ -1,0 +1,19 @@
+graph TD
+    subgraph "Executor JVM Heap"
+        direction TB
+        subgraph "Spark Managed Memory (spark.memory.fraction)"
+            direction LR
+            Storage[Storage Memory: Caches and Broadcasts<br/>spark.memory.storageFraction]
+            Execution[Execution Memory: Shuffles and Joins<br/>1 - spark.memory.storageFraction]
+            Storage <-->|Dynamic Borrowing| Execution
+        end
+        
+        User[User Memory: User-defined structures & metadata]
+        Reserved[Reserved Memory: Spark internal framework metadata <br/> 300MB Fixed]
+    end
+
+    subgraph "Off-Heap Memory"
+        direction TB
+        Overhead[Memory Overhead: spark.executor.memoryOverhead<br/>Native libs, thread stacks, JVM overhead]
+        OffHeapStorage[Off-Heap Storage and Execution:<br/>spark.memory.offHeap.size]
+    end

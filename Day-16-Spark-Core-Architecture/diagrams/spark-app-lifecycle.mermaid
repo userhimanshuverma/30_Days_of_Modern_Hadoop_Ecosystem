@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor User as Engineer / Spark-Submit
+    participant CM as Cluster Manager
+    participant Driver as Spark Driver (SparkSession)
+    participant Exec as Executor Worker Nodes
+    participant HDFS as Shared Storage (HDFS/S3)
+
+    User->>CM: Submit Spark Application (spark-submit)
+    CM->>CM: Allocate Resource for Driver
+    CM->>Driver: Start Driver Process (JVM)
+    Driver->>Driver: Initialize SparkContext / DAGScheduler / TaskScheduler
+    Driver->>CM: Register App & Request Executor Resources
+    CM->>Exec: Launch Executor JVM Processes
+    Exec->>Driver: Register Executors and Report CPU Cores/RAM
+    
+    Note over Driver: User Code Execution Begins (Actions triggered)
+    Driver->>Driver: Build Logical Plan (RDD lineage)
+    Driver->>Driver: DAGScheduler splits RDD plan into Stages
+    Driver->>Driver: TaskScheduler submits Tasks per Stage (TaskSet)
+    
+    Driver->>Exec: Dispatch Tasks (Serialized bytecode)
+    activate Exec
+    Exec->>HDFS: Read input split data blocks
+    Note over Exec: Execute pipeline in memory (Transformations)
+    Exec->>Driver: Send TaskCompletion / Status Updates
+    deactivate Exec
+    
+    Driver->>Driver: Collect results / Write final output
+    Driver->>CM: Unregister Application
+    Driver->>Driver: Stop SparkSession and terminate JVM
+    CM->>Exec: Terminate Executors (Reclaim resources)
