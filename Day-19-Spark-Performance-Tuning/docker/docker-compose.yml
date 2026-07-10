@@ -1,0 +1,163 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. HDFS NAMENODE
+  # =========================================================================
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: namenode-day19
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # Web UI
+      - "9000:9000"  # RPC
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - namenode_data_day19:/hadoop/dfs/name
+      - ../:/workspace
+    command: ["namenode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day19-network
+
+  # =========================================================================
+  # 2. HDFS DATANODE
+  # =========================================================================
+  datanode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datanode-day19
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - datanode_data_day19:/hadoop/dfs/data
+      - ../:/workspace
+    command: ["datanode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day19-network
+
+  # =========================================================================
+  # 3. SPARK STANDALONE MASTER
+  # =========================================================================
+  spark-master:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-master-day19
+    restart: unless-stopped
+    ports:
+      - "8080:8080"  # Spark Master Web UI
+      - "7077:7077"  # Spark Master RPC
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["spark-master"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day19-network
+
+  # =========================================================================
+  # 4. SPARK STANDALONE WORKER
+  # =========================================================================
+  spark-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-worker-day19
+    restart: unless-stopped
+    ports:
+      - "8081:8081"  # Spark Worker Web UI
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["spark-worker"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day19-network
+
+  # =========================================================================
+  # 5. SPARK HISTORY SERVER
+  # =========================================================================
+  spark-history:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-history-day19
+    restart: unless-stopped
+    ports:
+      - "18080:18080" # Spark History Server UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+      spark-master:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["spark-history"]
+    networks:
+      - day19-network
+
+  # =========================================================================
+  # 6. SPARK CLIENT GATEWAY
+  # =========================================================================
+  spark-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-client-day19
+    restart: unless-stopped
+    depends_on:
+      spark-master:
+        condition: service_healthy
+      spark-worker:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["spark-client"]
+    networks:
+      - day19-network
+
+networks:
+  day19-network:
+    name: day19-network
+    driver: bridge
+
+volumes:
+  namenode_data_day19:
+  datanode_data_day19:
