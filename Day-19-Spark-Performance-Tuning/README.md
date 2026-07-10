@@ -211,11 +211,11 @@ gantt
     dateFormat  X
     axisFormat %s
     section Job Execution
-    Driver Orchestration & Planning   :active, des1, 0, 2
-    Stage 1: Map Tasks (Parallel Exec) :active, des2, 2, 8
-    Shuffle Write (Persist intermediate data) :des3, 8, 9
-    Stage 2: Reduce Tasks (Shuffle Fetch & Join) :active, des4, 9, 15
-    Result Aggregation to Driver      :des5, 15, 16
+    Driver Orchestration and Planning           :active, des1, 0, 2
+    Stage 1 Map Tasks Parallel Exec             :active, des2, 2, 8
+    Shuffle Write Persist Intermediate Data     :des3, 8, 9
+    Stage 2 Reduce Tasks Shuffle Fetch and Join :active, des4, 9, 15
+    Result Aggregation to Driver                :des5, 15, 16
 ```
 
 ### 3. Stage Dependency Graph (DAG Scheduler)
