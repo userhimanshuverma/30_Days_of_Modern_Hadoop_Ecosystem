@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<configuration>
+  <!-- ========================================================================= -->
+  <!-- 1. METASTORE DATABASE CONNECTION CONFIGURATIONS                           -->
+  <!-- ========================================================================= -->
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:postgresql://postgres-metastore-db:5432/metastore_db</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.postgresql.Driver</value>
+    <description>Driver class name for a JDBC metastore</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>hive</value>
+    <description>username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>hive</value>
+    <description>password to use against metastore database</description>
+  </property>
+
+  <!-- ========================================================================= -->
+  <!-- 2. HIVE METASTORE THRIFT CONFIGURATIONS                                  -->
+  <!-- ========================================================================= -->
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://hive-metastore:9083</value>
+    <description>Thrift URI for the remote metastore. Used by Hive clients (like HS2) to contact Metastore.</description>
+  </property>
+
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/user/hive/warehouse</value>
+    <description>location of default database for the warehouse</description>
+  </property>
+
+  <!-- ========================================================================= -->
+  <!-- 3. HIVESERVER2 CONFIGURATIONS                                            -->
+  <!-- ========================================================================= -->
+  <property>
+    <name>hive.server2.thrift.bind.host</name>
+    <value>0.0.0.0</value>
+    <description>Bind host on which HiveServer2 Thrift service will run.</description>
+  </property>
+
+  <property>
+    <name>hive.server2.thrift.port</name>
+    <value>10000</value>
+    <description>Port number of HiveServer2 Thrift interface.</description>
+  </property>
+
+  <property>
+    <name>hive.server2.webui.host</name>
+    <value>0.0.0.0</value>
+    <description>The host address the HiveServer2 WebUI listens on.</description>
+  </property>
+
+  <property>
+    <name>hive.server2.webui.port</name>
+    <value>10002</value>
+    <description>The port the HiveServer2 WebUI listens on.</description>
+  </property>
+
+  <!-- ========================================================================= -->
+  <!-- 4. TRANSACTIONAL (ACID) & CONCURRENCY CONFIGURATIONS                     -->
+  <!-- ========================================================================= -->
+  <property>
+    <name>hive.support.concurrency</name>
+    <value>true</value>
+    <description>Whether Hive supports concurrency control. Required for ACID transactions.</description>
+  </property>
+
+  <property>
+    <name>hive.txn.manager</name>
+    <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+    <description>Transaction manager to use. Required for ACID transactions.</description>
+  </property>
+
+  <property>
+    <name>hive.compactor.initiator.on</name>
+    <value>true</value>
+    <description>Whether to run the initiator thread for compacting transactions.</description>
+  </property>
+
+  <property>
+    <name>hive.compactor.worker.threads</name>
+    <value>1</value>
+    <description>The number of compacting worker threads.</description>
+  </property>
+
+  <property>
+    <name>hive.exec.dynamic.partition</name>
+    <value>true</value>
+    <description>Whether or not to allow dynamic partition inserts.</description>
+  </property>
+
+  <property>
+    <name>hive.exec.dynamic.partition.mode</name>
+    <value>nonstrict</value>
+    <description>In nonstrict mode, all partitions can be dynamic. In strict mode, at least one must be static.</description>
+  </property>
+
+  <!-- ========================================================================= -->
+  <!-- 5. SECURITY & COMPATIBILITY SETTINGS                                     -->
+  <!-- ========================================================================= -->
+  <property>
+    <name>hive.metastore.event.db.notification.api.auth</name>
+    <value>false</value>
+    <description>Disable db notification authorization checks for simplified cluster setup.</description>
+  </property>
+
+  <property>
+    <name>hive.server2.enable.doAs</name>
+    <value>false</value>
+    <description>
+      Setting doAs to false tells HiveServer2 to execute HDFS commands under the hive user identity, 
+      rather than impersonating the client user, simplifying permission management on HDFS in dev.
+    </description>
+  </property>
+
+  <property>
+    <name>hive.metastore.schema.verification</name>
+    <value>false</value>
+    <description>Enforce metastore schema version consistency.</description>
+  </property>
+</configuration>
