@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Tez Application Master (AM) Configurations -->
+    <property>
+        <name>tez.am.resource.memory.mb</name>
+        <value>2048</value>
+        <description>Memory allocated for the Tez Application Master (AM)</description>
+    </property>
+    <property>
+        <name>tez.am.java.opts</name>
+        <value>-server -Xmx1600m -Djava.net.preferIPv4Stack=true -XX:+UseG1GC</value>
+        <description>JVM parameters for the Tez Application Master</description>
+    </property>
+
+    <!-- Tez Task Containers Configuration -->
+    <property>
+        <name>tez.task.resource.memory.mb</name>
+        <value>2048</value>
+        <description>Memory size for Tez task containers</description>
+    </property>
+    <property>
+        <name>tez.task.launch.cmd-opts</name>
+        <value>-server -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB</value>
+        <description>Java command line options for Tez task launch</description>
+    </property>
+
+    <!-- Container Reuse Settings (Critical for avoiding JVM startup latency) -->
+    <property>
+        <name>tez.container.reuse.enabled</name>
+        <value>true</value>
+        <description>Re-uses containers in Tez to minimize YARN task-startup overhead</description>
+    </property>
+    <property>
+        <name>tez.container.reuse.max-holding-time-ms</name>
+        <value>10000</value>
+        <description>Maximum time (in ms) an idle container is held waiting for new tasks</description>
+    </property>
+    <property>
+        <name>tez.container.reuse.locational-delay-allocation-ms</name>
+        <value>250</value>
+        <description>Time to wait for matching node/rack locality before giving container to any task</description>
+    </property>
+
+    <!-- Shuffle & Memory Buffers Tuning -->
+    <property>
+        <name>tez.runtime.io.sort.mb</name>
+        <value>512</value>
+        <description>Size of the sort buffer when writing/sorting intermediate data</description>
+    </property>
+    <property>
+        <name>tez.runtime.unordered.output.buffer.size-mb</name>
+        <value>100</value>
+        <description>Size of the buffer for unordered outputs (e.g. MapJoins)</description>
+    </property>
+    <property>
+        <name>tez.runtime.pipelined.shuffle.enabled</name>
+        <value>true</value>
+        <description>Enables pipelined shuffle, allowing downstream tasks to fetch map output partitions while they are being written</description>
+    </property>
+
+    <!-- Task Grouping (Optimizing small files read) -->
+    <property>
+        <name>tez.grouping.min-size</name>
+        <value>16777216</value> <!-- 16 MB -->
+        <description>Minimum size of grouping input splits</description>
+    </property>
+    <property>
+        <name>tez.grouping.max-size</name>
+        <value>1073741824</value> <!-- 1 GB -->
+        <description>Maximum size of grouping input splits</description>
+    </property>
+
+    <!-- Tez History and Logging -->
+    <property>
+        <name>tez.history.logging.class</name>
+        <value>org.apache.tez.dag.history.logging.impl.SimpleHistoryLoggingService</value>
+        <description>Logging class to write history data</description>
+    </property>
+</configuration>

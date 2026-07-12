@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<configuration>
+    <!-- MapReduce Framework selection -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+        <description>Configures MapReduce to run on YARN</description>
+    </property>
+
+    <!-- Map & Reduce Task Memory Allocations -->
+    <property>
+        <name>mapreduce.map.memory.mb</name>
+        <value>1024</value>
+        <description>Resource allocation for Map task container</description>
+    </property>
+    <property>
+        <name>mapreduce.map.java.opts</name>
+        <value>-Xmx800m -XX:+UseG1GC</value>
+        <description>JVM heap memory size for Map tasks</description>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.memory.mb</name>
+        <value>1536</value>
+        <description>Resource allocation for Reduce task container</description>
+    </property>
+    <property>
+        <name>mapreduce.reduce.java.opts</name>
+        <value>-Xmx1200m -XX:+UseG1GC</value>
+        <description>JVM heap memory size for Reduce tasks</description>
+    </property>
+
+    <!-- Intermediate Map Output Sort Buffer -->
+    <property>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>256</value>
+        <description>Buffer size in MB for sorting map outputs before disk spill</description>
+    </property>
+
+    <!-- JobHistoryServer Configuration -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>yarn-resourcemanager:10020</value>
+        <description>IPC server address for the Job History Server</description>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>yarn-resourcemanager:19888</value>
+        <description>Web application HTTP address of the Job History Server</description>
+    </property>
+</configuration>

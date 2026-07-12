@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<configuration>
+    <!-- Resource Manager Settings -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>yarn-resourcemanager</value>
+        <description>Hostname of the YARN ResourceManager</description>
+    </property>
+
+    <!-- Node Manager Resource Configurations -->
+    <property>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>8192</value>
+        <description>Total physical memory (in MB) on the node available for YARN containers</description>
+    </property>
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>4</value>
+        <description>Number of CPU vcores available for YARN containers</description>
+    </property>
+
+    <!-- Scheduler Limits -->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+        <description>Minimum limit of memory allocation request for each container</description>
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>8192</value>
+        <description>Maximum limit of memory allocation request for each container</description>
+    </property>
+
+    <!-- Auxiliary Services (Shuffle handlers for MapReduce) -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+        <description>Auxiliary services to be run by the NodeManager</description>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+
+    <!-- Memory Check Disablers (Crucial for running inside Docker containers) -->
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>false</value>
+        <description>Disables physical memory limits check (prevents container killings due to Docker memory leaks)</description>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+        <description>Disables virtual memory limits check (prevents premature container killings due to JVM allocating large virtual spaces)</description>
+    </property>
+
+    <!-- Node Manager Log Aggregation -->
+    <property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+        <description>Enables YARN log aggregation, allowing us to inspect logs using yarn logs -applicationId</description>
+    </property>
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://yarn-resourcemanager:19888/jobhistory/logs</value>
+    </property>
+</configuration>

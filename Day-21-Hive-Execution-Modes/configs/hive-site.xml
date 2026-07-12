@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Execution Engine Selection -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+        <description>Chooses the execution engine. Options: mr, tez, spark. Default is tez.</description>
+    </property>
+
+    <!-- Vectorization Settings (Crucial for Tez/Spark Performance) -->
+    <property>
+        <name>hive.vectorized.execution.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized query execution for Map stage</description>
+    </property>
+    <property>
+        <name>hive.vectorized.execution.reduce.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized query execution for Reduce stage</description>
+    </property>
+    <property>
+        <name>hive.vectorized.execution.reduce.groupby.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized GroupBy operator on reducer</description>
+    </property>
+    <property>
+        <name>hive.vectorized.use.vectorized.input.format</name>
+        <value>true</value>
+        <description>Enables vectorized reading of underlying formats like ORC/Parquet</description>
+    </property>
+
+    <!-- Calcite Cost-Based Optimizer (CBO) Settings -->
+    <property>
+        <name>hive.cbo.enable</name>
+        <value>true</value>
+        <description>Enables Cost-Based Optimizer using Apache Calcite</description>
+    </property>
+    <property>
+        <name>hive.stats.autogather</name>
+        <value>true</value>
+        <description>Enables automatic gathering of basic statistics during writes</description>
+    </property>
+    <property>
+        <name>hive.stats.fetch.column.stats</name>
+        <value>true</value>
+        <description>Allows compiler to fetch column statistics from Metastore for CBO</description>
+    </property>
+    <property>
+        <name>hive.stats.fetch.partition.stats</name>
+        <value>true</value>
+        <description>Allows compiler to fetch partition statistics for CBO</description>
+    </property>
+
+    <!-- MapJoin (In-Memory Join) Optimizations -->
+    <property>
+        <name>hive.auto.convert.join</name>
+        <value>true</value>
+        <description>Enables automatic conversion of common joins into MapJoins</description>
+    </property>
+    <property>
+        <name>hive.auto.convert.join.noconditionaltask</name>
+        <value>true</value>
+        <description>Allows Hive to join multiple small tables in memory without extra shuffle stages</description>
+    </property>
+    <property>
+        <name>hive.auto.convert.join.noconditionaltask.size</name>
+        <value>26214400</value> <!-- 25 MB -->
+        <description>Threshold size of small tables to fit into memory for MapJoin</description>
+    </property>
+
+    <!-- Tez Execution Tuning -->
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>2048</value>
+        <description>Container size (in MB) for Tez tasks</description>
+    </property>
+    <property>
+        <name>hive.tez.java.opts</name>
+        <value>-server -Xmx1600m -Djava.net.preferIPv4Stack=true -XX:+UseG1GC</value>
+        <description>Java options for Tez tasks</description>
+    </property>
+    <property>
+        <name>hive.tez.input.format</name>
+        <value>org.apache.hadoop.hive.ql.io.HiveInputFormat</value>
+        <description>Input format class for Tez</description>
+    </property>
+    <property>
+        <name>hive.tez.dynamic.partition.pruning</name>
+        <value>true</value>
+        <description>Enables Dynamic Partition Pruning (DPP) in Tez</description>
+    </property>
+    <property>
+        <name>hive.tez.dynamic.partition.pruning.max.data.size</name>
+        <value>104857600</value> <!-- 100 MB -->
+        <description>Maximum size of DPP payload allowed to be transmitted</description>
+    </property>
+
+    <!-- Spark Execution Tuning (Hive on Spark - HoS) -->
+    <property>
+        <name>spark.master</name>
+        <value>yarn</value>
+        <description>Spark Master URI. For production Hive on Spark, use YARN.</description>
+    </property>
+    <property>
+        <name>spark.submit.deployMode</name>
+        <value>client</value>
+        <description>Spark deploy mode</description>
+    </property>
+    <property>
+        <name>hive.spark.client.connect.timeout</name>
+        <value>120000</value> <!-- 120 seconds -->
+        <description>Timeout for HiveServer2 connection to remote Spark executor driver</description>
+    </property>
+    <property>
+        <name>hive.spark.dynamic.partition.pruning</name>
+        <value>true</value>
+        <description>Enables Dynamic Partition Pruning (DPP) in Spark</description>
+    </property>
+
+    <!-- Hive Metastore and Server Connectivity -->
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://hive-metastore:9083</value>
+        <description>Thrift URI for Hive Metastore service</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:postgresql://postgres-metastore-db:5432/metastore_db</value>
+        <description>JDBC connection URL for Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.postgresql.Driver</value>
+        <description>JDBC driver class for Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>hive</value>
+        <description>Username to access Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>hivepassword</value>
+        <description>Password to access Metastore DB</description>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification</name>
+        <value>true</value>
+        <description>Enforces schema validation. If set to false, DB schema is auto-created.</description>
+    </property>
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+        <description>If true, HiveServer2 executes queries as the connecting user rather than the hive user.</description>
+    </property>
+</configuration>
