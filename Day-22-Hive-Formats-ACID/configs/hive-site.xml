@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- Hive Execution Engine Selection -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+        <description>Chooses the execution engine. Options: mr, tez, spark. Default is tez.</description>
+    </property>
+
+    <!-- ========================================================================= -->
+    <!-- HIVE ACID & TRANSACTION CONFIGURATIONS                                    -->
+    <!-- ========================================================================= -->
+    <property>
+        <name>hive.support.concurrency</name>
+        <value>true</value>
+        <description>Required for lock manager support. Enables ACID transactions.</description>
+    </property>
+
+    <property>
+        <name>hive.txn.manager</name>
+        <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+        <description>Transaction manager that stores transactions/locks in Hive Metastore DB.</description>
+    </property>
+
+    <!-- ACID Compactor Settings (Required on Metastore instances) -->
+    <property>
+        <name>hive.compactor.initiator.on</name>
+        <value>true</value>
+        <description>Enables compaction initiator thread on Hive Metastore.</description>
+    </property>
+
+    <property>
+        <name>hive.compactor.worker.threads</name>
+        <value>2</value>
+        <description>Number of worker threads performing compaction jobs in YARN/Tez.</description>
+    </property>
+
+    <property>
+        <name>hive.compactor.cleaner.on</name>
+        <value>true</value>
+        <description>Enables cleaner thread to purge old delta directories after successful compaction.</description>
+    </property>
+
+    <property>
+        <name>hive.compactor.delta.num.threshold</name>
+        <value>3</value>
+        <description>Number of delta directories that will trigger a Minor Compaction.</description>
+    </property>
+
+    <property>
+        <name>hive.compactor.delta.pct.threshold</name>
+        <value>0.1</value>
+        <description>Ratio of delta files size to base file size that will trigger a Major Compaction.</description>
+    </property>
+
+    <!-- Dynamic Partitioning Settings (Required for writing ACID partitions dynamically) -->
+    <property>
+        <name>hive.exec.dynamic.partition</name>
+        <value>true</value>
+        <description>Enables dynamic partitions</description>
+    </property>
+    <property>
+        <name>hive.exec.dynamic.partition.mode</name>
+        <value>nonstrict</value>
+        <description>Allows partitions without specifying a static partition key</description>
+    </property>
+
+    <!-- Strictly enforce managed transactional tables (Hive 3 default behavior) -->
+    <property>
+        <name>hive.strict.managed.tables</name>
+        <value>true</value>
+        <description>Ensures managed tables are transactional (ACID) and locks out non-ACID managed table creation.</description>
+    </property>
+    <property>
+        <name>hive.create.as.external.legacy</name>
+        <value>false</value>
+        <description>Default CREATE TABLE statement creates managed ACID tables rather than external tables.</description>
+    </property>
+
+    <!-- ========================================================================= -->
+    <!-- STORAGE FORMAT OPTIMIZATIONS (ORC & PARQUET)                              -->
+    <!-- ========================================================================= -->
+    <!-- Vectorization (Crucial for columnar reading & processing speeds) -->
+    <property>
+        <name>hive.vectorized.execution.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized query execution for Map stage</description>
+    </property>
+    <property>
+        <name>hive.vectorized.execution.reduce.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized query execution for Reduce stage</description>
+    </property>
+    <property>
+        <name>hive.vectorized.execution.reduce.groupby.enabled</name>
+        <value>true</value>
+        <description>Enables vectorized GroupBy operator on reducer</description>
+    </property>
+    <property>
+        <name>hive.vectorized.use.vectorized.input.format</name>
+        <value>true</value>
+        <description>Enables vectorized reading of ORC/Parquet</description>
+    </property>
+
+    <!-- ORC Writer Optimizations -->
+    <property>
+        <name>hive.exec.orc.default.compress</name>
+        <value>SNAPPY</value>
+        <description>Compression codec for ORC. Options: NONE, ZLIB, SNAPPY, LZO.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.stripe.size</name>
+        <value>67108864</value> <!-- 64MB for sandbox environment (268435456 [256MB] is production standard) -->
+        <description>Size of ORC stripes in bytes.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.row.index.stride</name>
+        <value>10000</value>
+        <description>Number of rows in an ORC row index stride (Row Group size).</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.writer.index.stride</name>
+        <value>10000</value>
+        <description>Enable indexing at regular row intervals.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.encoding.strategy</name>
+        <value>SPEED</value>
+        <description>ORC integer/string encoding strategy: SPEED or COMPRESSION.</description>
+    </property>
+
+    <!-- Parquet Writer Optimizations -->
+    <property>
+        <name>parquet.compression</name>
+        <value>SNAPPY</value>
+        <description>Compression codec for Parquet format.</description>
+    </property>
+    <property>
+        <name>hive.parquet.write.index.enabled</name>
+        <value>true</value>
+        <description>Write column-index statistics inside Parquet footers.</description>
+    </property>
+
+    <!-- ========================================================================= -->
+    <!-- METASTORE & SERVER CONNECTIVITY                                           -->
+    <!-- ========================================================================= -->
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://hive-metastore:9083</value>
+        <description>Thrift URI for Hive Metastore service</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:postgresql://postgres-metastore-db:5432/metastore_db</value>
+        <description>JDBC connection URL for Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.postgresql.Driver</value>
+        <description>JDBC driver class for Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>hive</value>
+        <description>Username to access Metastore DB</description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>hivepassword</value>
+        <description>Password to access Metastore DB</description>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification</name>
+        <value>true</value>
+        <description>Enforces schema validation.</description>
+    </property>
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+        <description>If true, HiveServer2 executes queries as the connecting user.</description>
+    </property>
+
+    <!-- Calcite Cost-Based Optimizer (CBO) Settings -->
+    <property>
+        <name>hive.cbo.enable</name>
+        <value>true</value>
+        <description>Enables Cost-Based Optimizer using Calcite</description>
+    </property>
+    <property>
+        <name>hive.stats.autogather</name>
+        <value>true</value>
+        <description>Enables automatic statistics gathering during writes</description>
+    </property>
+    <property>
+        <name>hive.stats.fetch.column.stats</name>
+        <value>true</value>
+        <description>Allows compiler to fetch column statistics from Metastore for CBO</description>
+    </property>
+    <property>
+        <name>hive.stats.fetch.partition.stats</name>
+        <value>true</value>
+        <description>Allows compiler to fetch partition statistics for CBO</description>
+    </property>
+
+    <!-- MapJoin (In-Memory Join) Optimizations -->
+    <property>
+        <name>hive.auto.convert.join</name>
+        <value>true</value>
+        <description>Enables automatic conversion of common joins into MapJoins</description>
+    </property>
+    <property>
+        <name>hive.auto.convert.join.noconditionaltask</name>
+        <value>true</value>
+        <description>Allows Hive to join multiple small tables in memory without extra shuffle stages</description>
+    </property>
+    <property>
+        <name>hive.auto.convert.join.noconditionaltask.size</name>
+        <value>26214400</value> <!-- 25 MB -->
+        <description>Threshold size of small tables to fit into memory for MapJoin</description>
+    </property>
+
+    <!-- Tez Execution Tuning -->
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>2048</value>
+        <description>Container size (in MB) for Tez tasks</description>
+    </property>
+    <property>
+        <name>hive.tez.java.opts</name>
+        <value>-server -Xmx1600m -Djava.net.preferIPv4Stack=true -XX:+UseG1GC</value>
+        <description>Java options for Tez tasks</description>
+    </property>
+    <property>
+        <name>hive.tez.input.format</name>
+        <value>org.apache.hadoop.hive.ql.io.HiveInputFormat</value>
+        <description>Input format class for Tez</description>
+    </property>
+    <property>
+        <name>hive.tez.dynamic.partition.pruning</name>
+        <value>true</value>
+        <description>Enables Dynamic Partition Pruning (DPP) in Tez</description>
+    </property>
+</configuration>

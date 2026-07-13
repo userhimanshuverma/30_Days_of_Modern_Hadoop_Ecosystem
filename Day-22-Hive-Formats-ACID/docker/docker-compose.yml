@@ -1,0 +1,208 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. METASTORE DATABASE (PostgreSQL backend)
+  # =========================================================================
+  postgres-metastore-db:
+    image: postgres:15-alpine
+    container_name: postgres-metastore-db-day22
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: metastore_db
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hivepassword
+    volumes:
+      - postgres_data_day22:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d metastore_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 2. HDFS NAMENODE
+  # =========================================================================
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: namenode-day22
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # HDFS Namenode Web UI
+      - "9000:9000"  # HDFS Namenode RPC Port
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - namenode_data_day22:/hadoop/dfs/name
+      - ../:/workspace
+    command: ["namenode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 3. HDFS DATANODE
+  # =========================================================================
+  datanode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datanode-day22
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # HDFS Datanode Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - datanode_data_day22:/hadoop/dfs/data
+      - ../:/workspace
+    command: ["datanode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 4. YARN RESOURCEMANAGER
+  # =========================================================================
+  resourcemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resourcemanager-day22
+    restart: unless-stopped
+    ports:
+      - "8088:8088"  # YARN ResourceManager Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["resourcemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 5. YARN NODEMANAGER
+  # =========================================================================
+  nodemanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodemanager-day22
+    restart: unless-stopped
+    ports:
+      - "8042:8042"  # YARN NodeManager Web UI
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ../:/workspace
+    command: ["nodemanager"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 6. HIVE METASTORE SERVER (HMS)
+  # =========================================================================
+  hive-metastore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hive-metastore-day22
+    restart: unless-stopped
+    ports:
+      - "9083:9083"  # HMS Thrift Port
+    depends_on:
+      postgres-metastore-db:
+        condition: service_healthy
+      namenode:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      - HIVE_CONF_DIR=/opt/hive/conf
+      - TEZ_CONF_DIR=/opt/tez/conf
+    volumes:
+      - ../:/workspace
+    command: ["metastore"]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9083"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+  # =========================================================================
+  # 7. HIVESERVER2 (HS2)
+  # =========================================================================
+  hiveserver2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hiveserver2-day22
+    restart: unless-stopped
+    ports:
+      - "10000:10000"  # HS2 Thrift JDBC Port
+      - "10002:10002"  # HS2 Web UI Port
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+      nodemanager:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      - HIVE_CONF_DIR=/opt/hive/conf
+      - TEZ_CONF_DIR=/opt/tez/conf
+    volumes:
+      - ../:/workspace
+    command: ["hiveserver2"]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 10000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day22-network
+
+networks:
+  day22-network:
+    name: day22-network
+    driver: bridge
+
+volumes:
+  postgres_data_day22:
+  namenode_data_day22:
+  datanode_data_day22:
