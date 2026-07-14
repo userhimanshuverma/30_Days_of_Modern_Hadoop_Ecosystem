@@ -123,7 +123,7 @@ graph TD
     Scheduler -->|2. Assign Tasks| W1_Exec
     Scheduler -->|2. Assign Tasks| W2_Exec
 
-    W1_Exec <-->|3. Exchange Operators (Data Shuffle)| W2_Exec
+    W1_Exec <-->|3. Exchange Operators - Data Shuffle| W2_Exec
 
     W1_SPI -->|4. Pull Splits| Source1[("Hive Metastore / HDFS")]
     W2_SPI -->|4. Pull Splits| Source2[("MySQL / Kafka")]
