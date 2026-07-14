@@ -1,0 +1,40 @@
+{
+    "tableName": "clicks",
+    "schemaName": "default",
+    "topicName": "clicks",
+    "key": {
+        "dataFormat": "raw",
+        "fields": [
+            {
+                "name": "key_id",
+                "type": "VARCHAR",
+                "dataFormat": "SIZE"
+            }
+        ]
+    },
+    "message": {
+        "dataFormat": "json",
+        "fields": [
+            {
+                "name": "click_id",
+                "mapping": "click_id",
+                "type": "VARCHAR"
+            },
+            {
+                "name": "user_id",
+                "mapping": "user_id",
+                "type": "INTEGER"
+            },
+            {
+                "name": "page_url",
+                "mapping": "page_url",
+                "type": "VARCHAR"
+            },
+            {
+                "name": "click_timestamp",
+                "mapping": "click_timestamp",
+                "type": "TIMESTAMP"
+            }
+        ]
+    }
+}

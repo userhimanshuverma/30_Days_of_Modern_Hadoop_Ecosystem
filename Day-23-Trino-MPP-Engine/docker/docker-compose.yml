@@ -1,0 +1,230 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. METASTORE DATABASE (PostgreSQL backend)
+  # =========================================================================
+  postgres-metastore-db:
+    image: postgres:15-alpine
+    container_name: postgres-metastore-db-day23
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: metastore_db
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+    volumes:
+      - postgres_data_day23:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d metastore_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 2. HDFS NAMENODE
+  # =========================================================================
+  namenode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: namenode-day23
+    restart: unless-stopped
+    ports:
+      - "9870:9870"  # HDFS Namenode Web UI
+      - "9000:9000"  # HDFS Namenode RPC Port
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - namenode_data_day23:/hadoop/dfs/name
+      - ../:/workspace
+    command: ["namenode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 3. HDFS DATANODE
+  # =========================================================================
+  datanode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datanode-day23
+    restart: unless-stopped
+    ports:
+      - "9864:9864"  # HDFS Datanode Web UI
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - datanode_data_day23:/hadoop/dfs/data
+      - ../:/workspace
+    command: ["datanode"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 4. HIVE METASTORE SERVER (HMS)
+  # =========================================================================
+  hive-metastore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hive-metastore-day23
+    restart: unless-stopped
+    ports:
+      - "9083:9083"  # HMS Thrift Port
+    depends_on:
+      postgres-metastore-db:
+        condition: service_healthy
+      namenode:
+        condition: service_healthy
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      - HIVE_CONF_DIR=/opt/hive/conf
+    volumes:
+      - ../:/workspace
+    command: ["metastore"]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9083"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 5. KAFKA EVENT STREAM STORAGE
+  # =========================================================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper-day23
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - day23-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-day23
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-day23:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-day23:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 6. MYSQL DATABASE
+  # =========================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-day23
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: inventory
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 7. TRINO COORDINATOR
+  # =========================================================================
+  trino-coordinator:
+    image: trinodb/trino:435
+    container_name: trino-coordinator-day23
+    ports:
+      - "8080:8080"
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../configs/node.properties:/etc/trino/node.properties:ro
+      - ../configs/config.properties:/etc/trino/config.properties:ro
+      - ../configs/jvm.config:/etc/trino/jvm.config:ro
+      - ../configs/log.properties:/etc/trino/log.properties:ro
+      - ../configs/catalogs/hive.properties:/etc/trino/catalog/hive.properties:ro
+      - ../configs/catalogs/kafka.properties:/etc/trino/catalog/kafka.properties:ro
+      - ../configs/catalogs/mysql.properties:/etc/trino/catalog/mysql.properties:ro
+      - ../configs/kafka/default.clicks.json:/etc/trino/kafka/default.clicks.json:ro
+      - ../configs/core-site.xml:/etc/trino/core-site.xml:ro
+      - ../configs/hdfs-site.xml:/etc/trino/hdfs-site.xml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - day23-network
+
+  # =========================================================================
+  # 8. TRINO WORKER
+  # =========================================================================
+  trino-worker:
+    image: trinodb/trino:435
+    container_name: trino-worker-day23
+    depends_on:
+      trino-coordinator:
+        condition: service_healthy
+    volumes:
+      - ../configs/node-worker.properties:/etc/trino/node.properties:ro
+      - ../configs/config-worker.properties:/etc/trino/config.properties:ro
+      - ../configs/jvm.config:/etc/trino/jvm.config:ro
+      - ../configs/log.properties:/etc/trino/log.properties:ro
+      - ../configs/catalogs/hive.properties:/etc/trino/catalog/hive.properties:ro
+      - ../configs/catalogs/kafka.properties:/etc/trino/catalog/kafka.properties:ro
+      - ../configs/catalogs/mysql.properties:/etc/trino/catalog/mysql.properties:ro
+      - ../configs/kafka/default.clicks.json:/etc/trino/kafka/default.clicks.json:ro
+      - ../configs/core-site.xml:/etc/trino/core-site.xml:ro
+      - ../configs/hdfs-site.xml:/etc/trino/hdfs-site.xml:ro
+    networks:
+      - day23-network
+
+networks:
+  day23-network:
+    name: day23-network
+    driver: bridge
+
+volumes:
+  postgres_data_day23:
+  namenode_data_day23:
+  datanode_data_day23:

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://namenode-day23:9000</value>
+    <description>Default Hadoop HDFS filesystem scheme and host</description>
+  </property>
+
+  <property>
+    <name>hadoop.tmp.dir</name>
+    <value>/hadoop/dfs/tmp</value>
+    <description>A base for other temporary directories.</description>
+  </property>
+
+  <property>
+    <name>hadoop.proxyuser.hive.hosts</name>
+    <value>*</value>
+  </property>
+
+  <property>
+    <name>hadoop.proxyuser.hive.groups</name>
+    <value>*</value>
+  </property>
+
+  <!-- Enable proxy permissions for Trino user to query via Hive Metastore -->
+  <property>
+    <name>hadoop.proxyuser.trino.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.trino.groups</name>
+    <value>*</value>
+  </property>
+</configuration>
