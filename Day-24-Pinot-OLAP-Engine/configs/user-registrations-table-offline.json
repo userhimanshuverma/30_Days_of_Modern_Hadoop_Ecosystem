@@ -1,0 +1,54 @@
+{
+  "tableName": "user_registrations_OFFLINE",
+  "tableType": "OFFLINE",
+  "schemaName": "user_registrations",
+  "segmentsConfig": {
+    "timeColumnName": "signupTimestamp",
+    "timeType": "MILLISECONDS",
+    "retentionTimeUnit": "DAYS",
+    "retentionTimeValue": "365",
+    "segmentPushType": "APPEND",
+    "segmentAssignmentStrategy": "BalanceNumSegmentsSegmentAssignmentStrategy",
+    "replication": "1"
+  },
+  "tenants": {
+    "broker": "DefaultTenant",
+    "server": "DefaultTenant"
+  },
+  "tableIndexConfig": {
+    "loadMode": "MMAP",
+    "invertedIndexColumns": [
+      "country",
+      "accountType",
+      "device"
+    ],
+    "bloomFilterColumns": [
+      "userId"
+    ],
+    "rangeIndexColumns": [
+      "age"
+    ],
+    "textIndexColumns": [
+      "email"
+    ],
+    "noDictionaryColumns": [],
+    "starTreeIndexConfigs": [
+      {
+        "dimensionsSplitOrder": [
+          "country",
+          "accountType",
+          "device"
+        ],
+        "skipStarNodeCreationForDimensions": [],
+        "functionColumnPairs": [
+          "SUM__registrationFee",
+          "COUNT__userId"
+        ],
+        "maxLeafRecords": 10000
+      }
+    ]
+  },
+  "metadata": {
+    "customConfigs": {}
+  }
+}

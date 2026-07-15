@@ -1,0 +1,51 @@
+{
+  "schemaName": "user_registrations",
+  "dimensionFieldSpecs": [
+    {
+      "name": "userId",
+      "dataType": "STRING"
+    },
+    {
+      "name": "username",
+      "dataType": "STRING"
+    },
+    {
+      "name": "email",
+      "dataType": "STRING"
+    },
+    {
+      "name": "country",
+      "dataType": "STRING"
+    },
+    {
+      "name": "signupSource",
+      "dataType": "STRING"
+    },
+    {
+      "name": "accountType",
+      "dataType": "STRING"
+    },
+    {
+      "name": "device",
+      "dataType": "STRING"
+    },
+    {
+      "name": "age",
+      "dataType": "INT"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "registrationFee",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "signupTimestamp",
+      "dataType": "LONG",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}

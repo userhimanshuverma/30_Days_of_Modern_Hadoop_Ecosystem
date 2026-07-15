@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: pinot-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: pinot-kafka
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:19092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  pinot-controller:
+    image: apachepinot/pinot:1.1.0
+    container_name: pinot-controller
+    command: "StartController -zkAddress zookeeper:2181"
+    ports:
+      - "9000:9000"
+    environment:
+      JAVA_OPTS: "-Xms1G -Xmx1G -Dlog4j2.configurationFile=conf/pinot-controller-log4j2.xml"
+    depends_on:
+      - zookeeper
+
+  pinot-broker:
+    image: apachepinot/pinot:1.1.0
+    container_name: pinot-broker
+    command: "StartBroker -zkAddress zookeeper:2181"
+    ports:
+      - "8099:8099"
+    environment:
+      JAVA_OPTS: "-Xms1G -Xmx1G -Dlog4j2.configurationFile=conf/pinot-broker-log4j2.xml"
+    depends_on:
+      - pinot-controller
+
+  pinot-server:
+    image: apachepinot/pinot:1.1.0
+    container_name: pinot-server
+    command: "StartServer -zkAddress zookeeper:2181"
+    ports:
+      - "8098:8098"
+    environment:
+      JAVA_OPTS: "-Xms1G -Xmx1G -Dlog4j2.configurationFile=conf/pinot-server-log4j2.xml"
+    depends_on:
+      - pinot-broker
+
+  pinot-minion:
+    image: apachepinot/pinot:1.1.0
+    container_name: pinot-minion
+    command: "StartMinion -zkAddress zookeeper:2181"
+    ports:
+      - "9514:9514"
+    environment:
+      JAVA_OPTS: "-Xms512M -Xmx512M -Dlog4j2.configurationFile=conf/pinot-minion-log4j2.xml"
+    depends_on:
+      - pinot-controller
