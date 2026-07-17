@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # 1. OpenLDAP Server (Identity Provider)
+  ldap-service:
+    image: osixia/openldap:1.5.0
+    container_name: ldap-service
+    environment:
+      - LDAP_ORGANISATION=Apache Hadoop
+      - LDAP_DOMAIN=hadoop.apache.org
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_TLS=false  # Disabled for simple lab authentication, TLS is managed at the Knox Gateway level
+    volumes:
+      # Inject custom user and group LDIF mappings on startup
+      - ./users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-users.ldif:ro
+    ports:
+      - "389:389"
+    networks:
+      - knox-network
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost:389", "-b", "dc=hadoop,dc=apache,dc=org"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Apache Knox Security Gateway (Reverse Proxy / Security Perimeter)
+  knox-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: knox-gateway
+    environment:
+      - KNOX_MASTER_SECRET=knoxmastersecret123!
+    volumes:
+      # Mount configuration files
+      - ../configs/gateway-site.xml:/mnt/configs/gateway-site.xml:ro
+      # Mount topologies (will be hot-reloaded by Knox if modified)
+      - ../topologies:/mnt/topologies:ro
+    ports:
+      - "8443:8443"
+    networks:
+      - knox-network
+    depends_on:
+      ldap-service:
+        condition: service_healthy
+      hadoop-namenode:
+        condition: service_started
+      hive-server:
+        condition: service_started
+
+  # 3. Apache Hadoop HDFS NameNode (WebHDFS backend)
+  hadoop-namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    environment:
+      - CLUSTER_NAME=test-cluster
+      - ENSURE_NAMENODE_DIR=/tmp/hadoop-root/dfs/name
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9870:9870"
+    networks:
+      - knox-network
+
+  # 4. Apache Hive Server 2 (SQL Query engine over HTTP thrift transport)
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    environment:
+      - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:derby:;databaseName=/var/lib/hive/metastore/metastore_db;create=true
+      - SERVICE_NAME=hiveserver2
+    ports:
+      - "10001:10001"
+    networks:
+      - knox-network
+    depends_on:
+      - hadoop-namenode
+
+networks:
+  knox-network:
+    name: knox-network
+    driver: bridge

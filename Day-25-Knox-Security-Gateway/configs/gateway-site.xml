@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<configuration>
+
+    <!-- The HTTP port the gateway will listen on for incoming client requests -->
+    <property>
+        <name>gateway.port</name>
+        <value>8443</value>
+        <description>The port that the gateway will listen on for requests.</description>
+    </property>
+
+    <!-- The context path under which Knox routes requests. E.g. https://localhost:8443/gateway -->
+    <property>
+        <name>gateway.path</name>
+        <value>gateway</value>
+        <description>The context path that will precede the topology name in requests.</description>
+    </property>
+
+    <!-- Frequency in seconds to scan the topologies directory for changes -->
+    <property>
+        <name>gateway.deployment.dir.polling.interval</name>
+        <value>5</value>
+        <description>The polling interval in seconds for topology changes.</description>
+    </property>
+
+    <!-- Enable or disable SSL offloading at the Knox Gateway level -->
+    <property>
+        <name>ssl.enabled</name>
+        <value>true</value>
+        <description>Indicates if SSL/TLS is enabled for the gateway endpoint.</description>
+    </property>
+
+    <!-- Auto-generation of local SSL keystore and certificates if not already present -->
+    <property>
+        <name>ssl.exclude.protocols</name>
+        <value>SSLv3,TLSv1,TLSv1.1</value>
+        <description>A comma-separated list of SSL/TLS protocols to exclude.</description>
+    </property>
+
+    <!-- Truststore type (usually JKS) -->
+    <property>
+        <name>gateway.truststore.type</name>
+        <value>JKS</value>
+    </property>
+
+    <!-- Address on which Knox binds. Default is 0.0.0.0 (all interfaces) -->
+    <property>
+        <name>gateway.bind.address</name>
+        <value>0.0.0.0</value>
+        <description>The IP address that the gateway binds to. Use 0.0.0.0 for all interfaces.</description>
+    </property>
+
+    <!-- HttpClient timeout configuration for backend Hadoop services -->
+    <property>
+        <name>gateway.httpclient.connectionTimeout</name>
+        <value>5s</value>
+        <description>The connection timeout for Knox HTTP connections to backend Hadoop services.</description>
+    </property>
+    
+    <property>
+        <name>gateway.httpclient.socketTimeout</name>
+        <value>30s</value>
+        <description>The socket timeout for Knox HTTP traffic to backend Hadoop services.</description>
+    </property>
+
+    <!-- Enable or disable X-Forwarded-* headers propagation -->
+    <property>
+        <name>gateway.xforwarded.enabled</name>
+        <value>true</value>
+        <description>Propagate X-Forwarded-* headers to backend services.</description>
+    </property>
+
+    <!-- Knox Master Secret Configuration (typically stored in a secure credential store) -->
+    <property>
+        <name>gateway.signing.keystore.name</name>
+        <value>gateway.jks</value>
+    </property>
+
+</configuration>

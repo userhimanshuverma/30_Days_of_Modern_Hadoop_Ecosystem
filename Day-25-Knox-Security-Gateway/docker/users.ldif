@@ -1,0 +1,53 @@
+# Root organizational units
+dn: ou=people,dc=hadoop,dc=apache,dc=org
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=hadoop,dc=apache,dc=org
+objectClass: organizationalUnit
+ou: groups
+
+# User Accounts
+dn: uid=admin,ou=people,dc=hadoop,dc=apache,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Knox Administrator
+sn: Administrator
+uid: admin
+userPassword: adminpassword
+
+dn: uid=guest,ou=people,dc=hadoop,dc=apache,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Guest User
+sn: Guest
+uid: guest
+userPassword: guestpassword
+
+dn: uid=analyst,ou=people,dc=hadoop,dc=apache,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Data Analyst
+sn: Analyst
+uid: analyst
+userPassword: analystpassword
+
+# Groups
+dn: cn=admin,ou=groups,dc=hadoop,dc=apache,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: admin
+member: uid=admin,ou=people,dc=hadoop,dc=apache,dc=org
+
+dn: cn=analyst,ou=groups,dc=hadoop,dc=apache,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: analyst
+member: uid=guest,ou=people,dc=hadoop,dc=apache,dc=org
+member: uid=analyst,ou=people,dc=hadoop,dc=apache,dc=org
