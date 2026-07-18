@@ -1,0 +1,130 @@
+{
+  "entities": [
+    {
+      "typeName": "kafka_topic",
+      "attributes": {
+        "name": "raw-payment-events",
+        "qualifiedName": "kafka://prod-broker:9092/raw-payment-events",
+        "partitions": 12,
+        "description": "Raw stream of customer payment transactions. Contains PII/PCI data."
+      },
+      "guid": "-101",
+      "classifications": [
+        {
+          "typeName": "PCI_DSS_SCOPE"
+        },
+        {
+          "typeName": "PII"
+        }
+      ]
+    },
+    {
+      "typeName": "spark_process",
+      "attributes": {
+        "name": "SparkPaymentIngestionJob",
+        "qualifiedName": "spark://prod-yarn-cluster/jobs/spark-payment-ingestion-job",
+        "description": "Spark structured streaming process that consumes Kafka events, parses schemas, and appends to Hive tables.",
+        "inputs": [
+          {
+            "guid": "-101",
+            "typeName": "kafka_topic"
+          }
+        ],
+        "outputs": [
+          {
+            "guid": "-102",
+            "typeName": "hive_table"
+          }
+        ]
+      },
+      "guid": "-201"
+    },
+    {
+      "typeName": "hive_table",
+      "attributes": {
+        "name": "raw_payments",
+        "qualifiedName": "financial_lake.raw_payments@production_hive",
+        "description": "Raw payment ledger. Monitored for regulatory reporting.",
+        "db": {
+          "uniqueAttributes": {
+            "qualifiedName": "financial_lake@production_hive"
+          }
+        }
+      },
+      "guid": "-102",
+      "classifications": [
+        {
+          "typeName": "PCI_DSS_SCOPE"
+        },
+        {
+          "typeName": "PII"
+        }
+      ]
+    },
+    {
+      "typeName": "hive_process",
+      "attributes": {
+        "name": "CREATE TABLE clean_payments AS SELECT...",
+        "qualifiedName": "hive://hive-server2/processes/payments-compliance-anonymization",
+        "queryText": "CREATE TABLE financial_lake.clean_payments AS SELECT account_id, customer_name, sha2(card_number, 256) as card_hash, amount, country FROM raw_payments;",
+        "inputs": [
+          {
+            "guid": "-102",
+            "typeName": "hive_table"
+          }
+        ],
+        "outputs": [
+          {
+            "guid": "-103",
+            "typeName": "hive_table"
+          }
+        ]
+      },
+      "guid": "-202"
+    },
+    {
+      "typeName": "hive_table",
+      "attributes": {
+        "name": "clean_payments",
+        "qualifiedName": "financial_lake.clean_payments@production_hive",
+        "description": "Anonymized payments dataset with hashed primary credit card details. Authorized for analyst consumption."
+      },
+      "guid": "-103",
+      "classifications": [
+        {
+          "typeName": "ANONYMIZED"
+        }
+      ]
+    },
+    {
+      "typeName": "trino_view",
+      "attributes": {
+        "name": "payments_dashboard_feed",
+        "qualifiedName": "trino://prod-coordinator/catalog/hive/schema/financial_lake/view/payments_dashboard_feed",
+        "queryText": "CREATE VIEW payments_dashboard_feed AS SELECT country, count(*) as tx_count, sum(amount) as tx_sum FROM clean_payments GROUP BY country;",
+        "inputs": [
+          {
+            "guid": "-103",
+            "typeName": "hive_table"
+          }
+        ],
+        "outputs": [
+          {
+            "guid": "-104",
+            "typeName": "bi_dashboard"
+          }
+        ]
+      },
+      "guid": "-203"
+    },
+    {
+      "typeName": "bi_dashboard",
+      "attributes": {
+        "name": "Executive Payment Operations Dashboard",
+        "qualifiedName": "dashboard://tableau-server/financials/exec-payments-op",
+        "description": "Tableau executive dashboard showing volume aggregated by country. Consumed by executives."
+      },
+      "guid": "-104"
+    }
+  ]
+}
