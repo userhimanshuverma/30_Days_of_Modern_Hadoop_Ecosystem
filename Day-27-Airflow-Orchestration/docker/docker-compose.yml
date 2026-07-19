@@ -1,0 +1,122 @@
+# docker/docker-compose.yml
+# Production-Grade Multi-Service Docker Compose Stack
+# Spawns a CeleryExecutor-based Apache Airflow Cluster with Postgres and Redis
+
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow_secure_pass@postgres:5432/airflow_db
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow_secure_pass@postgres:5432/airflow_db
+    - AIRFLOW__CELERY__BROKER_URL=redis://:redis_secure_pass@redis:6379/0
+    - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow_secure_pass@postgres:5432/airflow_db
+    - AIRFLOW__CORE__FERNET_KEY=46Ju5Qc4E9AEceE5G4H8F2F8B7D2H4Y1C9F4U5P6W7A=
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+    - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+  volumes:
+    - ../dags:/opt/airflow/dags
+    - ../logs:/opt/airflow/logs
+    - ../plugins:/opt/airflow/plugins
+    - ../configs:/opt/airflow/configs
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  # Metadata database backend
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow_secure_pass
+      - POSTGRES_DB=airflow_db
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Broker for Celery execution queue
+  redis:
+    image: redis:6.2-alpine
+    command: redis-server --requirepass redis_secure_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-cache-volume:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_secure_pass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Airflow DB Initer (runs database migration and admin user creation)
+  airflow-init:
+    <<: *airflow-common
+    command: >
+      bash -c "airflow db init &&
+      airflow users create
+      --username admin
+      --password admin_password
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email admin@enterprise.com"
+    depends_on:
+      - postgres
+      - redis
+
+  # Airflow Web Server console
+  webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  # Airflow Central Scheduler
+  scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  # Airflow Task execution Worker (Celery Daemon)
+  worker:
+    <<: *airflow-common
+    command: celery worker
+    ports:
+      - "8793:8793"
+    restart: always
+
+  # Airflow Triggerer (co-routine engine for deferrable operators & sensors)
+  triggerer:
+    <<: *airflow-common
+    command: triggerer
+    restart: always
+
+volumes:
+  postgres-db-volume:
+  redis-cache-volume:
