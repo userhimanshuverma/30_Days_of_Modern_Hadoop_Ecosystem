@@ -248,10 +248,10 @@ kafka_server_brokertopicmetrics_messagesinpersec_count{cluster="prod-east",topic
 
 ### Mathematical Formulation of Key Metrics
 1. **CPU Utilization Percentage**:
-   $$\text{CPU \%} = 100 \times \left(1 - \text{rate}(\text{node\_cpu\_seconds\_total}\{\text{mode}="idle"\}[5m])\right)$$
+   $$\text{CPU Percent} = 100 \times \left(1 - \text{rate}\left(\mathtt{node\_cpu\_seconds\_total}\{\mathtt{mode}="idle"\}[5m]\right)\right)$$
 
 2. **Histogram P99 Latency Calculation**:
-   $$\text{P99 Latency} = \text{histogram\_quantile}\left(0.99, \sum_{\text{le}} \text{rate}(\text{trino\_query\_execution\_time\_bucket}[5m])\right)$$
+   $$\text{P99 Latency} = \text{histogram\_quantile}\left(0.99, \sum_{\text{le}} \text{rate}\left(\mathtt{trino\_query\_execution\_time\_bucket}[5m]\right)\right)$$
 
 ### Service Level Terminology (SLI / SLO / SLA)
 - **SLI (Service Level Indicator)**: Quantifiable metric measuring service performance (e.g., "Percentage of Trino queries returning in under 2 seconds").
