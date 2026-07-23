@@ -1,28 +1,28 @@
 graph LR
-    subgraph Ingestion ["Data Ingestion Layer"]
-        PROD["Microservice Producers"] -->|JSON / Avro Data| KAFKA["Kafka Cluster (Consumer Lag, ReplicatedPartitions)"]
+    subgraph Ingestion [Data Ingestion Layer]
+        PROD[Microservice Producers] -->|JSON Data| KAFKA[Kafka Cluster]
     end
 
-    subgraph Stream_Processing ["Stream and Batch Processing"]
-        KAFKA -->|Streaming Reads| SPARK["Spark Streaming (ProcessingTime, FailedTasks, GC)"]
-        SPARK -->|Write ORC/Parquet| HDFS["HDFS Storage (UnderReplicatedBlocks, MissingBlocks)"]
+    subgraph Stream_Processing [Stream and Batch Processing]
+        KAFKA -->|Streaming Reads| SPARK[Spark Streaming]
+        SPARK -->|Write ORC Parquet| HDFS[HDFS Storage]
     end
 
-    subgraph Analytics_Layer ["Interactive Query and OLAP"]
-        HDFS -->|Catalog Sync| HIVE["Hive Metastore HMS (Connection Pool)"]
-        HIVE --- TRINO["Trino MPP Engine (ActiveQueries, SplitQueueTime)"]
-        KAFKA -->|Real-time Ingestion| PINOT["Pinot OLAP (SegmentStatus, QueryLatencyP99)"]
+    subgraph Analytics_Layer [Interactive Query and OLAP]
+        HDFS -->|Catalog Sync| HIVE[Hive Metastore HMS]
+        HIVE --- TRINO[Trino MPP Engine]
+        KAFKA -->|Realtime Ingestion| PINOT[Pinot OLAP]
     end
 
-    subgraph Observability_Mesh ["Enterprise Telemetry Collector"]
-        KAFKA -.->|JMX Exporter| PROM["Prometheus HA Pair"]
+    subgraph Observability_Mesh [Enterprise Telemetry Collector]
+        KAFKA -.->|JMX Exporter| PROM[Prometheus HA Pair]
         SPARK -.->|PrometheusServlet| PROM
         HDFS -.->|JMX Exporter| PROM
         HIVE -.->|JMX Exporter| PROM
         TRINO -.->|JMX Exporter| PROM
         PINOT -.->|Prometheus Exporter| PROM
         
-        PROM --> GRAF["Unified SRE Command Dashboard"]
-        PROM --> AM["Alertmanager"]
-        AM --> PAGER["On-Call Incident Automation"]
+        PROM --> GRAF[Unified SRE Command Dashboard]
+        PROM --> AM[Alertmanager]
+        AM --> PAGER[On Call Incident Automation]
     end

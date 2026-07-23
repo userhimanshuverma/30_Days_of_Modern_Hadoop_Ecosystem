@@ -1,26 +1,26 @@
-flowchart LR
-    subgraph Sources ["Application and Engine Layer"]
-        A1["Java JVM MBeans (Memory, GC, Threads)"]
-        A2["Custom Engine Metrics (Kafka Msgs/Sec, HDFS Blocks)"]
-        A3["Linux OS Stats (/proc, /sys, cgroups)"]
+graph LR
+    subgraph Sources [Application and Engine Layer]
+        A1[Java JVM MBeans - Memory GC Threads]
+        A2[Custom Engine Metrics - Kafka Msgs and HDFS Blocks]
+        A3[Linux OS Stats - proc sys cgroups]
     end
 
-    subgraph Translation ["Exporter and Scrape Translation Layer"]
-        B1["jmx_exporter (Transforms MBeans to OpenMetrics)"]
-        B2["PrometheusServlet / OTel (Exposes native /metrics)"]
-        B3["node_exporter (Reads /proc and exports OS stats)"]
+    subgraph Translation [Exporter and Scrape Translation Layer]
+        B1[jmx_exporter - Transforms MBeans to OpenMetrics]
+        B2[PrometheusServlet / OTel - Exposes native metrics]
+        B3[node_exporter - Reads proc and exports OS stats]
     end
 
-    subgraph Storage ["TSDB Engine (Prometheus)"]
-        C1["Scrape Loop (Target interval 15s)"]
-        C2["Head Block In-Memory (2 Hours Active Buffer)"]
-        C3["WAL Write Ahead Log (Crash Recovery)"]
-        C4["Persisted Blocks (2h compressed chunks on disk)"]
+    subgraph Storage [TSDB Engine Prometheus]
+        C1[Scrape Loop - Target interval 15s]
+        C2[Head Block In Memory - 2 Hours Active Buffer]
+        C3[WAL Write Ahead Log - Crash Recovery]
+        C4[Persisted Blocks - 2h compressed chunks on disk]
     end
 
-    subgraph Consumption ["Visualization and Alerting"]
-        D1["Grafana Dashboard Panels (PromQL Range Queries)"]
-        D2["Alertmanager Engine (PromQL Instant Queries)"]
+    subgraph Consumption [Visualization and Alerting]
+        D1[Grafana Dashboard Panels - PromQL Range Queries]
+        D2[Alertmanager Engine - PromQL Instant Queries]
     end
 
     A1 -->|JMX Interrogation| B1

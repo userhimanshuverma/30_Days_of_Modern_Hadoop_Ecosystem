@@ -33,37 +33,37 @@
 
 ```mermaid
 graph TB
-    subgraph Storage_And_Compute ["Distributed Cluster Nodes"]
-        NN["HDFS NameNode (JVM + JMX Agent :5556)"]
-        DN["HDFS DataNodes (JVM + JMX Agent :5557)"]
-        KAFKA["Kafka Brokers (JVM + JMX Agent :5558)"]
-        SPARK["Spark Drivers and Executors (PrometheusServlet :4040)"]
-        TRINO["Trino Coordinator (JMX Agent / OTel :8081)"]
-        PINOT["Pinot Controller and Server (Prometheus Exporter :8082)"]
-        NODE["Host Linux Kernel (Node Exporter :9100)"]
+    subgraph Storage_And_Compute [Distributed Cluster Nodes]
+        NN[HDFS NameNode - JVM and JMX Agent 5556]
+        DN[HDFS DataNodes - JVM and JMX Agent 5557]
+        KAFKA[Kafka Brokers - JVM and JMX Agent 5558]
+        SPARK[Spark Drivers and Executors - PrometheusServlet 4040]
+        TRINO[Trino Coordinator - JMX Agent and OTel 8081]
+        PINOT[Pinot Controller and Server - Prometheus Exporter 8082]
+        NODE[Host Linux Kernel - Node Exporter 9100]
     end
 
-    subgraph Observability_Tier ["Observability and Metrics Core"]
-        PROM["Prometheus TSDB Server (Pull Engine :9090)"]
-        ALERT["Alertmanager (Grouping / Routing :9093)"]
-        GRAF["Grafana Visualizer (Dashboards UI :3000)"]
+    subgraph Observability_Tier [Observability and Metrics Core]
+        PROM[Prometheus TSDB Server - Pull Engine 9090]
+        ALERT[Alertmanager - Grouping and Routing 9093]
+        GRAF[Grafana Visualizer - Dashboards UI 3000]
     end
 
-    subgraph Alert_Receivers ["Incident Management and On-Call"]
-        SLACK["Slack Notification Channel"]
-        PD["PagerDuty On-Call Escalation"]
-        MAIL["SRE Team Email Group"]
+    subgraph Alert_Receivers [Incident Management and On-Call]
+        SLACK[Slack Notification Channel]
+        PD[PagerDuty On-Call Escalation]
+        MAIL[SRE Team Email Group]
     end
 
-    NN -->|HTTP Pull /metrics| PROM
-    DN -->|HTTP Pull /metrics| PROM
-    KAFKA -->|HTTP Pull /metrics| PROM
-    SPARK -->|HTTP Pull /metrics| PROM
-    TRINO -->|HTTP Pull /metrics| PROM
-    PINOT -->|HTTP Pull /metrics| PROM
-    NODE -->|HTTP Pull /metrics| PROM
+    NN -->|HTTP Pull metrics| PROM
+    DN -->|HTTP Pull metrics| PROM
+    KAFKA -->|HTTP Pull metrics| PROM
+    SPARK -->|HTTP Pull metrics| PROM
+    TRINO -->|HTTP Pull metrics| PROM
+    PINOT -->|HTTP Pull metrics| PROM
+    NODE -->|HTTP Pull metrics| PROM
 
-    PROM -->|PromQL Datasource Queries| GRAF
+    PROM -->|PromQL Queries| GRAF
     PROM -->|Evaluates Alert Rules| ALERT
     ALERT -->|Dispatch Notification| SLACK
     ALERT -->|Page P1 Incidents| PD
@@ -100,13 +100,13 @@ Observability acts as the central nerve center for modern data engineering. It e
 Operating an enterprise-grade Hadoop platform without centralized observability leads to catastrophic failure modes across infrastructure, compute, and business SLAs:
 
 ```mermaid
-flowchart TD
-    A["Silent Disk Degrades on DataNode 14"] --> B["DataNode I/O Wait Jumps to 98%"]
-    B --> C["HDFS Block Reads Timeout"]
-    C --> D["Spark Tasks Stalled in Fetch Failed State"]
-    D --> E["Executor Retries Exhaust YARN Queue Memory"]
-    E --> F["Kafka Consumer Group Loses Heartbeat and Collapses"]
-    F --> G["Outage: Executive Dashboards Go Stale"]
+graph TD
+    A[Silent Disk Degrades on DataNode 14] --> B[DataNode IO Wait Jumps to 98 Percent]
+    B --> C[HDFS Block Reads Timeout]
+    C --> D[Spark Tasks Stalled in Fetch Failed State]
+    D --> E[Executor Retries Exhaust YARN Queue Memory]
+    E --> F[Kafka Consumer Group Loses Heartbeat and Collapses]
+    F --> G[Outage Executive Dashboards Go Stale]
 ```
 
 ### Real-World Production Failure Modes
@@ -134,29 +134,29 @@ flowchart TD
 Understanding the metrics workflow requires analyzing each exporter and engine interface within the telemetry stack.
 
 ```mermaid
-flowchart LR
-    subgraph Sources ["Application and Engine Layer"]
-        A1["Java JVM MBeans (Memory, GC, Threads)"]
-        A2["Custom Engine Metrics (Kafka Msgs/Sec, HDFS Blocks)"]
-        A3["Linux OS Stats (/proc, /sys, cgroups)"]
+graph LR
+    subgraph Sources [Application and Engine Layer]
+        A1[Java JVM MBeans - Memory GC Threads]
+        A2[Custom Engine Metrics - Kafka Msgs and HDFS Blocks]
+        A3[Linux OS Stats - proc sys cgroups]
     end
 
-    subgraph Translation ["Exporter and Scrape Translation Layer"]
-        B1["jmx_exporter (Transforms MBeans to OpenMetrics)"]
-        B2["PrometheusServlet / OTel (Exposes native /metrics)"]
-        B3["node_exporter (Reads /proc and exports OS stats)"]
+    subgraph Translation [Exporter and Scrape Translation Layer]
+        B1[jmx_exporter - Transforms MBeans to OpenMetrics]
+        B2[PrometheusServlet / OTel - Exposes native metrics]
+        B3[node_exporter - Reads proc and exports OS stats]
     end
 
-    subgraph Storage ["TSDB Engine (Prometheus)"]
-        C1["Scrape Loop (Target interval 15s)"]
-        C2["Head Block In-Memory (2 Hours Active Buffer)"]
-        C3["WAL Write Ahead Log (Crash Recovery)"]
-        C4["Persisted Blocks (2h compressed chunks on disk)"]
+    subgraph Storage [TSDB Engine Prometheus]
+        C1[Scrape Loop - Target interval 15s]
+        C2[Head Block In Memory - 2 Hours Active Buffer]
+        C3[WAL Write Ahead Log - Crash Recovery]
+        C4[Persisted Blocks - 2h compressed chunks on disk]
     end
 
-    subgraph Consumption ["Visualization and Alerting"]
-        D1["Grafana Dashboard Panels (PromQL Range Queries)"]
-        D2["Alertmanager Engine (PromQL Instant Queries)"]
+    subgraph Consumption [Visualization and Alerting]
+        D1[Grafana Dashboard Panels - PromQL Range Queries]
+        D2[Alertmanager Engine - PromQL Instant Queries]
     end
 
     A1 -->|JMX Interrogation| B1
@@ -194,31 +194,31 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Target as Exporters (JMX / Node)
+    participant Target as Exporters JMX and Node
     participant PromScraper as Prometheus Scraper
-    participant TSDBMem as TSDB Head Block (RAM)
-    participant WAL as Write-Ahead Log (Disk)
+    participant TSDBMem as TSDB Head Block RAM
+    participant WAL as Write Ahead Log Disk
     participant RuleEngine as Alert Evaluation Engine
     participant AlertMgr as Alertmanager Service
 
-    loop Every 15 seconds (scrape_interval)
-        PromScraper->>Target: HTTP GET /metrics
-        Target-->>PromScraper: 200 OK (OpenMetrics Payload)
+    loop Every 15 seconds scrape_interval
+        PromScraper->>Target: HTTP GET metrics
+        Target-->>PromScraper: 200 OK OpenMetrics Payload
         PromScraper->>PromScraper: Parse metrics and validate labels
         PromScraper->>TSDBMem: Append samples to memory chunk
         PromScraper->>WAL: Log write to WAL segment file
     end
 
-    loop Every 15 seconds (evaluation_interval)
-        RuleEngine->>TSDBMem: Query PromQL rules (e.g. MemoryAvailable < 1GB)
-        TSDBMem-->>RuleEngine: Returns time-series vector
+    loop Every 15 seconds evaluation_interval
+        RuleEngine->>TSDBMem: Query PromQL rules MemoryAvailable < 1GB
+        TSDBMem-->>RuleEngine: Returns time series vector
         alt Condition Is True for duration
-            RuleEngine->>AlertMgr: POST /api/v2/alerts (State: FIRING)
-            AlertMgr->>AlertMgr: Deduplicate, Group and Silence check
+            RuleEngine->>AlertMgr: POST alerts State FIRING
+            AlertMgr->>AlertMgr: Deduplicate Group and Silence check
             AlertMgr->>AlertMgr: Route via tree rules
             AlertMgr-->>Target: Send alert to Slack or PagerDuty
         else Condition Resolved
-            RuleEngine->>AlertMgr: POST /api/v2/alerts (State: RESOLVED)
+            RuleEngine->>AlertMgr: POST alerts State RESOLVED
         end
     end
 ```
@@ -497,16 +497,16 @@ bash scripts/verify-dashboard.sh
 
 ```mermaid
 graph TD
-    ALERT["Alert Triggered or Panel Blank"] --> TYPE{"Issue Category?"}
+    ALERT[Alert Triggered or Panel Blank] --> TYPE{Issue Category}
     
-    TYPE -->|Missing Metrics| M1["Check exporter port reachability with curl"]
-    M1 --> M2["Inspect target logs for JVM JMX bind errors"]
+    TYPE -->|Missing Metrics| M1[Check exporter port reachability with curl]
+    M1 --> M2[Inspect target logs for JVM JMX bind errors]
     
-    TYPE -->|High CPU / OOM on Prometheus| H1["Query TSDB status: topk(10, count by(__name__))"]
-    H1 --> H2["Apply labeldrop in metric_relabel_configs for UUIDs"]
+    TYPE -->|High CPU or OOM on Prometheus| H1[Query TSDB status topk]
+    H1 --> H2[Apply labeldrop in metric relabel configs]
     
-    TYPE -->|Alerts Not Firing to Slack| A1["Check Alertmanager route matcher in alertmanager.yml"]
-    A1 --> A2["Verify Slack Webhook token / PagerDuty integration key"]
+    TYPE -->|Alerts Not Firing to Slack| A1[Check Alertmanager route matcher]
+    A1 --> A2[Verify Slack Webhook token and PagerDuty key]
 ```
 
 ### Playbook Index
@@ -522,32 +522,32 @@ graph TD
 
 ```mermaid
 graph LR
-    subgraph Ingestion ["Data Ingestion Layer"]
-        PROD["Microservice Producers"] -->|JSON / Avro Data| KAFKA["Kafka Cluster (Consumer Lag, ReplicatedPartitions)"]
+    subgraph Ingestion [Data Ingestion Layer]
+        PROD[Microservice Producers] -->|JSON Data| KAFKA[Kafka Cluster]
     end
 
-    subgraph Stream_Processing ["Stream and Batch Processing"]
-        KAFKA -->|Streaming Reads| SPARK["Spark Streaming (ProcessingTime, FailedTasks, GC)"]
-        SPARK -->|Write ORC/Parquet| HDFS["HDFS Storage (UnderReplicatedBlocks, MissingBlocks)"]
+    subgraph Stream_Processing [Stream and Batch Processing]
+        KAFKA -->|Streaming Reads| SPARK[Spark Streaming]
+        SPARK -->|Write ORC Parquet| HDFS[HDFS Storage]
     end
 
-    subgraph Analytics_Layer ["Interactive Query and OLAP"]
-        HDFS -->|Catalog Sync| HIVE["Hive Metastore HMS (Connection Pool)"]
-        HIVE --- TRINO["Trino MPP Engine (ActiveQueries, SplitQueueTime)"]
-        KAFKA -->|Real-time Ingestion| PINOT["Pinot OLAP (SegmentStatus, QueryLatencyP99)"]
+    subgraph Analytics_Layer [Interactive Query and OLAP]
+        HDFS -->|Catalog Sync| HIVE[Hive Metastore HMS]
+        HIVE --- TRINO[Trino MPP Engine]
+        KAFKA -->|Realtime Ingestion| PINOT[Pinot OLAP]
     end
 
-    subgraph Observability_Mesh ["Enterprise Telemetry Collector"]
-        KAFKA -.->|JMX Exporter| PROM["Prometheus HA Pair"]
+    subgraph Observability_Mesh [Enterprise Telemetry Collector]
+        KAFKA -.->|JMX Exporter| PROM[Prometheus HA Pair]
         SPARK -.->|PrometheusServlet| PROM
         HDFS -.->|JMX Exporter| PROM
         HIVE -.->|JMX Exporter| PROM
         TRINO -.->|JMX Exporter| PROM
         PINOT -.->|Prometheus Exporter| PROM
         
-        PROM --> GRAF["Unified SRE Command Dashboard"]
-        PROM --> AM["Alertmanager"]
-        AM --> PAGER["On-Call Incident Automation"]
+        PROM --> GRAF[Unified SRE Command Dashboard]
+        PROM --> AM[Alertmanager]
+        AM --> PAGER[On Call Incident Automation]
     end
 ```
 

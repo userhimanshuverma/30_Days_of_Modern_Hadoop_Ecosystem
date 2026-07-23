@@ -1,14 +1,14 @@
 graph TD
-    INCOMING["Alert firing from Prometheus (Labels: alertname, severity, service)"] --> ROUTER{"Root Route Matcher"}
+    INCOMING[Alert firing from Prometheus] --> ROUTER{Root Route Matcher}
     
-    ROUTER -->|match: severity=critical| CRIT_NODE["Critical Grouping (group_by: alertname, cluster)"]
-    ROUTER -->|match: severity=warning| WARN_NODE["Warning Grouping (group_by: service)"]
-    ROUTER -->|default match| DEF_NODE["Default Grouping (group_by: instance)"]
+    ROUTER -->|match: severity=critical| CRIT_NODE[Critical Grouping - group_by alertname cluster]
+    ROUTER -->|match: severity=warning| WARN_NODE[Warning Grouping - group_by service]
+    ROUTER -->|default match| DEF_NODE[Default Grouping - group_by instance]
 
-    CRIT_NODE --> INHIBIT{"Inhibition Check (e.g. node_down suppresses process_down)"}
-    INHIBIT -->|Muted| DROPPED["Alert Silenced / Suppressed"]
-    INHIBIT -->|Passed| PD_RECV["PagerDuty Receiver (Immediate P1 Page)"]
-    CRIT_NODE --> SLACK_CRIT["Slack #alerts-critical"]
+    CRIT_NODE --> INHIBIT{Inhibition Check - node_down suppresses process_down}
+    INHIBIT -->|Muted| DROPPED[Alert Silenced or Suppressed]
+    INHIBIT -->|Passed| PD_RECV[PagerDuty Receiver - Immediate P1 Page]
+    CRIT_NODE --> SLACK_CRIT[Slack alerts-critical]
 
-    WARN_NODE --> SLACK_WARN["Slack #alerts-warnings"]
-    DEF_NODE --> EMAIL_DIGEST["Daily SRE Email Digest"]
+    WARN_NODE --> SLACK_WARN[Slack alerts-warnings]
+    DEF_NODE --> EMAIL_DIGEST[Daily SRE Email Digest]
