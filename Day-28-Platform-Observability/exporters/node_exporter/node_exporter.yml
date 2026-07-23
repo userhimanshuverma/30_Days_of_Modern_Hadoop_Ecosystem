@@ -1,0 +1,21 @@
+# exporters/node_exporter/node_exporter.yml
+# Recommended Node Exporter flags for Hadoop data node infrastructure
+
+collector:
+  enabled:
+    - cpu
+    - diskstats
+    - filesystem
+    - loadavg
+    - meminfo
+    - netdev
+    - stat
+    - time
+    - uname
+  disabled:
+    - infiniband
+    - bcache
+
+web:
+  listen-address: ":9100"
+  telemetry-path: "/metrics"

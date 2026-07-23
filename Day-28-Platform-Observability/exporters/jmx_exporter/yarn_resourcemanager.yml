@@ -1,0 +1,14 @@
+# exporters/jmx_exporter/yarn_resourcemanager.yml
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+rules:
+  - pattern: Hadoop<service=ResourceManager, name=ClusterMetrics><>(NumActiveNMs|NumDecommissionedNMs|NumLostNMs|NumUnhealthyNMs|AMLaunchDelay)
+    name: hadoop_yarn_resourcemanager_$1
+    type: GAUGE
+
+  - pattern: Hadoop<service=ResourceManager, name=QueueMetrics, q0=root, q1=(.+)><>(AppsSubmitted|AppsRunning|AppsPending|AppsCompleted|AppsFailed|AllocatedMB|AllocatedVCores)
+    name: hadoop_yarn_queue_$2
+    labels:
+      queue: "$1"
+    type: GAUGE

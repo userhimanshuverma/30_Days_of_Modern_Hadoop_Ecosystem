@@ -1,0 +1,104 @@
+# prometheus/alert-rules.yml
+# Production Prometheus Alerting Rules for Modern Hadoop & Platform Components
+
+groups:
+  - name: platform_infrastructure_alerts
+    rules:
+      - alert: HostDiskSpaceFillingFast
+        expr: (node_filesystem_free_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 5m
+        labels:
+          severity: critical
+          tier: infrastructure
+        annotations:
+          summary: "Host disk space lower than 15% on {{ $labels.instance }}"
+          description: "Disk mount {{ $labels.mountpoint }} has only {{ $value | humanizePercentage }} remaining capacity."
+          runbook: "https://github.com/platform/wiki/troubleshooting/disk-full"
+
+      - alert: HostHighCpuUtilization
+        expr: instance:node_cpu_utilization:percent > 90
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "CPU utilization above 90% on {{ $labels.instance }}"
+          description: "CPU load on instance {{ $labels.instance }} has exceeded 90% threshold for over 10 minutes."
+
+  - name: hdfs_alerts
+    rules:
+      - alert: HDFSNameNodeInSafemode
+        expr: hadoop_namenode_safemode == 1
+        for: 2m
+        labels:
+          severity: critical
+          tier: data-storage
+        annotations:
+          summary: "HDFS NameNode entered SAFEMODE"
+          description: "HDFS Cluster {{ $labels.cluster }} NameNode has entered read-only SafeMode state."
+
+      - alert: HDFSUnderReplicatedBlocksSpike
+        expr: hadoop_namenode_under_replicated_blocks > 1000
+        for: 15m
+        labels:
+          severity: warning
+          tier: data-storage
+        annotations:
+          summary: "HDFS Under-Replicated Blocks above threshold"
+          description: "NameNode reports {{ $value }} under-replicated blocks. Check DataNode health."
+
+  - name: kafka_alerts
+    rules:
+      - alert: KafkaConsumerGroupLagHigh
+        expr: kafka_consumergroup_lag_total > 50000
+        for: 5m
+        labels:
+          severity: critical
+          tier: messaging
+        annotations:
+          summary: "Kafka Consumer Group Lag Spike on {{ $labels.consumergroup }}"
+          description: "Total unconsumed message backlog for group {{ $labels.consumergroup }} on topic {{ $labels.topic }} is {{ $value }}."
+
+      - alert: KafkaUnderReplicatedPartitions
+        expr: kafka_server_replica_manager_underreplicatedpartitions > 0
+        for: 3m
+        labels:
+          severity: critical
+          tier: messaging
+        annotations:
+          summary: "Kafka Under-Replicated Partitions detected"
+          description: "Kafka Broker {{ $labels.instance }} reports {{ $value }} under-replicated partitions."
+
+  - name: spark_alerts
+    rules:
+      - alert: SparkExecutorOOMWarning
+        expr: jvm_memory_bytes_used{area="heap", job="spark_metrics"} / jvm_memory_bytes_max{area="heap", job="spark_metrics"} > 0.90
+        for: 3m
+        labels:
+          severity: critical
+          tier: compute
+        annotations:
+          summary: "Spark Executor Heap Memory > 90%"
+          description: "Spark driver/executor heap utilization on {{ $labels.instance }} is near OOM limit."
+
+  - name: trino_pinot_alerts
+    rules:
+      - alert: TrinoQueryFailureSpike
+        expr: rate(trino_execution_execution_failed_queries_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          tier: analytics
+        annotations:
+          summary: "Trino Query failure rate spike detected"
+          description: "Trino cluster is failing more than 5 queries per second."
+
+      - alert: PrometheusTargetMissing
+        expr: up == 0
+        for: 3m
+        labels:
+          severity: critical
+          tier: observability
+        annotations:
+          summary: "Prometheus target scrape failed"
+          description: "Target exporter {{ $labels.instance }} under job {{ $labels.job }} is offline."

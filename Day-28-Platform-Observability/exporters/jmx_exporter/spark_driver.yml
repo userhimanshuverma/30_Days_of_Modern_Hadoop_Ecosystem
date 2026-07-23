@@ -1,0 +1,8 @@
+# exporters/jmx_exporter/spark_driver.yml
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+rules:
+  - pattern: metrics<name=(.+)><>(Value|Count)
+    name: spark_metric_$1
+    type: GAUGE

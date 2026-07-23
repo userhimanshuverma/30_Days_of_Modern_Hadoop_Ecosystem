@@ -1,0 +1,36 @@
+graph TB
+    subgraph Storage_And_Compute ["Distributed Cluster Nodes"]
+        NN["HDFS NameNode (JVM + JMX Agent :5556)"]
+        DN["HDFS DataNodes (JVM + JMX Agent :5557)"]
+        KAFKA["Kafka Brokers (JVM + JMX Agent :5558)"]
+        SPARK["Spark Drivers and Executors (PrometheusServlet :4040)"]
+        TRINO["Trino Coordinator (JMX Agent / OTel :8081)"]
+        PINOT["Pinot Controller and Server (Prometheus Exporter :8082)"]
+        NODE["Host Linux Kernel (Node Exporter :9100)"]
+    end
+
+    subgraph Observability_Tier ["Observability and Metrics Core"]
+        PROM["Prometheus TSDB Server (Pull Engine :9090)"]
+        ALERT["Alertmanager (Grouping / Routing :9093)"]
+        GRAF["Grafana Visualizer (Dashboards UI :3000)"]
+    end
+
+    subgraph Alert_Receivers ["Incident Management and On-Call"]
+        SLACK["Slack Notification Channel"]
+        PD["PagerDuty On-Call Escalation"]
+        MAIL["SRE Team Email Group"]
+    end
+
+    NN -->|HTTP Pull /metrics| PROM
+    DN -->|HTTP Pull /metrics| PROM
+    KAFKA -->|HTTP Pull /metrics| PROM
+    SPARK -->|HTTP Pull /metrics| PROM
+    TRINO -->|HTTP Pull /metrics| PROM
+    PINOT -->|HTTP Pull /metrics| PROM
+    NODE -->|HTTP Pull /metrics| PROM
+
+    PROM -->|PromQL Datasource Queries| GRAF
+    PROM -->|Evaluates Alert Rules| ALERT
+    ALERT -->|Dispatch Notification| SLACK
+    ALERT -->|Page P1 Incidents| PD
+    ALERT -->|Email Digest| MAIL

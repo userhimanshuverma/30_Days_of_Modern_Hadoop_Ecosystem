@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant Target as Exporters (JMX / Node)
+    participant PromScraper as Prometheus Scraper
+    participant TSDBMem as TSDB Head Block (RAM)
+    participant WAL as Write-Ahead Log (Disk)
+    participant RuleEngine as Alert Evaluation Engine
+    participant AlertMgr as Alertmanager Service
+
+    loop Every 15 seconds (scrape_interval)
+        PromScraper->>Target: HTTP GET /metrics
+        Target-->>PromScraper: 200 OK (OpenMetrics Payload)
+        PromScraper->>PromScraper: Parse metrics and validate labels
+        PromScraper->>TSDBMem: Append samples to memory chunk
+        PromScraper->>WAL: Log write to WAL segment file
+    end
+
+    loop Every 15 seconds (evaluation_interval)
+        RuleEngine->>TSDBMem: Query PromQL rules (e.g. MemoryAvailable < 1GB)
+        TSDBMem-->>RuleEngine: Returns time-series vector
+        alt Condition Is True for duration
+            RuleEngine->>AlertMgr: POST /api/v2/alerts (State: FIRING)
+            AlertMgr->>AlertMgr: Deduplicate, Group and Silence check
+            AlertMgr->>AlertMgr: Route via tree rules
+            AlertMgr-->>Target: Send alert to Slack or PagerDuty
+        else Condition Resolved
+            RuleEngine->>AlertMgr: POST /api/v2/alerts (State: RESOLVED)
+        end
+    end

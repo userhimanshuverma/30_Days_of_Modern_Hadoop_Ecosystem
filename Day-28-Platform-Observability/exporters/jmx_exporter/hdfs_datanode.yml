@@ -1,0 +1,12 @@
+# exporters/jmx_exporter/hdfs_datanode.yml
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+rules:
+  - pattern: Hadoop<service=DataNode, name=FSDatasetState><>(Capacity|DfsUsed|Remaining)
+    name: hadoop_datanode_$1_bytes
+    type: GAUGE
+
+  - pattern: Hadoop<service=DataNode, name=DataNodeInfo><>(XceiverCount)
+    name: hadoop_datanode_$1
+    type: GAUGE

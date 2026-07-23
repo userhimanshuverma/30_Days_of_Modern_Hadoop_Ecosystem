@@ -1,0 +1,35 @@
+# prometheus/recording-rules.yml
+# Production Prometheus Recording Rules for pre-aggregating high cardinality metrics
+
+groups:
+  - name: node_exporter_rules
+    rules:
+      - record: instance:node_cpu_utilization:percent
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      - record: instance:node_memory_utilization:percent
+        expr: 100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))
+
+      - record: instance:node_filesystem_free:percent
+        expr: 100 * (node_filesystem_free_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+
+  - name: kafka_rules
+    rules:
+      - record: job:kafka_broker_messages_in_per_sec:rate5m
+        expr: sum by (job) (rate(kafka_server_brokertopicmetrics_messagesinpersec_count[5m]))
+
+      - record: kafka_consumergroup_lag_total
+        expr: sum by (consumergroup, topic) (kafka_consumergroup_lag)
+
+  - name: hdfs_rules
+    rules:
+      - record: hdfs:namenode:capacity_used_percent
+        expr: 100 * (hadoop_namenode_capacity_used_bytes / hadoop_namenode_capacity_total_bytes)
+
+      - record: hdfs:datanode:dead_nodes_count
+        expr: hadoop_namenode_num_dead_datanodes
+
+  - name: trino_rules
+    rules:
+      - record: trino:query_execution_time_p95
+        expr: histogram_quantile(0.95, sum(rate(trino_execution_execution_execution_time_ms_bucket[5m])) by (le))

@@ -1,0 +1,12 @@
+# exporters/jmx_exporter/hdfs_namenode.yml
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+rules:
+  - pattern: Hadoop<service=NameNode, name=FSNamesystem><>(CapacityTotal|CapacityUsed|CapacityRemaining|BlocksTotal|FilesTotal|UnderReplicatedBlocks|CorruptBlocks|MissingBlocks|NumLiveDataNodes|NumDeadDataNodes)
+    name: hadoop_namenode_$1
+    type: GAUGE
+
+  - pattern: Hadoop<service=NameNode, name=NameNodeInfo><>(Safemode)
+    name: hadoop_namenode_$1
+    type: GAUGE

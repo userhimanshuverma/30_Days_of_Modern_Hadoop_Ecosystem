@@ -1,0 +1,84 @@
+# prometheus/prometheus.yml
+# Production Prometheus configuration for Hadoop & Modern Data Platform Observability
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'production-data-platform-01'
+    datacenter: 'us-east-1'
+    environment: 'production'
+
+rule_files:
+  - 'recording-rules.yml'
+  - 'alert-rules.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+      scheme: http
+      timeout: 10s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          role: 'host-metrics'
+
+  - job_name: 'kafka_jmx'
+    static_configs:
+      - targets: ['kafka-jmx-exporter:5558']
+        labels:
+          service: 'kafka'
+          component: 'broker'
+
+  - job_name: 'hdfs_namenode_jmx'
+    static_configs:
+      - targets: ['hdfs-namenode-jmx:5556']
+        labels:
+          service: 'hdfs'
+          component: 'namenode'
+
+  - job_name: 'hdfs_datanode_jmx'
+    static_configs:
+      - targets: ['hdfs-datanode-jmx:5557']
+        labels:
+          service: 'hdfs'
+          component: 'datanode'
+
+  - job_name: 'spark_metrics'
+    metrics_path: '/metrics/prometheus'
+    static_configs:
+      - targets: ['spark-driver:4040']
+        labels:
+          service: 'spark'
+          component: 'driver'
+
+  - job_name: 'trino_jmx'
+    static_configs:
+      - targets: ['trino-coordinator:8081']
+        labels:
+          service: 'trino'
+          component: 'coordinator'
+
+  - job_name: 'pinot_metrics'
+    static_configs:
+      - targets: ['pinot-controller:8082']
+        labels:
+          service: 'pinot'
+          component: 'controller'
+
+  - job_name: 'airflow_metrics'
+    static_configs:
+      - targets: ['airflow-statsd-exporter:9102']
+        labels:
+          service: 'airflow'
+          component: 'scheduler'

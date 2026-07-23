@@ -1,0 +1,33 @@
+# exporters/jmx_exporter/kafka.yml
+# Prometheus JMX Exporter configuration rules for Kafka Brokers
+
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+ssl: false
+
+rules:
+  # Broker Topic Metrics
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=(BytesInPerSec|BytesOutPerSec|MessagesInPerSec|FailedProduceRequestsPerSec|FailedFetchRequestsPerSec)><>Count
+    name: kafka_server_brokertopicmetrics_$1_count
+    type: COUNTER
+
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=(BytesInPerSec|BytesOutPerSec|MessagesInPerSec|FailedProduceRequestsPerSec|FailedFetchRequestsPerSec)><>OneMinuteRate
+    name: kafka_server_brokertopicmetrics_$1_oneminuterate
+    type: GAUGE
+
+  # Replica Manager
+  - pattern: kafka.server<type=ReplicaManager, name=(UnderReplicatedPartitions|OfflineReplicaCount|PartitionCount)><>Value
+    name: kafka_server_replica_manager_$1
+    type: GAUGE
+
+  # Controller State
+  - pattern: kafka.controller<type=KafkaController, name=(ActiveControllerCount|OfflinePartitionsCount)><>Value
+    name: kafka_controller_$1
+    type: GAUGE
+
+  # JVM GC Metrics
+  - pattern: java.lang<type=GarbageCollector, name=(.+)><>(CollectionCount|CollectionTime)
+    name: jvm_gc_$2_total
+    labels:
+      gc_name: "$1"
+    type: COUNTER

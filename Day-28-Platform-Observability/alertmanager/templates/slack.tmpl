@@ -1,0 +1,13 @@
+{{ define "slack.default.text" }}
+{{ range .Alerts }}
+*Alert:* {{ .Annotations.summary }}
+*Description:* {{ .Annotations.description }}
+*Severity:* `{{ .Labels.severity }}`
+*Cluster:* `{{ .Labels.cluster }}`
+*Service:* `{{ .Labels.service }}`
+*Instance:* `{{ .Labels.instance }}`
+*Active Since:* {{ .StartsAt | formatName }}
+{{ if .Annotations.runbook }}*Runbook:* {{ .Annotations.runbook }}{{ end }}
+---
+{{ end }}
+{{ end }}
