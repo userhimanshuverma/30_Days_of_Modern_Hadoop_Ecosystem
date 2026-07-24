@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+
+    <!-- =================================================================== -->
+    <!-- AWS S3 & MinIO Object Storage Configurations (S3A Connector)       -->
+    <!-- =================================================================== -->
+    
+    <!-- Filesystem Implementation for s3a:// URLs -->
+    <property>
+        <name>fs.s3a.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+        <description>The FileSystem implementation for s3a:// URLs.</description>
+    </property>
+
+    <!-- Endpoint (MinIO endpoint for local testing, or s3.amazonaws.com) -->
+    <property>
+        <name>fs.s3a.endpoint</name>
+        <value>http://minio:9000</value>
+        <description>AWS S3 or MinIO endpoint URL.</description>
+    </property>
+
+    <!-- Path Style Access (Required for MinIO/Ceph, set to false for real AWS S3) -->
+    <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+        <description>Enable path-style access for MinIO/S3 compatible storage.</description>
+    </property>
+
+    <!-- Credentials Provider Chain -->
+    <property>
+        <name>fs.s3a.aws.credentials.provider</name>
+        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>
+        <description>Credential provider class for S3A authentication.</description>
+    </property>
+
+    <!-- Access Key & Secret Key (Environment / MinIO Defaults) -->
+    <property>
+        <name>fs.s3a.access.key</name>
+        <value>minioadmin</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.secret.key</name>
+        <value>minioadminpassword</value>
+    </property>
+
+    <!-- SSL / TLS Configuration -->
+    <property>
+        <name>fs.s3a.connection.ssl.enabled</name>
+        <value>false</value>
+        <description>Set to true in production AWS environment with HTTPS.</description>
+    </property>
+
+    <!-- S3A Fast Upload & Multipart Configuration -->
+    <property>
+        <name>fs.s3a.fast.upload</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.fast.upload.buffer</name>
+        <value>disk</value>
+        <description>Buffer type: disk, bytebuffer, or array.</description>
+    </property>
+
+    <property>
+        <name>fs.s3a.multipart.size</name>
+        <value>67108864</value>
+        <description>64MB part size for S3 multipart uploads.</description>
+    </property>
+
+    <!-- S3A Committer Configuration (Magic Committer) -->
+    <property>
+        <name>fs.s3a.committer.name</name>
+        <value>magic</value>
+        <description>S3A Committer strategy: magic, directory, or partition.</description>
+    </property>
+
+    <property>
+        <name>fs.s3a.committer.magic.enabled</name>
+        <value>true</value>
+    </property>
+
+
+    <!-- =================================================================== -->
+    <!-- Azure Data Lake Storage Gen2 Configurations (ABFS Connector)        -->
+    <!-- =================================================================== -->
+    
+    <!-- Filesystem Implementation for abfs:// and abfss:// URLs -->
+    <property>
+        <name>fs.abfs.impl</name>
+        <value>org.apache.hadoop.fs.azureblob.AzureBlobFileSystem</value>
+    </property>
+
+    <property>
+        <name>fs.abfss.impl</name>
+        <value>org.apache.hadoop.fs.azureblob.SecureAzureBlobFileSystem</value>
+    </property>
+
+    <!-- Authentication Type: OAuth Service Principal -->
+    <property>
+        <name>fs.azure.account.auth.type</name>
+        <value>OAuth</value>
+    </property>
+
+    <property>
+        <name>fs.azure.account.oauth.provider.type</name>
+        <value>org.apache.hadoop.fs.azureblob.oauth2.ClientCredsTokenProvider</value>
+    </property>
+
+    <property>
+        <name>fs.azure.account.oauth2.client.id</name>
+        <value>YOUR_AZURE_CLIENT_ID</value>
+    </property>
+
+    <property>
+        <name>fs.azure.account.oauth2.client.secret</name>
+        <value>YOUR_AZURE_CLIENT_SECRET</value>
+    </property>
+
+    <property>
+        <name>fs.azure.account.oauth2.client.endpoint</name>
+        <value>https://login.microsoftonline.com/YOUR_TENANT_ID/oauth2/token</value>
+    </property>
+
+
+    <!-- =================================================================== -->
+    <!-- Google Cloud Storage Configurations (GCS Connector)                 -->
+    <!-- =================================================================== -->
+    
+    <!-- Filesystem Implementation for gs:// URLs -->
+    <property>
+        <name>fs.gs.impl</name>
+        <value>com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem</value>
+    </property>
+
+    <property>
+        <name>fs.AbstractFileSystem.gs.impl</name>
+        <value>com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS</value>
+    </property>
+
+    <!-- GCS Project ID & Auth Strategy -->
+    <property>
+        <name>fs.gs.project.id</name>
+        <value>YOUR_GCP_PROJECT_ID</value>
+    </property>
+
+    <property>
+        <name>fs.gs.auth.service.account.enable</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>fs.gs.auth.service.account.json.keyfile</name>
+        <value>/etc/gcp/gcp-service-account-key.json</value>
+    </property>
+
+</configuration>
